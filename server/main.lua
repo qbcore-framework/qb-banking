@@ -345,8 +345,8 @@ AddEventHandler('qb-banking:doQuickDeposit', function(amount)
         local cash = xPlayer.Functions.RemoveMoney('cash', tonumber(amount), 'banking-quick-depo')
         local bank = xPlayer.Functions.AddMoney('bank', tonumber(amount), 'banking-quick-depo')
         if bank then
-            TriggerClientEvent('qb-banking:openBankScreen', _src)
-            TriggerClientEvent('qb-banking:successAlert', _src, 'You made a cash deposit of $'..amount..' successfully.')
+            TriggerClientEvent('qb-banking:openBankScreen', src)
+            TriggerClientEvent('qb-banking:successAlert', src, 'You made a cash deposit of $'..amount..' successfully.')
             TriggerEvent('qb-log:server:createLog', 'banking', 'Banking', 'Made a cash deposit of $'..amount..' successfully.', src)
         end
     end
@@ -372,8 +372,8 @@ AddEventHandler('qb-banking:doQuickWithdraw', function(amount, branch)
         local cash = xPlayer.Functions.RemoveMoney('bank', tonumber(amount), 'banking-quick-withdraw')
         local bank = xPlayer.Functions.AddMoney('cash', tonumber(amount), 'banking-quick-withdraw')
         if cash then 
-            TriggerClientEvent('qb-banking:openBankScreen', _src)
-            TriggerClientEvent('qb-banking:successAlert', _src, 'You made a cash withdrawal of $'..amount..' successfully.')
+            TriggerClientEvent('qb-banking:openBankScreen', src)
+            TriggerClientEvent('qb-banking:successAlert', src, 'You made a cash withdrawal of $'..amount..' successfully.')
             TriggerEvent('qb-log:server:createLog', 'banking', 'Banking', 'Made a cash withdrawal of $'..amount..' successfully.', src)
         end
     end
