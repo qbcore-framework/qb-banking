@@ -30,8 +30,8 @@ INSERT INTO `banks` (`id`, `name`, `coords`, `cashiercoords`, `beforevaults`, `v
 CREATE TABLE `bank_accounts` (
   `record_id` bigint(255) NOT NULL,
   `citizenid` varchar(250) DEFAULT NULL,
-  `buisness` varchar(50) DEFAULT NULL,
-  `buisnessid` int(11) DEFAULT NULL,
+  `business` varchar(50) DEFAULT NULL,
+  `businessid` int(11) DEFAULT NULL,
   `gangid` varchar(50) DEFAULT NULL,
   `amount` bigint(255) NOT NULL DEFAULT 0,
   `account_type` enum('Current','Savings','Buisness','Gang') NOT NULL DEFAULT 'Current'
