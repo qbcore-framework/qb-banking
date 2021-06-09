@@ -27,29 +27,23 @@ INSERT INTO `banks` (`id`, `name`, `coords`, `cashiercoords`, `beforevaults`, `v
 (9, 'Paleto', '{\"x\":-112.22,\"h\":314.95,\"z\":31.63,\"y\":6468.92}', '{\"door\":{\"outside\":{\"y\":6468.29,\"z\":31.63,\"h\":41.06,\"x\":-108.89},\"reverse\":1,\"coords\":{\"x\":-108.91468811035,\"y\":6469.1049804688,\"z\":31.910284042358}, \"hash\":-1184592117, \"oh\":325.0 , \"ch\":44.863204956055}, \"counters\":[{\"y\":6468.99,\"z\":31.63,\"h\":136.44,\"x\":-110.22},{\"y\":6470.04,\"z\":31.63,\"h\":134.15,\"x\":-111.27},{\"y\":6471.14,\"z\":31.63,\"h\":134.03,\"x\":-112.28},{\"y\":6472.25,\"z\":31.63,\"h\":132.97,\"x\":-113.35}]}', '{\"door\":{\"coords\":{\"x\":-104.60489654541,\"y\":6473.4438476563,\"z\":31.795324325562,\"h\":150.00003051758},\"hash\":-1185205679,\"ch\":45.0,\"oh\":150.00003051758},\"coords\":{\"y\":6471.9,\"z\":31.63,\"h\":40.24,\"x\":-105.54}}', '{\"door\":{\"thermite\":{\"spark\":{\"x\":-105.8085,\"y\":6473.49509,\"z\":31.80},\"drip\":{\"y\":6472.29,\"z\":31.63,\"h\":184.07,\"x\":-105.49},\"bomb\":{\"rotation\":{\"x\":-90.0,\"y\":-225.0,\"z\":0.0},\"offset\":{\"x\":-0.32795,\"y\":0.220195,\"z\": 0.175}},\"heading\":45.0},\"reverse\":1,\"coords\":{\"x\":-104.81363677979,\"y\":6473.646484375,\"z\":31.9547996521}, \"hash\":1622278560, \"oh\": 325.0, \"ch\":45.013021469116}, \"coords\":{\"y\":6472.36,\"z\":31.63,\"h\":37.87,\"x\":-105.43}}', '{\"door\":{\"thermite\":{\"spark\":{\"x\":-105.552,\"y\":6476.13,\"z\":31.95},\"drip\":{\"y\":6474.6,\"z\":31.63,\"h\":314.79,\"x\":-105.82},\"bomb\":{\"rotation\":{\"x\":-90.0,\"y\":-135.0,\"z\":0.0},\"offset\":{\"x\":0.26795,\"y\":0.5495,\"z\":0.36}},\"heading\":320.0},\"coords\":{\"x\":-106.47130584717,\"y\":6476.1577148438,\"z\":31.9547996521}, \"hash\":1309269072, \"oh\": 244.0, \"ch\":314.96466064453}, \"coords\":{\"y\":6474.72,\"z\":31.63,\"h\":316.34,\"x\":-105.76}}', NULL, '[{\"y\":6472.92,\"z\":31.63,\"h\":141.47,\"x\":-106.56},{\"y\":6474.14,\"z\":31.63,\"h\":133.41,\"x\":-107.76},{\"y\":6475.82,\"z\":31.63,\"h\":55.73,\"x\":-107.53}]', '[{\"y\":6475.52,\"z\":31.63,\"h\":225.83,\"x\":-102.89},{\"y\":6477.48,\"z\":31.68,\"h\":320.61,\"x\":-102.47},{\"y\":6478.97,\"z\":31.63,\"h\":316.32,\"x\":-103.95},{\"y\":6478.68,\"z\":31.63,\"h\":39.94,\"x\":-105.89}]', 1, 0, 'Paleto', '{\"x\":-113.32,\"h\":316.07,\"z\":31.63,\"y\":6469.96}'),
 (10, 'Pacific', '{\"x\":242.1,\"y\":224.44,\"z\":106.29,\"h\":336.9}', '{\"door\":{\"thermite\":{\"spark\":{\"x\":257.457,\"y\":221.105,\"z\":106.39},\"drip\":{\"x\":257.27,\"y\":219.8,\"z\":106.29},\"bomb\":{\"rotation\":{\"x\":90.0,\"y\":-20.0,\"z\":0.0},\"offset\":{\"x\":0.135,\"y\":0.385,\"z\":0.15}},\"heading\":339.0},\"outside\":{\"x\":256.79,\"y\":220.03,\"z\":106.29,\"h\":355.46},\"coords\":{\"x\":256.31155395508,\"y\":220.65785217285,\"z\":106.42955780029,\"h\":340.00003051758},\"hash\":-222270721,\"ch\":-19.999971389771,\"oh\":70.0},\"coords\":{\"x\":256.79,\"y\":220.03,\"z\":106.29,\"h\":355.46}}', '{\"door\":{\"coords\":{\"x\":262.19808959961,\"y\":222.51881408691,\"z\":106.42955780029,\"h\":256.77621459961},\"hash\":746855201,\"ch\":-110.22378540039,\"oh\":-20.0},\"coords\":{\"x\":261.95,\"y\":223.1,\"z\":106.28,\"h\":241.67}}', '{\"door\":{\"coords\":{\"x\":255.22825622559,\"y\":223.97601318359,\"z\":102.39321899414,\"h\":160.17094421387},\"hash\":961976194,\"ch\":160.17094421387,\"oh\":70.0},\"coords\":{\"x\":253.29,\"y\":228.46,\"z\":101.68,\"h\":65.44}}', '{\"door\":{\"thermite\":{\"spark\":{\"x\":252.99,\"y\":221.75,\"z\":101.78},\"drip\":{\"x\":253.0,\"y\":220.97,\"z\":101.68},\"bomb\":{\"rotation\":{\"x\":-90.0,\"y\":20.0,\"z\":0.0},\"offset\":{\"x\":-0.005,\"y\":-0.255,\"z\":0.15}},\"heading\":161.0},\"coords\":{\"x\":251.85757446289,\"y\":221.06549072266,\"z\":101.83240509033,\"h\":160.00001525879},\"hash\":-1508355822,\"ch\":160.00001525879,\"oh\":70.0},\"coords\":{\"x\":252.63,\"y\":221.29,\"z\":101.68,\"h\":156.96}}', '{\"door\":{\"thermite\":{\"spark\":{\"x\":261.65,\"y\":216.62,\"z\":101.78},\"drip\":{\"x\":261.4,\"y\":215.67,\"z\":101.68},\"bomb\":{\"rotation\":{\"x\":-90.0,\"y\":-70.0,\"z\": 0.0},\"offset\":{\"x\":0.25,\"y\":-0.0325,\"z\":0.15}},\"heading\":250.0},\"reverse\":-1,\"coords\":{\"x\":261.30041503906,\"y\":214.50514221191,\"z\":101.83240509033,\"h\":250.17224121094},\"hash\":-1508355822,\"ch\":-109.82776641846,\"oh\":170.0},\"coords\":{\"x\":261.12,\"y\":215.24,\"z\":101.68,\"h\":252.85},\"coords\":{\"x\":261.06,\"y\":215.22,\"z\":101.68,\"h\":247.37}}', '[{\"x\":258.16,\"y\":218.56,\"z\":101.68,\"h\":341.82},{\"x\":259.71,\"y\":218.03,\"z\":101.68,\"h\":359.39},{\"x\":261.44,\"y\":217.41,\"z\":101.68,\"h\":0.29},{\"x\":259.99,\"y\":213.48,\"z\":101.68,\"h\":159.81},{\"x\":258.27,\"y\":214.1,\"z\":101.68,\"h\":167.51},{\"x\":256.48,\"y\":214.76,\"z\":101.68,\"h\":169.49}]', '[{\"x\":263.19,\"y\":212.32,\"z\":101.68,\"h\":164.78},{\"x\":266.09,\"y\":213.42,\"z\":101.68,\"h\":275.82},{\"x\":264.66,\"y\":216.23,\"z\":101.68,\"h\":357.47}]', 1, 0, 'Big', NULL);
 
-CREATE TABLE `bank_accounts` (
-  `record_id` bigint(255) NOT NULL,
+CREATE TABLE IF NOT EXISTS `bank_accounts` (
+  `record_id` bigint(255) NOT NULL AUTO_INCREMENT,
   `citizenid` varchar(250) DEFAULT NULL,
-  `business` varchar(50) DEFAULT NULL,
-  `businessid` int(11) DEFAULT NULL,
+  `buisness` varchar(50) DEFAULT NULL,
+  `buisnessid` int(11) DEFAULT NULL,
   `gangid` varchar(50) DEFAULT NULL,
   `amount` bigint(255) NOT NULL DEFAULT 0,
-  `account_type` enum('Current','Savings','Buisness','Gang') NOT NULL DEFAULT 'Current'
+  `account_type` enum('Current','Savings','Buisness','Gang') NOT NULL DEFAULT 'Current',
+  PRIMARY KEY (`record_id`),
+  UNIQUE KEY `citizenid` (`citizenid`),
+  KEY `buisness` (`buisness`),
+  KEY `buisnessid` (`buisnessid`),
+  KEY `gangid` (`gangid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE `bank_cards` (
-  `record_id` bigint(255) NOT NULL,
-  `steamid` varchar(50) DEFAULT NULL,
-  `account` varchar(50) DEFAULT NULL,
-  `cardNumber` varchar(50) DEFAULT NULL,
-  `cardPin` text DEFAULT NULL,
-  `cardActive` text DEFAULT NULL,
-  `cardType` varchar(50) DEFAULT NULL,
-  `cardHolder` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-CREATE TABLE `bank_statements` (
-  `record_id` bigint(255) NOT NULL,
+CREATE TABLE IF NOT EXISTS `bank_statements` (
+  `record_id` bigint(255) NOT NULL AUTO_INCREMENT,
   `citizenid` varchar(50) DEFAULT NULL,
   `account` varchar(50) DEFAULT NULL,
   `buisness` varchar(50) DEFAULT NULL,
@@ -59,5 +53,9 @@ CREATE TABLE `bank_statements` (
   `withdraw` int(11) DEFAULT NULL,
   `balance` int(11) DEFAULT NULL,
   `date` varchar(50) DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL
+  `type` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`record_id`),
+  KEY `buisness` (`buisness`),
+  KEY `buisnessid` (`buisnessid`),
+  KEY `gangid` (`gangid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
