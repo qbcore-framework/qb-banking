@@ -356,7 +356,7 @@ function generateSavings(cid)
                 local success = self.saveAccount()
 
                 local time = os.date("%Y-%m-%d %H:%M:%S")
-                QBCore.Functions.ExecuteSql(false, "INSERT INTO `bank_statements` (`citizenid`,  `account`  `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES ('" .. self.cid .. "', 'Saving', 0,'" .. amt .. "', '" .. self.balance .. "', '" .. time .. "', '" .. text .. "')")
+                QBCore.Functions.ExecuteSql(false, "INSERT INTO `bank_statements` (`citizenid`,  `account`,  `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES ('" .. self.cid .. "', 'Saving', 0,'" .. amt .. "', '" .. self.balance .. "', '" .. time .. "', '" .. text .. "')")
                 local statementTable = {['withdraw'] = amt, ['deposited'] = nil, ['type'] = text,  ['date'] = time, ['balance'] = self.balance, ['account'] = "Savings", ['record_id'] = statementUpdate, ['character_id'] = self.cid }
                 table.insert(self.bankStatement, statementTable)
                 return true
