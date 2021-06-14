@@ -4,7 +4,7 @@ function generateCurrent(cid)
     self.source = -1
     local processed = false
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_cards` WHERE `citizenid` = '" .. self.cid .."'", function(getCurrentAccount)
+    QBCore.Functions.ExecuteSql(true, {['a'] = self.cid}, "SELECT * FROM `bank_cards` WHERE `citizenid` = @a", function(getCurrentAccount)
         if getCurrentAccount[1] ~= nil then
             self.aid = getCurrentAccount[1].record_id
             self.balance = getCurrentAccount[1].amount
@@ -29,7 +29,7 @@ function generateCurrent(cid)
     repeat Wait(0) until processed == true
     processed = false
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_statements` WHERE `account` = 'Current' AND `citizenid` = '" .. self.cid .. "' ORDER BY `record_id` DESC LIMIT 30", function(bankStatement)
+    QBCore.Functions.ExecuteSql(true, {['a'] = self.cid}, "SELECT * FROM `bank_statements` WHERE `account` = 'Current' AND `citizenid` = @a ORDER BY `record_id` DESC LIMIT 30", function(bankStatement)
         if bankStatement[1] ~= nil then
             self.bankStatement = bankStatement
         else
@@ -43,7 +43,13 @@ function generateCurrent(cid)
     self.updateItemPin = function(pin)
         local processed = false
         local success
-        QBCore.Functions.ExecuteSql(true, "SELECT * FROM `stored_items` WHERE `metaprivate` LIKE '%\"cardnumber\":"..self.cardNumber.."%' AND `metaprivate` LIKE '%\"account\":"..self.account.."%' AND `metaprivate` LIKE '%\"sortcode\":"..self.sortcode.."%' AND `type` = 'Bankcard' LIMIT 1", function(item)
+        QBCore.Functions.ExecuteSql(true,
+            { 
+                ['a'] = self.cardNumber,
+                ['b'] = self.account,
+                ['c'] = self.sortcode
+            },
+            "SELECT * FROM `stored_items` WHERE `metaprivate` LIKE '%\"cardnumber\":@a%' AND `metaprivate` LIKE '%\"account\":@b%' AND `metaprivate` LIKE '%\"sortcode\":@c%' AND `type` = 'Bankcard' LIMIT 1", function(item)
             if item[1] ~= nil then
                 itemFound = true
                 local decode = json.decode(item[1].metaprivate)
@@ -114,7 +120,17 @@ function generateCurrent(cid)
             else
                 friendlyName = "Mastercard"
             end
-            QBCore.Functions.ExecuteSql(false, "UPDATE `bank_cards` SET `cardNumber` = '" .. cardNumber .. "', `cardPin` = '" .. pinSet .. "', `cardDecrypted` = 'false', `cardActive` = 1, `cardLocked` = 0, `cardType` = '" .. friendlyName .. "' WHERE `citizenid` = '" ..self.cid .. "' AND `record_id` = '" .. self.aid .. "'", function(rowsChanged)
+            QBCore.Functions.ExecuteSql(
+                false, 
+                {
+                    ['a'] = cardNumber,
+                    ['b'] = pinSet,
+                    ['c'] = friendlyName,
+                    ['d'] = self.cid,
+                    ['e'] = self.aid
+                }, 
+                "UPDATE `bank_cards` SET `cardNumber` = @a, `cardPin` = @b, `cardDecrypted` = 'false', `cardActive` = 1, `cardLocked` = 0, `cardType` = @c WHERE `citizenid` = @d AND `record_id` = @e", function(rowsChanged)
+                
                 self.cardNumber = cardNumber
                 self.cardActive = true
                 self.cardLocked = false
@@ -292,13 +308,13 @@ function generateSavings(cid)
     self.cid = cid
     self.source = -1
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `citizenid` = '" .. self.cid .."' AND `account_type` = 'Savings'", function(getSavingsAccount)
+    QBCore.Functions.ExecuteSql(true, {['a'] = self.cid}, "SELECT * FROM `bank_accounts` WHERE `citizenid` = @a AND `account_type` = 'Savings'", function(getSavingsAccount)
         if getSavingsAccount[1] ~= nil then
             self.aid = getSavingsAccount[1].record_id
             self.balance = getSavingsAccount[1].amount
         end
         
-        QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_statements` WHERE `account` = 'Savings' AND `citizenid` = '" .. self.cid .. "' ORDER BY `record_id` DESC LIMIT 30", function(stats)
+        QBCore.Functions.ExecuteSql(true, {['a'] = self.cid}, "SELECT * FROM `bank_statements` WHERE `account` = 'Savings' AND `citizenid` = @a ORDER BY `record_id` DESC LIMIT 30", function(stats)
             self.bankStatement = stats
         end)
     end)
@@ -306,7 +322,11 @@ function generateSavings(cid)
 
 
     self.saveAccount = function()
-        local success = QBCore.Functions.ExecuteSql(false, "UPDATE `bank_accounts` SET `amount` = '" .. self.balance .. "' WHERE `citizenid` = '" .. self.cid .. "' AND `record_id` = '" .. self.aid .. "'")
+        local success = QBCore.Functions.ExecuteSql(false, {
+            ['a'] = self.balance,
+            ['b'] = self.cid,
+            ['c'] = self.aid
+        }, "UPDATE `bank_accounts` SET `amount` = @a WHERE `citizenid` = @b AND `record_id` = @c")
         if success == 1 then
             return true
         else
@@ -342,7 +362,17 @@ function generateSavings(cid)
             self.balance = self.balance + amt
             local success = self.saveAccount()
             local time = os.date("%Y-%m-%d %H:%M:%S")
-            QBCore.Functions.ExecuteSql(false, "INSERT INTO `bank_statements` (`citizenid`,  `account`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES ('" .. self.cid .. "', 'Saving', '" .. amt .. "', 0, '" .. self.balance .. "', '" .. time .. "', '" .. text .. "')")
+            QBCore.Functions.ExecuteSql(
+                false,
+                {
+                    ['a']= self.cid,
+                    ['b'] = account,
+                    ['c'] = amt,
+                    ['d'] = self.balance,
+                    ['e'] = time,
+                    ['f'] = text
+                },
+                "INSERT INTO `bank_statements` (`citizenid`,  `account`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (@a, @b, 'Saving', 0, @d, @e, @f)")
             local statementTable = {['withdraw'] = nil, ['deposited'] = amt, ['type'] = text,  ['date'] = time, ['balance'] = self.balance, ['account'] = "Savings", ['record_id'] = statementUpdate, ['character_id'] = self.cid }
             table.insert(self.bankStatement, statementTable)
             return true 
@@ -356,7 +386,17 @@ function generateSavings(cid)
                 local success = self.saveAccount()
 
                 local time = os.date("%Y-%m-%d %H:%M:%S")
-                QBCore.Functions.ExecuteSql(false, "INSERT INTO `bank_statements` (`citizenid`,  `account`,  `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES ('" .. self.cid .. "', 'Saving', 0,'" .. amt .. "', '" .. self.balance .. "', '" .. time .. "', '" .. text .. "')")
+                QBCore.Functions.ExecuteSql(
+                    false,
+                    {
+                        ['a']= self.cid,
+                        ['b'] = account,
+                        ['c'] = amt,
+                        ['d'] = self.balance,
+                        ['e'] = time,
+                        ['f'] = text
+                    },
+                    "INSERT INTO `bank_statements` (`citizenid`,  `account`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (@a, @b, @c, '', @d, @e, @f)")
                 local statementTable = {['withdraw'] = amt, ['deposited'] = nil, ['type'] = text,  ['date'] = time, ['balance'] = self.balance, ['account'] = "Savings", ['record_id'] = statementUpdate, ['character_id'] = self.cid }
                 table.insert(self.bankStatement, statementTable)
                 return true
@@ -378,7 +418,7 @@ function createSavingsAccount(cid)
     print(cid)
     local completed = false
     local success = false
-    QBCore.Functions.ExecuteSql(false, "INSERT INTO `bank_accounts` (`citizenid`,`amount`,`account_type`) VALUES ('" .. cid .. "', '0', 'Savings')", function(result)
+    QBCore.Functions.ExecuteSql(false, {['a'] = cid}, "INSERT INTO `bank_accounts` (`citizenid`,`amount`,`account_type`) VALUES (@a, '0', 'Savings')", function(result)
         savingsAccounts[cid] = generateSavings(cid)
         success = true
         completed = true

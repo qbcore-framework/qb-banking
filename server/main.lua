@@ -9,7 +9,7 @@ Citizen.CreateThread(function()
     local sav = 0
     local gang = 0
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `banks`", function(bankssql)
+    QBCore.Functions.ExecuteSql(true, nil, "SELECT * FROM `banks`", function(bankssql)
         for k, v in pairs(bankssql) do
             local coords = json.decode(v.coords)
             if v.moneyBags ~= nil then
@@ -22,7 +22,7 @@ Citizen.CreateThread(function()
         ready = ready + 1
     end)
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `account_type` = 'Business'", function(accts)
+    QBCore.Functions.ExecuteSql(true, nil, "SELECT * FROM `bank_accounts` WHERE `account_type` = 'Business'", function(accts)
         buis = #accts
         if accts[1] ~= nil then
             for k, v in pairs(accts) do
@@ -37,7 +37,7 @@ Citizen.CreateThread(function()
         ready = ready + 1
     end)
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `account_type` = 'Savings'", function(savings)
+    QBCore.Functions.ExecuteSql(true, nil, "SELECT * FROM `bank_accounts` WHERE `account_type` = 'Savings'", function(savings)
         sav = #savings
         if savings[1] ~= nil then
             for k, v in pairs(savings) do
@@ -47,7 +47,7 @@ Citizen.CreateThread(function()
         ready = ready + 1
     end)
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `account_type` = 'Gang'", function(gangs)
+    QBCore.Functions.ExecuteSql(true, nil, "SELECT * FROM `bank_accounts` WHERE `account_type` = 'Gang'", function(gangs)
         gang = #gangs
         if gangs[1] ~= nil then
             for k, v in pairs(gangs) do
@@ -127,7 +127,13 @@ function checkAccountExists(acct, sc)
     local success
     local cid
     local processed = false
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `account_number` = '" .. acct .. "' AND `sort_code` = '" .. sc .. "'", function(exists)
+    QBCore.Functions.ExecuteSql(
+        true,
+        {
+            ['a'] = acct,
+            ['b'] = sc
+        }, 
+        "SELECT * FROM `bank_accounts` WHERE `account_number` = @a AND `sort_code` = @b", function(exists)
         if exists[1] ~= nil then 
             success = true
             cid = exists[1].character_id
