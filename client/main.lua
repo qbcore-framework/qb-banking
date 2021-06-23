@@ -1,46 +1,25 @@
 QBCore = nil
 InBank = false
+blips = {}
+local banks
+local showing = false
+playerData, playerLoaded = nil, false
+
 Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(10)
-        if QBCore == nil then
-            TriggerEvent('QBCore:GetObject', function(obj) QBCore = obj end)
-            Citizen.Wait(200)
-        end
+    while QBCore == nil do
+        TriggerEvent('QBCore:GetObject', function(obj) QBCore = obj end)
+        Citizen.Wait(200)
     end
 end)
 
-playerData, playerLoaded = nil, false
-local banks
-blips = {}
-local showing = false
-
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function(data)
-    QBCore.Functions.TriggerCallback('qb-banking:server:requestBanks', function(banksdata)
-        banks = banksdata
-        playerData = data
-        playerLoaded = true
-        createBlips()
-        if showing then
-            showing = false
-        end
-
-        TriggerEvent("debug", 'Banking: Refresh Banks', 'success')
-    end)
-end)
-
-RegisterCommand('refreshBanks', function()
-    QBCore.Functions.TriggerCallback('qb-banking:server:requestBanks', function(banksdata)
-        banks = banksdata
-        playerLoaded = true
-        createBlips()
-        if showing then
-            showing = false
-        end
-
-        TriggerEvent("debug", 'Banking: Refresh Banks', 'success')
-    end)
+    playerData = data
+    playerLoaded = true
+    createBlips()
+    if showing then
+        showing = false
+    end
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload')
@@ -71,7 +50,7 @@ AddEventHandler('qb-banking:updateCash', function(data)
 end)
 
 function createBlips()
-    for k, v in pairs(banks) do
+    for k, v in pairs(Config.BankLocations) do
         blips[k] = AddBlipForCoord(tonumber(v.x), tonumber(v.y), tonumber(v.z))
         SetBlipSprite(blips[k], Config.Blip.blipType)
         SetBlipDisplay(blips[k], 4)
@@ -85,8 +64,8 @@ function createBlips()
 end
 
 function removeBlips()
-    for k, v in pairs(blips) do
-        RemoveBlip(v)
+    for k, v in pairs(Config.BankLocations) do
+        RemoveBlip(blips[k])
     end
     blips = {}
 end
@@ -122,28 +101,6 @@ AddEventHandler('qb-banking:openBankScreen', function()
     openAccountScreen()
 end)
 
-RegisterNetEvent('qb-banking:client:usedMoneyBag')
-AddEventHandler('qb-banking:client:usedMoneyBag', function(item)
-    local playerCoords = GetEntityCoords(PlayerPedId())
-    for k, v in pairs(banks) do 
-        if v.bankType == "Paleto" and v.moneyBags ~= nil and v.bankOpen then
-            local moneyBagDist = #(playerCoords - vector3(v.moneyBags.x, v.moneyBags.y, v.moneyBags.z))
-            if moneyBagDist < 1.0 then
-                QBCore.Functions.Progressbar("accessing_atm", "Cashier Counting Bag..", 60000, false, true, {
-                    disableMovement = true,
-                    disableCarMovement = true,
-                    disableMouse = false,
-                    disableCombat = true,
-                }, {}, {}, {}, function() -- Done
-                    TriggerServerEvent('qb-banking:server:unpackMoneyBag', item)
-                end, function()
-                    QBCore.Functions.Notify("Failed!", "error")
-                end)
-            end
-        end
-    end
-end)
-
 local letSleep = true
 Citizen.CreateThread(function()
     while true do
@@ -152,20 +109,18 @@ Citizen.CreateThread(function()
         if playerLoaded and QBCore ~= nil and not InBank then 
             local playerPed = PlayerPedId()
             local playerCoords = GetEntityCoords(playerPed, true)
-            if banks ~= nil then
-                for k, v in pairs(banks) do 
-                    local bankDist = #(playerCoords - vector3(v.x, v.y, v.z))
-                    if bankDist < 3.0 then
-                        letSleep = false
+            for k, v in pairs(Config.BankLocations) do 
+                local bankDist = #(playerCoords - v)
+                if bankDist < 3.0 then
+                    letSleep = false
 
-                        DrawMarker(27, v.x, v.y, v.z-0.99, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.001, 1.0001, 0.5001, 0, 25, 165, 100, false, true, 2, false, false, false, false) 
+                    DrawMarker(27, v.x, v.y, v.z-0.99, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.001, 1.0001, 0.5001, 0, 25, 165, 100, false, true, 2, false, false, false, false) 
 
-                        if bankDist < 1.0 then
-                            DrawText3Ds(v.x, v.y, v.z-0.25, v.bankOpen and '~g~E~w~ - Access Bank')
+                    if bankDist < 1.0 then
+                        DrawText3Ds(v.x, v.y, v.z-0.25, '~g~E~w~ - Access Bank')
 
-                            if v.bankOpen and IsControlJustPressed(0, 38) then
-                                openAccountScreen()
-                            end
+                        if IsControlJustPressed(0, 38) then
+                            openAccountScreen()
                         end
                     end
                 end

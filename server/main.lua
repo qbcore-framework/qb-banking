@@ -1,26 +1,12 @@
 QBCore = nil
 TriggerEvent('QBCore:GetObject', function(obj) QBCore = obj end)
 
-banks = {}
 Citizen.CreateThread(function()
     local ready = 0
     local buis = 0
     local cur = 0
     local sav = 0
     local gang = 0
-
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `banks`", function(bankssql)
-        for k, v in pairs(bankssql) do
-            local coords = json.decode(v.coords)
-            if v.moneyBags ~= nil then
-                moneyBags = json.decode(v.moneyBags)
-            else
-                moneyBags = nil
-            end
-            banks[tonumber(v.id)] = { ['x'] = coords.x, ['y'] = coords.y, ['z'] = coords.z, ['bankOpen'] = v.bankOpen, ['bankCooldown'] = v.bankCooldown, ['bankType'] = v.bankType, ['moneyBags'] = moneyBags }
-        end
-        ready = ready + 1
-    end)
 
     QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `account_type` = 'Business'", function(accts)
         buis = #accts
@@ -110,17 +96,6 @@ exports('gang', function(gid)
     if gangAccounts[cid] then
         return gangAccounts[cid]
     end
-end)
-
-QBCore.Functions.CreateCallback('qb-banking:server:requestBanks', function(source, cb)
-    repeat Wait(0) until banks ~= nil
-    cb(banks)
-end)
-
-QBCore.Functions.CreateCallback('qb-banking:server:checkMoneyBagCount', function(source, cb)
-    local src = source
-    local xPlayer = QBCore.Functions.GetPlayer(src)
-    cb(xPlayer.Functions.GetItemByName('moneybag').count)
 end)
 
 function checkAccountExists(acct, sc)
