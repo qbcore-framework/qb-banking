@@ -130,7 +130,7 @@ AddEventHandler('qb-banking:createNewCard', function()
         end
     end
 
-    TriggerEvent('qb-log:server:createLog', 'banking', 'Banking', "Created new card **[" .. xPlayer.PlayerData.citizenid .. "]**", src)
+    TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "Created new card **[" .. xPlayer.PlayerData.citizenid .. "]**", src)
 end)
 
 RegisterServerEvent('qb-base:itemUsed')
@@ -306,7 +306,7 @@ AddEventHandler('qb-banking:createBankCard', function(pin)
     TriggerClientEvent('qb-banking:openBankScreen', src)
     TriggerClientEvent('QBCore:Notify', src, 'You have successfully ordered a Debit Card.', 'success')
     
-    TriggerEvent('qb-log:server:createLog', 'banking', 'Banking', 'Successfully ordered a Debit Card', src)
+    TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'Successfully ordered a Debit Card', src)
 end)
 
 RegisterServerEvent('qb-banking:doQuickDeposit')
@@ -322,7 +322,7 @@ AddEventHandler('qb-banking:doQuickDeposit', function(amount)
         if bank then
             TriggerClientEvent('qb-banking:openBankScreen', src)
             TriggerClientEvent('qb-banking:successAlert', src, 'You made a cash deposit of $'..amount..' successfully.')
-            TriggerEvent('qb-log:server:createLog', 'banking', 'Banking', 'Made a cash deposit of $'..amount..' successfully.', src)
+            TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'Made a cash deposit of $'..amount..' successfully.', src)
         end
     end
 end)
@@ -349,7 +349,7 @@ AddEventHandler('qb-banking:doQuickWithdraw', function(amount, branch)
         if cash then 
             TriggerClientEvent('qb-banking:openBankScreen', src)
             TriggerClientEvent('qb-banking:successAlert', src, 'You made a cash withdrawal of $'..amount..' successfully.')
-            TriggerEvent('qb-log:server:createLog', 'banking', 'Banking', 'Made a cash withdrawal of $'..amount..' successfully.', src)
+            TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'Made a cash withdrawal of $'..amount..' successfully.', src)
         end
     end
 end)
@@ -381,7 +381,7 @@ AddEventHandler('qb-banking:savingsDeposit', function(amount)
         while savings == nil do Wait(0) end
         TriggerClientEvent('qb-banking:openBankScreen', src)
         TriggerClientEvent('qb-banking:successAlert', src, 'You made a savings deposit of $'..tostring(amount)..' successfully.')
-        TriggerEvent('qb-log:server:createLog', 'banking', 'Banking', 'made a savings deposit of $'..tostring(amount)..' successfully..', src)
+        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'made a savings deposit of $'..tostring(amount)..' successfully..', src)
     end
 end)
 
@@ -399,7 +399,7 @@ AddEventHandler('qb-banking:savingsWithdraw', function(amount)
         while savings == nil do Wait(0) end
         TriggerClientEvent('qb-banking:openBankScreen', src)
         TriggerClientEvent('qb-banking:successAlert', src, 'You made a savings withdrawal of $'..tostring(amount)..' successfully.')
-        TriggerEvent('qb-log:server:createLog', 'banking', 'Banking', 'Made a savings withdrawal of $'..tostring(amount)..' successfully.', src)
+        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'Made a savings withdrawal of $'..tostring(amount)..' successfully.', src)
     end
 end)
 
@@ -412,5 +412,5 @@ AddEventHandler('qb-banking:createSavingsAccount', function()
     repeat Wait(0) until success ~= nil
     TriggerClientEvent('qb-banking:openBankScreen', src)
     TriggerClientEvent('qb-banking:successAlert', src, 'You have successfully opened a savings account.')
-    TriggerEvent('qb-log:server:createLog', 'banking', 'Banking', "Created new saving account", src)
+    TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "Created new saving account", src)
 end)
