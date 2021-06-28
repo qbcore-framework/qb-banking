@@ -114,7 +114,16 @@ function generateCurrent(cid)
             else
                 friendlyName = "Mastercard"
             end
-            QBCore.Functions.ExecuteSql(false, "UPDATE `bank_cards` SET `cardNumber` = '" .. cardNumber .. "', `cardPin` = '" .. pinSet .. "', `cardDecrypted` = 'false', `cardActive` = 1, `cardLocked` = 0, `cardType` = '" .. friendlyName .. "' WHERE `citizenid` = '" ..self.cid .. "' AND `record_id` = '" .. self.aid .. "'", function(rowsChanged)
+            exports.ghmattimysql:execute('UPDATE bank_cards SET cardnumber=@cardnumber, cardPin=@cardPin, cardDecrypted=@cardDecrypted, cardActive=@cardActive, cardLocked=@cardLocked, cardType=@cardType WHERE citizenid=@citizenid AND record_id=@record_id', {
+                ['@cardnumber'] = cardNumber,
+                ['@cardPin'] = pinSet,
+                ['@cardDecrypted'] = false,
+                ['@cardActive'] = 1,
+                ['@cardLocked'] = 0,
+                ['@cardType'] = friendlyName,
+                ['@citizenid'] = self.cid,
+                ['@record_id'] = self.aid
+            }, function(rowsChanged)
                 self.cardNumber = cardNumber
                 self.cardActive = true
                 self.cardLocked = false
@@ -306,12 +315,17 @@ function generateSavings(cid)
 
 
     self.saveAccount = function()
-        local success = QBCore.Functions.ExecuteSql(false, "UPDATE `bank_accounts` SET `amount` = '" .. self.balance .. "' WHERE `citizenid` = '" .. self.cid .. "' AND `record_id` = '" .. self.aid .. "'")
-        if success == 1 then
-            return true
-        else
-            return false
-        end
+        exports.ghmattimysql:execute('UPDATE bank_accounts SET amount=@amount WHERE citizenid=@citizenid AND record_id=@record_id', {
+            ['@amount'] = self.balance,
+            ['@citizenid'] = self.cid,
+            ['@record_id'] = self.aid
+        }, function(success)
+            if success then
+                return true
+            else
+                return false
+            end
+        end)
     end
 
     local rTable = {}
@@ -342,7 +356,15 @@ function generateSavings(cid)
             self.balance = self.balance + amt
             local success = self.saveAccount()
             local time = os.date("%Y-%m-%d %H:%M:%S")
-            QBCore.Functions.ExecuteSql(false, "INSERT INTO `bank_statements` (`citizenid`,  `account`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES ('" .. self.cid .. "', 'Saving', '" .. amt .. "', 0, '" .. self.balance .. "', '" .. time .. "', '" .. text .. "')")
+            exports.ghmattimysql:execute('INSERT INTO bank_statements (citizenid, account, deposited, withdraw, balance, date, type) VALUES (@citizenid, @account, @deposited, @withdraw, @balance, @date, @type)', {
+                ['@citizenid'] = self.cid,
+                ['@account'] = 'Saving',
+                ['@deposited'] = amt,
+                ['@withdraw'] = 0,
+                ['@balance'] = self.balance,
+                ['@date'] = time,
+                ['@type'] = text
+            })
             local statementTable = {['withdraw'] = nil, ['deposited'] = amt, ['type'] = text,  ['date'] = time, ['balance'] = self.balance, ['account'] = "Savings", ['record_id'] = statementUpdate, ['character_id'] = self.cid }
             table.insert(self.bankStatement, statementTable)
             return true 
@@ -354,9 +376,16 @@ function generateSavings(cid)
             if amt <= self.balance then
                 self.balance = self.balance - amt
                 local success = self.saveAccount()
-
                 local time = os.date("%Y-%m-%d %H:%M:%S")
-                QBCore.Functions.ExecuteSql(false, "INSERT INTO `bank_statements` (`citizenid`,  `account`,  `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES ('" .. self.cid .. "', 'Saving', 0,'" .. amt .. "', '" .. self.balance .. "', '" .. time .. "', '" .. text .. "')")
+                exports.ghmattimysql:execute('INSERT INTO bank_statements (citizenid, account, deposited, withdraw, balance, date, type) VALUES (@citizenid, @account, @deposited, @withdraw, @balance, @date, @type)', {
+                    ['@citizenid'] = self.cid,
+                    ['@account'] = 'Saving',
+                    ['@deposited'] = 0,
+                    ['@withdraw'] = amt,
+                    ['@balance'] = self.balance,
+                    ['@date'] = time,
+                    ['@type'] = text
+                })
                 local statementTable = {['withdraw'] = amt, ['deposited'] = nil, ['type'] = text,  ['date'] = time, ['balance'] = self.balance, ['account'] = "Savings", ['record_id'] = statementUpdate, ['character_id'] = self.cid }
                 table.insert(self.bankStatement, statementTable)
                 return true
@@ -378,7 +407,11 @@ function createSavingsAccount(cid)
     print(cid)
     local completed = false
     local success = false
-    QBCore.Functions.ExecuteSql(false, "INSERT INTO `bank_accounts` (`citizenid`,`amount`,`account_type`) VALUES ('" .. cid .. "', '0', 'Savings')", function(result)
+    exports.ghmattimysql:execute('INSERT INTO bank_accounts (citizenid, amount, account_type) VALUES (@citizenid, @amount, @account_type)', {
+        ['@citizenid'] = cid,
+        ['@amount'] = 0,
+        ['@account_type'] = 'Savings'
+    }, function(result)
         savingsAccounts[cid] = generateSavings(cid)
         success = true
         completed = true
