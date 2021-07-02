@@ -4,7 +4,7 @@ function generateCurrent(cid)
     self.source = -1
     local processed = false
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_cards` WHERE `citizenid` = '" .. self.cid .."'", function(getCurrentAccount)
+    exports.ghmattimysql:execute("SELECT * FROM `bank_cards` WHERE `citizenid` = @cid", {['@cid'] = self.cid}, function(getCurrentAccount)
         if getCurrentAccount[1] ~= nil then
             self.aid = getCurrentAccount[1].record_id
             self.balance = getCurrentAccount[1].amount
@@ -29,7 +29,7 @@ function generateCurrent(cid)
     repeat Wait(0) until processed == true
     processed = false
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_statements` WHERE `account` = 'Current' AND `citizenid` = '" .. self.cid .. "' ORDER BY `record_id` DESC LIMIT 30", function(bankStatement)
+    exports.ghmattimysql:execute("SELECT * FROM `bank_statements` WHERE `account` = 'Current' AND `citizenid` = @cid ORDER BY `record_id` DESC LIMIT 30", {['@cid'] = self.cid}, function(bankStatement)
         if bankStatement[1] ~= nil then
             self.bankStatement = bankStatement
         else
@@ -43,7 +43,11 @@ function generateCurrent(cid)
     self.updateItemPin = function(pin)
         local processed = false
         local success
-        QBCore.Functions.ExecuteSql(true, "SELECT * FROM `stored_items` WHERE `metaprivate` LIKE '%\"cardnumber\":"..self.cardNumber.."%' AND `metaprivate` LIKE '%\"account\":"..self.account.."%' AND `metaprivate` LIKE '%\"sortcode\":"..self.sortcode.."%' AND `type` = 'Bankcard' LIMIT 1", function(item)
+        exports.ghmattimysql:execute("SELECT * FROM `stored_items` WHERE `metaprivate` LIKE @card AND `metaprivate` LIKE @account AND `metaprivate` LIKE @sortcode AND `type` = 'Bankcard' LIMIT 1", {
+            ['@card'] = "%\"cardnumber\":"..self.cardNumber.."%",
+            ['@account'] = "%\"account\":"..self.account.."%",
+            ['@sortcode'] = "%\"sortcode\":"..self.sortcode.."%"
+        }, function(item)
             if item[1] ~= nil then
                 itemFound = true
                 local decode = json.decode(item[1].metaprivate)
@@ -301,13 +305,13 @@ function generateSavings(cid)
     self.cid = cid
     self.source = -1
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `citizenid` = '" .. self.cid .."' AND `account_type` = 'Savings'", function(getSavingsAccount)
+    exports['ghmattimysql']:execute("SELECT * FROM `bank_accounts` WHERE `citizenid` = @cid AND `account_type` = 'Savings'", {['@cid'] = self.cid}, function(getSavingsAccount)
         if getSavingsAccount[1] ~= nil then
             self.aid = getSavingsAccount[1].record_id
             self.balance = getSavingsAccount[1].amount
         end
         
-        QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_statements` WHERE `account` = 'Savings' AND `citizenid` = '" .. self.cid .. "' ORDER BY `record_id` DESC LIMIT 30", function(stats)
+        exports['ghmattimysql']:execute("SELECT * FROM `bank_statements` WHERE `account` = 'Savings' AND `citizenid` = @cid ORDER BY `record_id` DESC LIMIT 30", {['@cid'] = self.cid}, function(stats)
             self.bankStatement = stats
         end)
     end)

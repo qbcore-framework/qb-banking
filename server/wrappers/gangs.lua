@@ -3,7 +3,7 @@ function loadGangAccount(gangid)
     self.gid = gangid
 
     local processed = false
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `gangid` = @gang AND `account_type` = 'Gang'", {['@gang'] = self.gid}, function(query)
+    exports['ghmattimysql']:execute("SELECT * FROM `bank_accounts` WHERE `gangid` = @gang AND `account_type` = 'Gang'", {['@gang'] = self.gid}, function(query)
         if query[1] ~= nil then
             self.accountnumber = query[1].account_number
             self.sortcode = query[1].sort_code
@@ -17,7 +17,7 @@ function loadGangAccount(gangid)
     repeat Wait(0) until processed == true
     processed = false
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_statements` WHERE `account_number` = @ac AND `sort_code` = @sc AND `gangid` = @gid", {['@ac'] = self.accountnumber, ['@sc'] = self.sortcode, ['@gid'] = self.gid}, function(state)
+    exports['ghmattimysql']:execute("SELECT * FROM `bank_statements` WHERE `account_number` = @ac AND `sort_code` = @sc AND `gangid` = @gid", {['@ac'] = self.accountnumber, ['@sc'] = self.sortcode, ['@gid'] = self.gid}, function(state)
         self.accountStatement = state
         processed = true
     end)
@@ -69,7 +69,7 @@ function createGangAccount(gang, startingBalance)
     
     local newBalance = tonumber(startingBalance) or 0
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `gangid` = @gang", {['@gang'] = gang}, function(checkExists)
+    exports['ghmattimysql']:execute("SELECT * FROM `bank_accounts` WHERE `gangid` = @gang", {['@gang'] = gang}, function(checkExists)
         if checkExists[1] == nil then
             local sc = math.random(100000,999999)
             local acct = math.random(10000000,99999999)

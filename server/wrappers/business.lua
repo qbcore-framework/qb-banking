@@ -31,7 +31,7 @@ function generatebusinessAccount(acc, sc, bid)
     self.bid = bid
 
     local processed = false
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `account_number` = @acc AND `sort_code` = @sc AND `businessid` = @bid", {['@acc'] = self.accountNumber, ['@sc'] = self.sortCode, ['@bid'] = self.bid}, function(bankAccount)
+    exports.ghmattimysql:execute("SELECT * FROM `bank_accounts` WHERE `account_number` = @acc AND `sort_code` = @sc AND `businessid` = @bid", {['@acc'] = self.accountNumber, ['@sc'] = self.sortCode, ['@bid'] = self.bid}, function(bankAccount)
         if bankAccount[1] ~= nil then
             self.account_id = bankAccount[1].record_id
             self.balance = bankAccount[1].amount
@@ -83,7 +83,7 @@ function generatebusinessAccount(acc, sc, bid)
         local resLimit = limit or 30
         local processed = false
         local statement
-        QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_statements` WHERE `account` = 'business' AND `business` = @bus AND `account_number` = @acc AND `sort_code` = @sc AND `businessid` = @bid LIMIT @limit", {['@bus'] = bankAccount[1].business, ['@acc'] = self.accountNumber, ['@sc'] = self.sortCode, ['@limit'] = resLimit, ['@bid'] = self.bid }, function(res)
+        exports.ghmattimysql:execute("SELECT * FROM `bank_statements` WHERE `account` = 'business' AND `business` = @bus AND `account_number` = @acc AND `sort_code` = @sc AND `businessid` = @bid LIMIT @limit", {['@acc'] = self.accountNumber, ['@sc'] = self.sortCode, ['@bid'] = self.bid}, function(res)
             statement = res
             processed = true
         end)
@@ -150,7 +150,7 @@ function createbusinessAccount(accttype, bid, startingBalance)
     end
 
     local newBalance = tonumber(startingBalance) or 1000000
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `business` = @accttype AND `businessid` = @bid", {['@accttype'] = accttype, ['@bid'] = bid}, function(checkExists)
+    exports.ghmattimysql:execute("SELECT * FROM `bank_accounts` WHERE `business` = @accttype AND `businessid` = @bid", {['@accttype'] = accttype, ['@bid'] = bid}, function(checkExists)
         if checkExists[1] == nil then
             local sc = math.random(100000,999999)
             local acct = math.random(10000000,99999999)
