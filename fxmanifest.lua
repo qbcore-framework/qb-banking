@@ -4,8 +4,12 @@ game 'gta5'
 description 'QB-Banking'
 version '1.0.0'
 
+shared_scripts { 
+	'@qb-core/import.lua',
+	'config/config.lua',
+}
+
 server_scripts {
-    'config/config.lua',
     'server/wrappers/business.lua',
     'server/wrappers/useraccounts.lua',
     'server/wrappers/gangs.lua',
@@ -13,7 +17,6 @@ server_scripts {
 }
 
 client_scripts {
-    'config/config.lua',
     'client/main.lua',
     'client/nui.lua'
 }

@@ -1,6 +1,3 @@
-QBCore = nil
-TriggerEvent('QBCore:GetObject', function(obj) QBCore = obj end)
-
 Citizen.CreateThread(function()
     local ready = 0
     local buis = 0
