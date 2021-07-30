@@ -4,64 +4,61 @@ function generateCurrent(cid)
     self.source = -1
     local processed = false
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_cards` WHERE `citizenid` = '" .. self.cid .."'", function(getCurrentAccount)
-        if getCurrentAccount[1] ~= nil then
-            self.aid = getCurrentAccount[1].record_id
-            self.balance = getCurrentAccount[1].amount
-            if getCurrentAccount[1].cardActive then
-                self.cardNumber = getCurrentAccount[1].cardNumber
-                self.cardActive = getCurrentAccount[1].cardActive
-                self.cardPin    = getCurrentAccount[1].cardPin
-                self.cardLocked = getCurrentAccount[1].cardLocked
-                self.cardDecrypted = getCurrentAccount[1].cardDecrypted
-                self.cardType = getCurrentAccount[1].cardType
-                bankCards[tonumber(self.cardNumber)] = { ['pin'] = self.cardPin, ['cid'] = self.cid, ['locked'] = self.cardLocked, ['active'] = self.cardActive, ['decrypted'] = self.cardDecrypted }
-            else
-                self.cardNumber = 0
-                self.cardActive = false
-                self.cardPin    = 0
-                self.cardLocked = true
-            end
+    local getCurrentAccount = exports.ghmattimysql:executeSync('SELECT * FROM bank_cards WHERE citizenid=@citizenid', {['@citizenid'] = self.cid})
+    if getCurrentAccount[1] ~= nil then
+        self.aid = getCurrentAccount[1].record_id
+        self.balance = getCurrentAccount[1].amount
+        if getCurrentAccount[1].cardActive then
+            self.cardNumber = getCurrentAccount[1].cardNumber
+            self.cardActive = getCurrentAccount[1].cardActive
+            self.cardPin    = getCurrentAccount[1].cardPin
+            self.cardLocked = getCurrentAccount[1].cardLocked
+            self.cardDecrypted = getCurrentAccount[1].cardDecrypted
+            self.cardType = getCurrentAccount[1].cardType
+            bankCards[tonumber(self.cardNumber)] = { ['pin'] = self.cardPin, ['cid'] = self.cid, ['locked'] = self.cardLocked, ['active'] = self.cardActive, ['decrypted'] = self.cardDecrypted }
+        else
+            self.cardNumber = 0
+            self.cardActive = false
+            self.cardPin    = 0
+            self.cardLocked = true
         end
-        processed = true
-    end)
+    end
+    processed = true
 
     repeat Wait(0) until processed == true
     processed = false
-
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_statements` WHERE `account` = 'Current' AND `citizenid` = '" .. self.cid .. "' ORDER BY `record_id` DESC LIMIT 30", function(bankStatement)
-        if bankStatement[1] ~= nil then
-            self.bankStatement = bankStatement
-        else
-            self.bankStatement = {}
-        end
-        processed = true
-    end)
+    
+    local bankStatement = exports.ghmattimysql:executeSync('SELECT * FROM bank_statements WHERE account=@account AND citizenid=@citizenid ORDER BY record_id DESC LIMIT 30', {['@account'] = 'Current', ['@citizenid'] = self.cid})
+    if bankStatement[1] ~= nil then
+        self.bankStatement = bankStatement
+    else
+        self.bankStatement = {}
+    end
+    processed = true
     repeat Wait(0) until processed == true
     processed = false
 
     self.updateItemPin = function(pin)
         local processed = false
         local success
-        QBCore.Functions.ExecuteSql(true, "SELECT * FROM `stored_items` WHERE `metaprivate` LIKE '%\"cardnumber\":"..self.cardNumber.."%' AND `metaprivate` LIKE '%\"account\":"..self.account.."%' AND `metaprivate` LIKE '%\"sortcode\":"..self.sortcode.."%' AND `type` = 'Bankcard' LIMIT 1", function(item)
-            if item[1] ~= nil then
-                itemFound = true
-                local decode = json.decode(item[1].metaprivate)
-                decode.pin = pin
-                local recode = json.encode(decode)
-                exports['ghmattimysql']:execute("UPDATE `stored_items` SET `metaprivate` = @meta WHERE `record_id` = @rid", {['@meta'] = recode, ['@rid'] = item[1].record_id}, function(done)
-                    if done == 1 then
-                        success = true
-                    else
-                        success = false
-                    end
-                    processed = true
-                end)
-            else
-                success = false
+        local item = exports.ghmattimysql:executeSync("SELECT * FROM `stored_items` WHERE `metaprivate` LIKE '%\"cardnumber\":"..self.cardNumber.."%' AND `metaprivate` LIKE '%\"account\":"..self.account.."%' AND `metaprivate` LIKE '%\"sortcode\":"..self.sortcode.."%' AND `type` = 'Bankcard' LIMIT 1")
+        if item[1] ~= nil then
+            itemFound = true
+            local decode = json.decode(item[1].metaprivate)
+            decode.pin = pin
+            local recode = json.encode(decode)
+            exports['ghmattimysql']:execute("UPDATE `stored_items` SET `metaprivate` = @meta WHERE `record_id` = @rid", {['@meta'] = recode, ['@rid'] = item[1].record_id}, function(done)
+                if done == 1 then
+                    success = true
+                else
+                    success = false
+                end
                 processed = true
-            end
-        end)
+            end)
+        else
+            success = false
+            processed = true
+        end
         repeat Wait(0) until processed == true
         return success
     end
@@ -300,19 +297,13 @@ function generateSavings(cid)
     local self  = {}
     self.cid = cid
     self.source = -1
-
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `citizenid` = '" .. self.cid .."' AND `account_type` = 'Savings'", function(getSavingsAccount)
-        if getSavingsAccount[1] ~= nil then
-            self.aid = getSavingsAccount[1].record_id
-            self.balance = getSavingsAccount[1].amount
-        end
-        
-        QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_statements` WHERE `account` = 'Savings' AND `citizenid` = '" .. self.cid .. "' ORDER BY `record_id` DESC LIMIT 30", function(stats)
-            self.bankStatement = stats
-        end)
-    end)
-
-
+    local getSavingsAccount = exports.ghmattimysql:executeSync('SELECT * FROM bank_accounts WHERE citizenid=@citizenid AND account_type=@account_type', {['@citizenid'] = self.cid, ['@account_type'] = 'Savings'})
+    if getSavingsAccount[1] ~= nil then
+        self.aid = getSavingsAccount[1].record_id
+        self.balance = getSavingsAccount[1].amount
+    end
+    local stats = exports.ghmattimysql:executeSync('SELECT * FROM bank_statements WHERE account=@account AND citizenid=@citizenid ORDER BY record_id DESC LIMIT 30', {['@account'] = 'Savings', ['@citizenid'] = self.cid})
+    self.bankStatement = stats
 
     self.saveAccount = function()
         exports.ghmattimysql:execute('UPDATE bank_accounts SET amount=@amount WHERE citizenid=@citizenid AND record_id=@record_id', {

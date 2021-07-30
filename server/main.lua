@@ -5,40 +5,37 @@ Citizen.CreateThread(function()
     local sav = 0
     local gang = 0
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `account_type` = 'Business'", function(accts)
-        buis = #accts
-        if accts[1] ~= nil then
-            for k, v in pairs(accts) do
-                local acctType = v.business
-                if businessAccounts[acctType] == nil then
-                    businessAccounts[acctType] = {}
-                end
-                businessAccounts[acctType][tonumber(v.businessid)] = generateBusinessAccount(tonumber(v.account_number), tonumber(v.sort_code), tonumber(v.businessid))
-                while businessAccounts[acctType][tonumber(v.businessid)] == nil do Wait(0) end
+    local accts = exports.ghmattimysql:executeSync('SELECT * FROM bank_accounts WHERE account_type=@account_type', {['@account_type'] = 'Business'})
+    buis = #accts
+    if accts[1] ~= nil then
+        for k, v in pairs(accts) do
+            local acctType = v.business
+            if businessAccounts[acctType] == nil then
+                businessAccounts[acctType] = {}
             end
+            businessAccounts[acctType][tonumber(v.businessid)] = generateBusinessAccount(tonumber(v.account_number), tonumber(v.sort_code), tonumber(v.businessid))
+            while businessAccounts[acctType][tonumber(v.businessid)] == nil do Wait(0) end
         end
-        ready = ready + 1
-    end)
+    end
+    ready = ready + 1
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `account_type` = 'Savings'", function(savings)
-        sav = #savings
-        if savings[1] ~= nil then
-            for k, v in pairs(savings) do
-                savingsAccounts[v.citizenid] = generateSavings(v.citizenid)
-            end
+    local savings = exports.ghmattimysql:executeSync('SELECT * FROM bank_accounts WHERE account_type=@account_type', {['@account_type'] = 'Savings'})
+    sav = #savings
+    if savings[1] ~= nil then
+        for k, v in pairs(savings) do
+            savingsAccounts[v.citizenid] = generateSavings(v.citizenid)
         end
-        ready = ready + 1
-    end)
+    end
+    ready = ready + 1
 
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `account_type` = 'Gang'", function(gangs)
-        gang = #gangs
-        if gangs[1] ~= nil then
-            for k, v in pairs(gangs) do
-                gangAccounts[v.gangid] = loadGangAccount(v.gangid)
-            end
+    local gangs = exports.ghmattimysql:executeSync('SELECT * FROM bank_accounts WHERE account_type=@account_type', {['@account_type'] = 'Gang'})
+    gang = #gangs
+    if gangs[1] ~= nil then
+        for k, v in pairs(gangs) do
+            gangAccounts[v.gangid] = loadGangAccount(v.gangid)
         end
-        ready = ready + 1
-    end)
+    end
+    ready = ready + 1
 
     repeat Wait(0) until ready == 5
     local totalAccounts = (buis + cur + sav + gang)
@@ -98,19 +95,19 @@ end)
 function checkAccountExists(acct, sc)
     local success
     local cid
+    local actype
     local processed = false
-    QBCore.Functions.ExecuteSql(true, "SELECT * FROM `bank_accounts` WHERE `account_number` = '" .. acct .. "' AND `sort_code` = '" .. sc .. "'", function(exists)
-        if exists[1] ~= nil then 
-            success = true
-            cid = exists[1].character_id
-            actype = exists[1].account_type
-        else
-            success = false
-            cid = false
-            actype = false
-        end
-        processed = true
-    end)
+    local exists = exports.ghmattimysql:executeSync('SELECT * FROM bank_accounts WHERE account_number=@account_number AND sort_code=@sort_code', {['@account_number'] = acct, ['@sort_code'] = sc})
+    if exists[1] ~= nil then 
+        success = true
+        cid = exists[1].character_id
+        actype = exists[1].account_type
+    else
+        success = false
+        cid = false
+        actype = false
+    end
+    processed = true
     repeat Wait(0) until processed == true
     return success, cid, actype
 end
