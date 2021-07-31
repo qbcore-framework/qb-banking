@@ -247,7 +247,7 @@ function closeBanking() {
 
 $(function() {
     $("body").on("keydown", function (key) {
-        if (Config.closeKeys.includes(key.which)) {
+        if (Config.closeKeys.includes(key.which) || key.keyCode == 27) {
             closeBanking();
         }
     });
