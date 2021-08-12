@@ -1,8 +1,7 @@
 InBank = false
 blips = {}
 local banks
-local showing = false
-playerLoaded = false
+local showing, playerLoaded = false, false
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
