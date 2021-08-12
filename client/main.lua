@@ -2,11 +2,10 @@ InBank = false
 blips = {}
 local banks
 local showing = false
-playerData, playerLoaded = nil, false
+playerLoaded = false
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
-AddEventHandler('QBCore:Client:OnPlayerLoaded', function(data)
-    playerData = data
+AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     playerLoaded = true
     createBlips()
     if showing then
@@ -17,7 +16,6 @@ end)
 RegisterNetEvent('QBCore:Client:OnPlayerUnload')
 AddEventHandler('QBCore:Client:OnPlayerUnload', function()
     playerLoaded = false
-    playerData = nil
     banks = nil
     removeBlips()
     if showing then
@@ -30,14 +28,6 @@ AddEventHandler('qb-banking:client:syncBanks', function(data)
     banks = data
     if showing then
         showing = false
-    end
-end)
-
-RegisterNetEvent('qb-banking:updateCash')
-AddEventHandler('qb-banking:updateCash', function(data)
-    if playerLoaded and playerData then
-        playerData.cash = data
-        currentCash = playerData.cash
     end
 end)
 
