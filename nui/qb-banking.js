@@ -1,5 +1,5 @@
 var Config = new Object();
-Config.closeKeys = [69];
+Config.closeKeys = [69, 27];
 Config.ATMTransLimit = 5000;
 var currentLimit = null;
 var clientPin = null;
