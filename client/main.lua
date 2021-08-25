@@ -60,8 +60,6 @@ function openAccountScreen()
                 status = "openbank",
                 information = banking
             })
-
-            TriggerEvent("debug", 'Banking: Open UI', 'success')
         end        
     end)
 end
