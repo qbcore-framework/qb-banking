@@ -35,7 +35,7 @@ function createBlips()
         blips[k] = AddBlipForCoord(tonumber(v.x), tonumber(v.y), tonumber(v.z))
         SetBlipSprite(blips[k], Config.Blip.blipType)
         SetBlipDisplay(blips[k], 4)
-        SetBlipScale  (blips[k], 0.8)
+        SetBlipScale  (blips[k], Config.Blip.blipScale)
         SetBlipColour (blips[k], Config.Blip.blipColor)
         SetBlipAsShortRange(blips[k], true)
         BeginTextCommandSetBlipName("STRING")
@@ -60,8 +60,6 @@ function openAccountScreen()
                 status = "openbank",
                 information = banking
             })
-
-            TriggerEvent("debug", 'Banking: Open UI', 'success')
         end        
     end)
 end
