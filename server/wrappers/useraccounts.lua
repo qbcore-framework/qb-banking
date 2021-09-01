@@ -395,7 +395,6 @@ AddEventHandler('qb-banking:server:registerSavingsAccount', function(cid)
 end)
 
 function createSavingsAccount(cid)
-    print(cid)
     local completed = false
     local success = false
     exports.ghmattimysql:execute('INSERT INTO bank_accounts (citizenid, amount, account_type) VALUES (@citizenid, @amount, @account_type)', {
