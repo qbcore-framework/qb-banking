@@ -5,7 +5,7 @@ Config.cardTypes = { "visa", "mastercard"}
 Config.Blip = {
     blipName = "Bank",
     blipType = 108,
-    blipColor = 2,
+    blipColor = 0,
     blipScale = 0.55
 }
 
