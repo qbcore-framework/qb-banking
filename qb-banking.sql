@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `bank_accounts` (
   KEY `buisness` (`buisness`),
   KEY `buisnessid` (`buisnessid`),
   KEY `gangid` (`gangid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `bank_statements` (
   `record_id` bigint(255) NOT NULL AUTO_INCREMENT,
@@ -29,4 +29,4 @@ CREATE TABLE IF NOT EXISTS `bank_statements` (
   KEY `buisness` (`buisness`),
   KEY `buisnessid` (`buisnessid`),
   KEY `gangid` (`gangid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
