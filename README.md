@@ -5,13 +5,11 @@
 - [qb-logs](https://github.com/qbcore-framework/qb-logs) - For keeping records
 
 ## Screenshots
-![Account Home](https://imgur.com/jy3n4my.png)
-![Debit Card Selection on ATM](https://imgur.com/fk8diMV.png)
-![Debit Card](https://imgur.com/y04n6jR.png)
-![Savings Account](https://imgur.com/lkhhbum.png)
-![Transfer](https://imgur.com/O0e1mzw.png)
-![Account Options](https://imgur.com/NYphhb5.png)
-![Banks](https://imgur.com/48LtSyk.png)
+![Account Home](https://i.imgur.com/XazaYYI.png)
+![Debit Card Selection on ATM](https://i.imgur.com/dvJ9hnC.png)
+![Savings Account](https://i.imgur.com/1HFUL06.png)
+![Transfer](https://i.imgur.com/SqADuRg.png)
+![Account Options](https://i.imgur.com/blMgfpG.png)
 
 ## Features
 - Debit card (MasterCard/Visa) with PIN
