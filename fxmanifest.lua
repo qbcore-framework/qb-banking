@@ -21,14 +21,14 @@ client_scripts {
     'client/nui.lua'
 }
 
-ui_page 'nui/index.html'
+ui_page 'html/index.html'
 
 files {
-    'nui/images/logo.png',
-    'nui/scripting/jquery-ui.css',
-    'nui/scripting/external/jquery/jquery.js',
-    'nui/scripting/jquery-ui.js',
-    'nui/style.css',
-    'nui/index.html',
-    'nui/qb-banking.js',
+    'html/images/*.png',
+    'html/scripting/jquery-ui.css',
+    'html/scripting/external/jquery/jquery.js',
+    'html/scripting/jquery-ui.js',
+    'html/style.css',
+    'html/index.html',
+    'html/banking.js',
 }
