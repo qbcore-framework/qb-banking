@@ -13,7 +13,7 @@ function generatebusinessAccount(acc, sc, bid)
     self.bid = bid
 
     local processed = false
-    local bankAccount = exports.ghmattimysql:executeSync('SELECT * FROM bank_accounts WHERE account_number=@acc AND sort_code=@sc AND businessid=@bid', {['@acc'] = self.accountNumber, ['@sc'] = self.sortCode, ['@bid'] = self.bid})
+    local bankAccount = exports.oxmysql:fetchSync('SELECT * FROM bank_accounts WHERE account_number=@acc AND sort_code=@sc AND businessid=@bid', {['@acc'] = self.accountNumber, ['@sc'] = self.sortCode, ['@bid'] = self.bid})
     if bankAccount[1] ~= nil then
         self.account_id = bankAccount[1].record_id
         self.balance = bankAccount[1].amount
@@ -35,7 +35,7 @@ function generatebusinessAccount(acc, sc, bid)
     repeat Wait(0) until processed == true
 
     self.saveAccount = function()
-        exports['ghmattimysql']:execute("UPDATE `bank_accounts` SET `amount` = @amount WHERE `record_id` = @rid", {['@amount'] = self.balance, ['@rid'] = self.account_id}, function() end)
+        exports.oxmysql:execute("UPDATE `bank_accounts` SET `amount` = @amount WHERE `record_id` = @rid", {['@amount'] = self.balance, ['@rid'] = self.account_id}, function() end)
     end
     
     local rTable = {}
@@ -64,7 +64,7 @@ function generatebusinessAccount(acc, sc, bid)
         local resLimit = limit or 30
         local processed = false
         local statement
-        local res = exports.ghmattimysql:executeSync("SELECT * FROM `bank_statements` WHERE `account` = 'business' AND `business` = @bus AND `account_number` = @acc AND `sort_code` = @sc AND `businessid` = @bid LIMIT @limit", {['@bus'] = bankAccount[1].business, ['@acc'] = self.accountNumber, ['@sc'] = self.sortCode, ['@limit'] = resLimit, ['@bid'] = self.bid})
+        local res = exports.oxmysql:fetchSync("SELECT * FROM `bank_statements` WHERE `account` = 'business' AND `business` = @bus AND `account_number` = @acc AND `sort_code` = @sc AND `businessid` = @bid LIMIT @limit", {['@bus'] = bankAccount[1].business, ['@acc'] = self.accountNumber, ['@sc'] = self.sortCode, ['@limit'] = resLimit, ['@bid'] = self.bid})
         statement = res
         processed = true
         repeat Wait(0) until processed == true
@@ -77,7 +77,7 @@ function generatebusinessAccount(acc, sc, bid)
         if type(amt) == "number" and text then
             if amt <= self.balance then
                 self.balance = self.balance - amt
-                exports['ghmattimysql']:execute("INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `withdraw`, `balance`, `type`) VALUES('business', @bus, @bid, @ac, @sc, @amt, @bal, @text)", {
+                exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `withdraw`, `balance`, `type`) VALUES('business', @bus, @bid, @ac, @sc, @amt, @bal, @text)", {
                     ['@bus'] = self.account_for,
                     ['@ac'] = self.accountNumber,
                     ['@sc'] = self.sortCode,
@@ -97,7 +97,7 @@ function generatebusinessAccount(acc, sc, bid)
     rTable.addBalance = function(amt, text)
         if type(amt) == "number" and text then
             self.balance = self.balance + amt
-            exports['ghmattimysql']:execute("INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `deposited`, `balance`, `type`) VALUES('business', @bus, @bid, @ac, @sc, @amt, @bal, @text)", {
+            exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `deposited`, `balance`, `type`) VALUES('business', @bus, @bid, @ac, @sc, @amt, @bal, @text)", {
                 ['@bus'] = self.account_for,
                 ['@ac'] = self.accountNumber,
                 ['@sc'] = self.sortCode,
@@ -130,11 +130,11 @@ function createbusinessAccount(accttype, bid, startingBalance)
     end
 
     local newBalance = tonumber(startingBalance) or 1000000
-    local checkExists = exports.ghmattimysql:executeSync("SELECT * FROM `bank_accounts` WHERE `business` = @accttype AND `businessid` = @bid", {['@accttype'] = accttype, ['@bid'] = bid})
+    local checkExists = exports.oxmysql:fetchSync("SELECT * FROM `bank_accounts` WHERE `business` = @accttype AND `businessid` = @bid", {['@accttype'] = accttype, ['@bid'] = bid})
     if checkExists[1] == nil then
         local sc = math.random(100000,999999)
         local acct = math.random(10000000,99999999)
-        exports['ghmattimysql']:execute("INSERT INTO `bank_accounts` (`business`, `businessid`, `account_number`, `sort_code`, `amount`, `account_type`) VALUES (@business, @bid, @acnum, @sc, @bal, 'business')", {['@business'] = accttype, ['@acnum'] = acct, ['@sc'] = sc, ['@bal'] = newBalance, ['@bid'] = bid }, function(success)
+        exports.oxmysql:insert("INSERT INTO `bank_accounts` (`business`, `businessid`, `account_number`, `sort_code`, `amount`, `account_type`) VALUES (@business, @bid, @acnum, @sc, @bal, 'business')", {['@business'] = accttype, ['@acnum'] = acct, ['@sc'] = sc, ['@bal'] = newBalance, ['@bid'] = bid }, function(success)
             if success > 0 then
                 businessAccounts[accttype][tonumber(bid)] = generatebusinessAccount(acct, sc, bid)
             end

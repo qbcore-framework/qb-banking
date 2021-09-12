@@ -4,7 +4,7 @@ function generateCurrent(cid)
     self.source = -1
     local processed = false
 
-    local getCurrentAccount = exports.ghmattimysql:executeSync('SELECT * FROM bank_cards WHERE citizenid=@citizenid', {['@citizenid'] = self.cid})
+    local getCurrentAccount = exports.oxmysql:fetchSync('SELECT * FROM bank_cards WHERE citizenid=@citizenid', {['@citizenid'] = self.cid})
     if getCurrentAccount[1] ~= nil then
         self.aid = getCurrentAccount[1].record_id
         self.balance = getCurrentAccount[1].amount
@@ -28,7 +28,7 @@ function generateCurrent(cid)
     repeat Wait(0) until processed == true
     processed = false
     
-    local bankStatement = exports.ghmattimysql:executeSync('SELECT * FROM bank_statements WHERE account=@account AND citizenid=@citizenid ORDER BY record_id DESC LIMIT 30', {['@account'] = 'Current', ['@citizenid'] = self.cid})
+    local bankStatement = exports.oxmysql:fetchSync('SELECT * FROM bank_statements WHERE account=@account AND citizenid=@citizenid ORDER BY record_id DESC LIMIT 30', {['@account'] = 'Current', ['@citizenid'] = self.cid})
     if bankStatement[1] ~= nil then
         self.bankStatement = bankStatement
     else
@@ -41,13 +41,13 @@ function generateCurrent(cid)
     self.updateItemPin = function(pin)
         local processed = false
         local success
-        local item = exports.ghmattimysql:executeSync("SELECT * FROM `stored_items` WHERE `metaprivate` LIKE '%\"cardnumber\":"..self.cardNumber.."%' AND `metaprivate` LIKE '%\"account\":"..self.account.."%' AND `metaprivate` LIKE '%\"sortcode\":"..self.sortcode.."%' AND `type` = 'Bankcard' LIMIT 1")
+        local item = exports.oxmysql:fetchSync("SELECT * FROM `stored_items` WHERE `metaprivate` LIKE '%\"cardnumber\":"..self.cardNumber.."%' AND `metaprivate` LIKE '%\"account\":"..self.account.."%' AND `metaprivate` LIKE '%\"sortcode\":"..self.sortcode.."%' AND `type` = 'Bankcard' LIMIT 1")
         if item[1] ~= nil then
             itemFound = true
             local decode = json.decode(item[1].metaprivate)
             decode.pin = pin
             local recode = json.encode(decode)
-            exports['ghmattimysql']:execute("UPDATE `stored_items` SET `metaprivate` = @meta WHERE `record_id` = @rid", {['@meta'] = recode, ['@rid'] = item[1].record_id}, function(done)
+            exports.oxmysql:execute("UPDATE `stored_items` SET `metaprivate` = @meta WHERE `record_id` = @rid", {['@meta'] = recode, ['@rid'] = item[1].record_id}, function(done)
                 if done == 1 then
                     success = true
                 else
@@ -66,7 +66,7 @@ function generateCurrent(cid)
     self.saveAccount = function()
         local success 
         local processed = false
-        exports['ghmattimysql']:execute("UPDATE `bank_accounts` SET `amount` = @amt WHERE `character_id` = @cid AND `record_id` = @rid", {['@amt'] = self.balance, ['@cid'] = self.cid, ['@rid'] = self.aid}, function(success1)
+        exports.oxmysql:execute("UPDATE `bank_accounts` SET `amount` = @amt WHERE `character_id` = @cid AND `record_id` = @rid", {['@amt'] = self.balance, ['@cid'] = self.cid, ['@rid'] = self.aid}, function(success1)
             if success1 > 0 then
                 success = true
             else
@@ -85,7 +85,7 @@ function generateCurrent(cid)
     end
 
     rTable.ToggleDebitCard = function(toggle)
-        exports['ghmattimysql']:execute("UPDATE `bank_accounts` SET `cardLocked` = @toggle WHERE `character_id` = @cid AND `record_id` = @acct", {['@cid'] = self.cid, ['@acct'] = self.aid, ['@toggle'] = toggle}, function(rowsChanged)
+        exports.oxmysql:execute("UPDATE `bank_accounts` SET `cardLocked` = @toggle WHERE `character_id` = @cid AND `record_id` = @acct", {['@cid'] = self.cid, ['@acct'] = self.aid, ['@toggle'] = toggle}, function(rowsChanged)
             if rowsChanged == 1 then
                 self.cardLocked = toggle
                 bankCards[tonumber(self.cardNumber)].locked = self.cardLocked
@@ -111,7 +111,7 @@ function generateCurrent(cid)
             else
                 friendlyName = "Mastercard"
             end
-            exports.ghmattimysql:execute('UPDATE bank_cards SET cardnumber=@cardnumber, cardPin=@cardPin, cardDecrypted=@cardDecrypted, cardActive=@cardActive, cardLocked=@cardLocked, cardType=@cardType WHERE citizenid=@citizenid AND record_id=@record_id', {
+            exports.oxmysql:execute('UPDATE bank_cards SET cardnumber=@cardnumber, cardPin=@cardPin, cardDecrypted=@cardDecrypted, cardActive=@cardActive, cardLocked=@cardLocked, cardType=@cardType WHERE citizenid=@citizenid AND record_id=@record_id', {
                 ['@cardnumber'] = cardNumber,
                 ['@cardPin'] = pinSet,
                 ['@cardDecrypted'] = false,
@@ -158,7 +158,7 @@ function generateCurrent(cid)
     end
 
     rTable.UpdateDebitCardPin = function(pin)
-        exports['ghmattimysql']:execute("UPDATE `bank_accounts` SET `cardPin` = @pin WHERE `character_id` = @cid AND `record_id` = @acct", {['@cid'] = self.cid, ['@acct'] = self.aid, ['@pin'] = pin}, function(rowsChanged)
+        exports.oxmysql:execute("UPDATE `bank_accounts` SET `cardPin` = @pin WHERE `character_id` = @cid AND `record_id` = @acct", {['@cid'] = self.cid, ['@acct'] = self.aid, ['@pin'] = pin}, function(rowsChanged)
             if rowsChanged == 1 then
                 self.cardPin = pin
                 self.updateItemPin(pin)
@@ -195,7 +195,7 @@ function generateCurrent(cid)
             local successBank = self.saveAccount()
             if successBank then
                 local time = os.date("%Y-%m-%d %H:%M:%S")
-                exports['ghmattimysql']:execute("INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (@accountty, @cid, @account, @sortcode, @deposited, @withdraw, @balance, @date, @type)", {
+                exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (@accountty, @cid, @account, @sortcode, @deposited, @withdraw, @balance, @date, @type)", {
                     ['@accountty'] = "Current",
                     ['@cid'] = self.cid,
                     ['@account'] = self.account,
@@ -245,7 +245,7 @@ function generateCurrent(cid)
 
                 if successBank then
                     local time = os.date("%Y-%m-%d %H:%M:%S")
-                    exports['ghmattimysql']:execute("INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (@accountty, @cid, @account, @sortcode, @deposited, @withdraw, @balance, @date, @type)", {
+                    exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (@accountty, @cid, @account, @sortcode, @deposited, @withdraw, @balance, @date, @type)", {
                         ['@accountty'] = "Current",
                         ['@cid'] = self.cid,
                         ['@account'] = self.account,
@@ -297,16 +297,16 @@ function generateSavings(cid)
     local self  = {}
     self.cid = cid
     self.source = -1
-    local getSavingsAccount = exports.ghmattimysql:executeSync('SELECT * FROM bank_accounts WHERE citizenid=@citizenid AND account_type=@account_type', {['@citizenid'] = self.cid, ['@account_type'] = 'Savings'})
+    local getSavingsAccount = exports.oxmysql:fetchSync('SELECT * FROM bank_accounts WHERE citizenid=@citizenid AND account_type=@account_type', {['@citizenid'] = self.cid, ['@account_type'] = 'Savings'})
     if getSavingsAccount[1] ~= nil then
         self.aid = getSavingsAccount[1].record_id
         self.balance = getSavingsAccount[1].amount
     end
-    local stats = exports.ghmattimysql:executeSync('SELECT * FROM bank_statements WHERE account=@account AND citizenid=@citizenid ORDER BY record_id DESC LIMIT 30', {['@account'] = 'Savings', ['@citizenid'] = self.cid})
+    local stats = exports.oxmysql:fetchSync('SELECT * FROM bank_statements WHERE account=@account AND citizenid=@citizenid ORDER BY record_id DESC LIMIT 30', {['@account'] = 'Savings', ['@citizenid'] = self.cid})
     self.bankStatement = stats
 
     self.saveAccount = function()
-        exports.ghmattimysql:execute('UPDATE bank_accounts SET amount=@amount WHERE citizenid=@citizenid AND record_id=@record_id', {
+        exports.oxmysql:execute('UPDATE bank_accounts SET amount=@amount WHERE citizenid=@citizenid AND record_id=@record_id', {
             ['@amount'] = self.balance,
             ['@citizenid'] = self.cid,
             ['@record_id'] = self.aid
@@ -347,7 +347,7 @@ function generateSavings(cid)
             self.balance = self.balance + amt
             local success = self.saveAccount()
             local time = os.date("%Y-%m-%d %H:%M:%S")
-            exports.ghmattimysql:execute('INSERT INTO bank_statements (citizenid, account, deposited, withdraw, balance, date, type) VALUES (@citizenid, @account, @deposited, @withdraw, @balance, @date, @type)', {
+            exports.oxmysql:insert('INSERT INTO bank_statements (citizenid, account, deposited, withdraw, balance, date, type) VALUES (@citizenid, @account, @deposited, @withdraw, @balance, @date, @type)', {
                 ['@citizenid'] = self.cid,
                 ['@account'] = 'Saving',
                 ['@deposited'] = amt,
@@ -368,7 +368,7 @@ function generateSavings(cid)
                 self.balance = self.balance - amt
                 local success = self.saveAccount()
                 local time = os.date("%Y-%m-%d %H:%M:%S")
-                exports.ghmattimysql:execute('INSERT INTO bank_statements (citizenid, account, deposited, withdraw, balance, date, type) VALUES (@citizenid, @account, @deposited, @withdraw, @balance, @date, @type)', {
+                exports.oxmysql:insert('INSERT INTO bank_statements (citizenid, account, deposited, withdraw, balance, date, type) VALUES (@citizenid, @account, @deposited, @withdraw, @balance, @date, @type)', {
                     ['@citizenid'] = self.cid,
                     ['@account'] = 'Saving',
                     ['@deposited'] = 0,
@@ -397,7 +397,7 @@ end)
 function createSavingsAccount(cid)
     local completed = false
     local success = false
-    exports.ghmattimysql:execute('INSERT INTO bank_accounts (citizenid, amount, account_type) VALUES (@citizenid, @amount, @account_type)', {
+    exports.oxmysql:insert('INSERT INTO bank_accounts (citizenid, amount, account_type) VALUES (@citizenid, @amount, @account_type)', {
         ['@citizenid'] = cid,
         ['@amount'] = 0,
         ['@account_type'] = 'Savings'
