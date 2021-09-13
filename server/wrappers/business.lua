@@ -13,7 +13,7 @@ function generatebusinessAccount(acc, sc, bid)
     self.bid = bid
 
     local processed = false
-    local bankAccount = exports.oxmysql:fetchSync('SELECT * FROM bank_accounts WHERE account_number=@acc AND sort_code=@sc AND businessid=@bid', {['@acc'] = self.accountNumber, ['@sc'] = self.sortCode, ['@bid'] = self.bid})
+    local bankAccount = exports.oxmysql:fetchSync('SELECT * FROM bank_accounts WHERE account_number = ? AND sort_code = ? AND businessid = ?', { self.accountNumber, self.sortCode, self.bid })
     if bankAccount[1] ~= nil then
         self.account_id = bankAccount[1].record_id
         self.balance = bankAccount[1].amount
@@ -35,9 +35,9 @@ function generatebusinessAccount(acc, sc, bid)
     repeat Wait(0) until processed == true
 
     self.saveAccount = function()
-        exports.oxmysql:execute("UPDATE `bank_accounts` SET `amount` = @amount WHERE `record_id` = @rid", {['@amount'] = self.balance, ['@rid'] = self.account_id}, function() end)
+        exports.oxmysql:execute("UPDATE `bank_accounts` SET `amount` = ? WHERE `record_id` = ?", { self.balance, self.account_id })
     end
-    
+
     local rTable = {}
 
     rTable.getName = function()
@@ -62,13 +62,14 @@ function generatebusinessAccount(acc, sc, bid)
 
     rTable.getBankStatement = function(limit)
         local resLimit = limit or 30
-        local processed = false
-        local statement
-        local res = exports.oxmysql:fetchSync("SELECT * FROM `bank_statements` WHERE `account` = 'business' AND `business` = @bus AND `account_number` = @acc AND `sort_code` = @sc AND `businessid` = @bid LIMIT @limit", {['@bus'] = bankAccount[1].business, ['@acc'] = self.accountNumber, ['@sc'] = self.sortCode, ['@limit'] = resLimit, ['@bid'] = self.bid})
-        statement = res
-        processed = true
-        repeat Wait(0) until processed == true
-        return statement
+        local res = exports.oxmysql:fetchSync("SELECT * FROM `bank_statements` WHERE `account` = 'business' AND `business` = ? AND `account_number` = ? AND `sort_code` = ? AND `businessid` = ? LIMIT ?", {
+            bankAccount[1].business,
+            self.accountNumber,
+            self.sortCode,
+            self.bid,
+            resLimit
+        })
+        return res
     end
 
     -- Update Functions
@@ -77,14 +78,15 @@ function generatebusinessAccount(acc, sc, bid)
         if type(amt) == "number" and text then
             if amt <= self.balance then
                 self.balance = self.balance - amt
-                exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `withdraw`, `balance`, `type`) VALUES('business', @bus, @bid, @ac, @sc, @amt, @bal, @text)", {
-                    ['@bus'] = self.account_for,
-                    ['@ac'] = self.accountNumber,
-                    ['@sc'] = self.sortCode,
-                    ['@amt'] = amt,
-                    ['@bal'] = self.balance,
-                    ['@text'] = text,
-                    ['@bid'] = self.bid
+                exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `withdraw`, `balance`, `type`) VALUES(?)", {
+                    'business',
+                    self.account_for,
+                    self.bid,
+                    self.accountNumber,
+                    self.sortCode,
+                    amt,
+                    self.balance,
+                    text
                 }, function(inserted)
                     if inserted > 0 then
                         self.saveAccount()
@@ -97,14 +99,15 @@ function generatebusinessAccount(acc, sc, bid)
     rTable.addBalance = function(amt, text)
         if type(amt) == "number" and text then
             self.balance = self.balance + amt
-            exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `deposited`, `balance`, `type`) VALUES('business', @bus, @bid, @ac, @sc, @amt, @bal, @text)", {
-                ['@bus'] = self.account_for,
-                ['@ac'] = self.accountNumber,
-                ['@sc'] = self.sortCode,
-                ['@amt'] = amt,
-                ['@bal'] = self.balance,
-                ['@text'] = text,
-                ['@bid'] = self.bid
+            exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `deposited`, `balance`, `type`) VALUES(?)", {
+                'business',
+                self.account_for,
+                self.bid,
+                self.accountNumber,
+                self.sortCode,
+                amt,
+                self.balance,
+                text
             }, function(inserted)
                 if inserted > 0 then
                     self.saveAccount()
@@ -130,11 +133,19 @@ function createbusinessAccount(accttype, bid, startingBalance)
     end
 
     local newBalance = tonumber(startingBalance) or 1000000
-    local checkExists = exports.oxmysql:fetchSync("SELECT * FROM `bank_accounts` WHERE `business` = @accttype AND `businessid` = @bid", {['@accttype'] = accttype, ['@bid'] = bid})
+    local checkExists = exports.oxmysql:fetchSync("SELECT * FROM `bank_accounts` WHERE `business` = ? AND `businessid` = ?", { accttype, bid })
     if checkExists[1] == nil then
         local sc = math.random(100000,999999)
         local acct = math.random(10000000,99999999)
-        exports.oxmysql:insert("INSERT INTO `bank_accounts` (`business`, `businessid`, `account_number`, `sort_code`, `amount`, `account_type`) VALUES (@business, @bid, @acnum, @sc, @bal, 'business')", {['@business'] = accttype, ['@acnum'] = acct, ['@sc'] = sc, ['@bal'] = newBalance, ['@bid'] = bid }, function(success)
+        exports.oxmysql:insert("INSERT INTO `bank_accounts` (`business`, `businessid`, `account_number`, `sort_code`, `amount`, `account_type`) VALUES (?)", {
+            accttype,
+            bid,
+            acct,
+            sc,
+            newBalance,
+            'business'
+        },
+        function(success)
             if success > 0 then
                 businessAccounts[accttype][tonumber(bid)] = generatebusinessAccount(acct, sc, bid)
             end
