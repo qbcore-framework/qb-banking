@@ -197,7 +197,7 @@ function generateCurrent(cid)
             if successBank then
                 local time = os.date("%Y-%m-%d %H:%M:%S")
                 -- TODO: The nil value might not be accepted by the sql handler here
-                exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (?)", {
+                exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", {
                     "Current",
                     self.cid,
                     self.account,
@@ -248,7 +248,7 @@ function generateCurrent(cid)
                 if successBank then
                     local time = os.date("%Y-%m-%d %H:%M:%S")
                     -- TODO: The nil value might not be accepted by the sql handler here
-                    exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (?)", {
+                    exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", {
                         "Current",
                         self.cid,
                         self.account,
@@ -346,7 +346,7 @@ function generateSavings(cid)
             self.balance = self.balance + amt
             local success = self.saveAccount()
             local time = os.date("%Y-%m-%d %H:%M:%S")
-            exports.oxmysql:insert('INSERT INTO bank_statements (citizenid, account, deposited, withdraw, balance, date, type) VALUES (?)', {
+            exports.oxmysql:insert('INSERT INTO bank_statements (citizenid, account, deposited, withdraw, balance, date, type) VALUES (?, ?, ?, ?, ?, ?, ?)', {
                 self.cid,
                 'Saving',
                 amt,
@@ -367,7 +367,7 @@ function generateSavings(cid)
                 self.balance = self.balance - amt
                 local success = self.saveAccount()
                 local time = os.date("%Y-%m-%d %H:%M:%S")
-                exports.oxmysql:insert('INSERT INTO bank_statements (citizenid, account, deposited, withdraw, balance, date, type) VALUES (?)', {
+                exports.oxmysql:insert('INSERT INTO bank_statements (citizenid, account, deposited, withdraw, balance, date, type) VALUES (?, ?, ?, ?, ?, ?, ?)', {
                     self.cid,
                     'Saving',
                     0,
@@ -396,7 +396,7 @@ end)
 function createSavingsAccount(cid)
     local completed = false
     local success = false
-    exports.oxmysql:insert('INSERT INTO bank_accounts (citizenid, amount, account_type) VALUES (?)', { cid, 0, 'Savings' }, function(result)
+    exports.oxmysql:insert('INSERT INTO bank_accounts (citizenid, amount, account_type) VALUES (?, ?, ?)', { cid, 0, 'Savings' }, function(result)
         savingsAccounts[cid] = generateSavings(cid)
         success = true
         completed = true
