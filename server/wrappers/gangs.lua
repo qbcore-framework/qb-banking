@@ -63,7 +63,7 @@ function createGangAccount(gang, startingBalance)
     if checkExists[1] == nil then
         local sc = math.random(100000,999999)
         local acct = math.random(10000000,99999999)
-        exports.oxmysql:insert("INSERT INTO `bank_accounts` (`gangid`, `account_number`, `sort_code`, `amount`, `account_type`) VALUES (?)", {
+        exports.oxmysql:insert("INSERT INTO `bank_accounts` (`gangid`, `account_number`, `sort_code`, `amount`, `account_type`) VALUES (?, ?, ?, ?, ?)", {
             gang,
             acct,
             sc,

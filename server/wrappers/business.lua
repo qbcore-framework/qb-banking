@@ -78,7 +78,7 @@ function generatebusinessAccount(acc, sc, bid)
         if type(amt) == "number" and text then
             if amt <= self.balance then
                 self.balance = self.balance - amt
-                exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `withdraw`, `balance`, `type`) VALUES(?)", {
+                exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `withdraw`, `balance`, `type`) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", {
                     'business',
                     self.account_for,
                     self.bid,
@@ -99,7 +99,7 @@ function generatebusinessAccount(acc, sc, bid)
     rTable.addBalance = function(amt, text)
         if type(amt) == "number" and text then
             self.balance = self.balance + amt
-            exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `deposited`, `balance`, `type`) VALUES(?)", {
+            exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `deposited`, `balance`, `type`) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", {
                 'business',
                 self.account_for,
                 self.bid,
@@ -137,7 +137,7 @@ function createbusinessAccount(accttype, bid, startingBalance)
     if checkExists[1] == nil then
         local sc = math.random(100000,999999)
         local acct = math.random(10000000,99999999)
-        exports.oxmysql:insert("INSERT INTO `bank_accounts` (`business`, `businessid`, `account_number`, `sort_code`, `amount`, `account_type`) VALUES (?)", {
+        exports.oxmysql:insert("INSERT INTO `bank_accounts` (`business`, `businessid`, `account_number`, `sort_code`, `amount`, `account_type`) VALUES (?, ?, ?, ?, ?, ?)", {
             accttype,
             bid,
             acct,
