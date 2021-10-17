@@ -144,3 +144,25 @@ AddEventHandler('qb-banking:successAlert', function(msg)
         message = msg
     })
 end)
+
+RegisterNetEvent('qb-banking:client:usedMoneyBag')
+AddEventHandler('qb-banking:client:usedMoneyBag', function(item)
+    local playerCoords = GetEntityCoords(PlayerPedId())
+    for k, v in pairs(banks) do 
+        if v.bankType == "Paleto" and v.moneyBags ~= nil and v.bankOpen then
+            local moneyBagDist = #(playerCoords - vector3(v.moneyBags.x, v.moneyBags.y, v.moneyBags.z))
+            if moneyBagDist < 1.0 then
+                QBCore.Functions.Progressbar("accessing_atm", "Cashier Counting Bag..", 60000, false, true, {
+                    disableMovement = true,
+                    disableCarMovement = true,
+                    disableMouse = false,
+                    disableCombat = true,
+                }, {}, {}, {}, function() -- Done
+                    TriggerServerEvent('qb-banking:server:unpackMoneyBag', item)
+                end, function()
+                    QBCore.Functions.Notify("Failed!", "error")
+                end)
+            end
+        end
+    end
+end)
