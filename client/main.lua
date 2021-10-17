@@ -88,24 +88,35 @@ Citizen.CreateThread(function()
         if playerLoaded and QBCore ~= nil and not InBank then 
             local playerPed = PlayerPedId()
             local playerCoords = GetEntityCoords(playerPed, true)
-            for k, v in pairs(Config.BankLocations) do 
-                local bankDist = #(playerCoords - v)
-                if bankDist < 3.0 then
-                    letSleep = false
+            if banks ~= nil then
+                for k, v in pairs(Config.BankLocations) do 
+                    local bankDist = #(playerCoords - v)
+                    if bankDist < 3.0 then
+                        letSleep = false
 
-                    DrawMarker(27, v.x, v.y, v.z-0.99, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.001, 1.0001, 0.5001, 0, 25, 165, 100, false, true, 2, false, false, false, false) 
+                        DrawMarker(27, v.x, v.y, v.z-0.99, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.001, 1.0001, 0.5001, 0, 25, 165, 100, false, true, 2, false, false, false, false) 
 
-                    if bankDist < 1.0 then
-                        DrawText3Ds(v.x, v.y, v.z-0.25, '~g~E~w~ - Access Bank')
+                        if v.bankType == "Paleto" and v.moneyBags ~= nil then
+                            local moneyBagDist = #(playerCoords - vector3(v.moneyBags.x, v.moneyBags.y, v.moneyBags.z))
+                            if v.bankOpen then
+                                DrawMarker(27, v.moneyBags.x, v.moneyBags.y, v.moneyBags.z-0.99, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 138, 87, 165, 100, false, true, 2, true, nil, nil, false)
+                            else
+                                DrawMarker(27, v.moneyBags.x, v.moneyBags.y, v.moneyBags.z-0.99, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 255, 0, 0, 100, false, true, 2, true, nil, nil, false)
+                            end
+                        end
+                        if bankDist < 1.0 then
+                            DrawText3Ds(v.x, v.y, v.z-0.25, v.bankOpen and '[E] - Bank' or 'The bank is currently closed')
 
-                        if IsControlJustPressed(0, 38) then
-                            openAccountScreen()
+                            if v.bankOpen and IsControlJustPressed(0, 38) then
+                                openAccountScreen()
+                            end
                         end
                     end
                 end
             end
         elseif InBank then
             letSleep = false
+            DisablePlayerFiring(PlayerId(), true)
         end
 
         if letSleep then
