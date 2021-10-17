@@ -452,3 +452,14 @@ RegisterNetEvent("payanimation")
 AddEventHandler("payanimation", function()
 TriggerEvent('animations:client:EmoteCommandStart', {"id"})
 end)
+
+QBCore.Functions.CreateCallback('qb-banking:server:requestBanks', function(source, cb)
+    repeat Wait(0) until banks ~= nil
+    cb(banks)
+end)
+
+QBCore.Functions.CreateCallback('qb-banking:server:checkMoneyBagCount', function(source, cb)
+    local src = source
+    local xPlayer = QBCore.Functions.GetPlayer(src)
+    cb(xPlayer.Functions.GetItemByName('moneybag').count)
+end)
