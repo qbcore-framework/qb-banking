@@ -4,7 +4,7 @@ function generateCurrent(cid)
     self.source = -1
     local processed = false
 
-    local getCurrentAccount = exports.oxmysql:fetchSync('SELECT * FROM bank_cards WHERE citizenid = ?', { self.cid })
+    local getCurrentAccount = exports.oxmysql:executeSync('SELECT * FROM bank_cards WHERE citizenid = ?', { self.cid })
     if getCurrentAccount[1] ~= nil then
         self.aid = getCurrentAccount[1].record_id
         self.balance = getCurrentAccount[1].amount
@@ -28,7 +28,7 @@ function generateCurrent(cid)
     repeat Wait(0) until processed == true
     processed = false
     
-    local bankStatement = exports.oxmysql:fetchSync('SELECT * FROM bank_statements WHERE account = ? AND citizenid = ? ORDER BY record_id DESC LIMIT 30', { 'Current', self.cid })
+    local bankStatement = exports.oxmysql:executeSync('SELECT * FROM bank_statements WHERE account = ? AND citizenid = ? ORDER BY record_id DESC LIMIT 30', { 'Current', self.cid })
     if bankStatement[1] ~= nil then
         self.bankStatement = bankStatement
     else
@@ -42,7 +42,7 @@ function generateCurrent(cid)
         local processed = false
         local success
         -- TODO: This should be turned into variables
-        local item = exports.oxmysql:fetchSync("SELECT * FROM `stored_items` WHERE `metaprivate` LIKE '%\"cardnumber\":"..self.cardNumber.."%' AND `metaprivate` LIKE '%\"account\":"..self.account.."%' AND `metaprivate` LIKE '%\"sortcode\":"..self.sortcode.."%' AND `type` = 'Bankcard' LIMIT 1")
+        local item = exports.oxmysql:executeSync("SELECT * FROM `stored_items` WHERE `metaprivate` LIKE '%\"cardnumber\":"..self.cardNumber.."%' AND `metaprivate` LIKE '%\"account\":"..self.account.."%' AND `metaprivate` LIKE '%\"sortcode\":"..self.sortcode.."%' AND `type` = 'Bankcard' LIMIT 1")
         if item[1] ~= nil then
             itemFound = true
             local decode = json.decode(item[1].metaprivate)
@@ -300,12 +300,12 @@ function generateSavings(cid)
     local self  = {}
     self.cid = cid
     self.source = -1
-    local getSavingsAccount = exports.oxmysql:fetchSync('SELECT * FROM bank_accounts WHERE citizenid = ? AND account_type = ?', { self.cid, 'Savings' })
+    local getSavingsAccount = exports.oxmysql:executeSync('SELECT * FROM bank_accounts WHERE citizenid = ? AND account_type = ?', { self.cid, 'Savings' })
     if getSavingsAccount[1] ~= nil then
         self.aid = getSavingsAccount[1].record_id
         self.balance = getSavingsAccount[1].amount
     end
-    local stats = exports.oxmysql:fetchSync('SELECT * FROM bank_statements WHERE account = ? AND citizenid = ? ORDER BY record_id DESC LIMIT 30', { 'Savings', self.cid })
+    local stats = exports.oxmysql:executeSync('SELECT * FROM bank_statements WHERE account = ? AND citizenid = ? ORDER BY record_id DESC LIMIT 30', { 'Savings', self.cid })
     self.bankStatement = stats
 
     self.saveAccount = function()

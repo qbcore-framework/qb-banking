@@ -13,7 +13,7 @@ function generatebusinessAccount(acc, sc, bid)
     self.bid = bid
 
     local processed = false
-    local bankAccount = exports.oxmysql:fetchSync('SELECT * FROM bank_accounts WHERE account_number = ? AND sort_code = ? AND businessid = ?', { self.accountNumber, self.sortCode, self.bid })
+    local bankAccount = exports.oxmysql:executeSync('SELECT * FROM bank_accounts WHERE account_number = ? AND sort_code = ? AND businessid = ?', { self.accountNumber, self.sortCode, self.bid })
     if bankAccount[1] ~= nil then
         self.account_id = bankAccount[1].record_id
         self.balance = bankAccount[1].amount
@@ -62,7 +62,7 @@ function generatebusinessAccount(acc, sc, bid)
 
     rTable.getBankStatement = function(limit)
         local resLimit = limit or 30
-        local res = exports.oxmysql:fetchSync("SELECT * FROM `bank_statements` WHERE `account` = 'business' AND `business` = ? AND `account_number` = ? AND `sort_code` = ? AND `businessid` = ? LIMIT ?", {
+        local res = exports.oxmysql:executeSync("SELECT * FROM `bank_statements` WHERE `account` = 'business' AND `business` = ? AND `account_number` = ? AND `sort_code` = ? AND `businessid` = ? LIMIT ?", {
             bankAccount[1].business,
             self.accountNumber,
             self.sortCode,
@@ -133,7 +133,7 @@ function createbusinessAccount(accttype, bid, startingBalance)
     end
 
     local newBalance = tonumber(startingBalance) or 1000000
-    local checkExists = exports.oxmysql:fetchSync("SELECT * FROM `bank_accounts` WHERE `business` = ? AND `businessid` = ?", { accttype, bid })
+    local checkExists = exports.oxmysql:executeSync("SELECT * FROM `bank_accounts` WHERE `business` = ? AND `businessid` = ?", { accttype, bid })
     if checkExists[1] == nil then
         local sc = math.random(100000,999999)
         local acct = math.random(10000000,99999999)
