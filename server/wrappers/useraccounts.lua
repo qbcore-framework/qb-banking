@@ -27,7 +27,7 @@ function generateCurrent(cid)
 
     repeat Wait(0) until processed == true
     processed = false
-    
+
     local bankStatement = exports.oxmysql:executeSync('SELECT * FROM bank_statements WHERE account = ? AND citizenid = ? ORDER BY record_id DESC LIMIT 30', { 'Current', self.cid })
     if bankStatement[1] ~= nil then
         self.bankStatement = bankStatement
@@ -65,7 +65,7 @@ function generateCurrent(cid)
     end
 
     self.saveAccount = function()
-        local success 
+        local success
         local processed = false
         exports.oxmysql:execute("UPDATE `bank_accounts` SET `amount` = ? WHERE `character_id` = ? AND `record_id` = ?", { self.balance, self.cid, self.aid }, function(success1)
             if success1 > 0 then
@@ -134,7 +134,7 @@ function generateCurrent(cid)
                 if self.source ~= -1 then
                     TriggerClientEvent('qb-banking:client:newCardSuccess', self.source, cardNumber, friendlyName)
                     local xPlayer = QBCore.Functions.GetPlayer(self.source)
-                    
+
                     if selectedCard == "visa" then
                         xPlayer.Functions.AddItem('visa', 1)
                     elseif selectedCard == "mastercard" then
@@ -169,7 +169,7 @@ function generateCurrent(cid)
     end
 
     rTable.updateSource = function(src)
-        if src ~= nil and type(src) == "number" then 
+        if src ~= nil and type(src) == "number" then
             self.source = src
         else
             self.source = -1
@@ -210,8 +210,7 @@ function generateCurrent(cid)
                 }, function(statementUpdated)
                     if statementUpdated > 0 then
                         local statementTable = {['withdraw'] = nil, ['deposited'] = amt, ['type'] = text, ['sort_code'] = self.sortcode, ['date'] = time, ['balance'] = self.balance, ['account'] = "Current", ['record_id'] = statementUpdated, ['account_number'] = self.account, ['character_id'] = self.cid }
-                        table.insert(self.bankStatement, statementTable)
-        
+                        self.bankStatement[#self.bankStatement+1] = statementTable
                         if self.source ~= -1 then
                             TriggerClientEvent('pw:updateBank', self.source, self.amount)
                         end
@@ -222,7 +221,7 @@ function generateCurrent(cid)
                     Addprocessed = true
                 end)
                 local statementTable = {['withdraw'] = nil, ['deposited'] = amt, ['type'] = text, ['sort_code'] = self.sortcode, ['date'] = time, ['balance'] = self.balance, ['account'] = "Current", ['record_id'] = statementUpdated, ['account_number'] = self.account, ['character_id'] = self.cid }
-                table.insert(self.bankStatement, statementTable)
+                self.bankStatement[#self.bankStatement+1] = statementTable
 
                 if self.source ~= -1 then
                     TriggerClientEvent('pw:updateBank', self.source, self.amount)
@@ -262,7 +261,7 @@ function generateCurrent(cid)
                         if statementUpdated > 0 then
                             successOri = true
                             local statementTable = {['withdraw'] = amt, ['deposited'] = nil, ['type'] = text, ['sort_code'] = self.sortcode, ['date'] = time, ['balance'] = self.balance, ['account'] = "Current", ['record_id'] = statementUpdated, ['account_number'] = self.account, ['character_id'] = self.cid }
-                            table.insert(self.bankStatement, statementTable)
+                            self.bankStatement[#self.bankStatement+1] = statementTable
 
                             if self.source ~= -1 then
                                 TriggerClientEvent('pw:updateBank', self.source, self.amount)
@@ -334,7 +333,7 @@ function generateSavings(cid)
     end
 
     rTable.updateSource = function(src)
-        if src ~= nil and type(src) == "number" then 
+        if src ~= nil and type(src) == "number" then
             self.source = src
         else
             self.source = -1
@@ -356,7 +355,7 @@ function generateSavings(cid)
                 text
             })
             local statementTable = {['withdraw'] = nil, ['deposited'] = amt, ['type'] = text,  ['date'] = time, ['balance'] = self.balance, ['account'] = "Savings", ['record_id'] = statementUpdate, ['character_id'] = self.cid }
-            table.insert(self.bankStatement, statementTable)
+            self.bankStatement[#self.bankStatement+1] = statementTable
             return true
         end
     end
@@ -377,7 +376,7 @@ function generateSavings(cid)
                     text
                 })
                 local statementTable = {['withdraw'] = amt, ['deposited'] = nil, ['type'] = text,  ['date'] = time, ['balance'] = self.balance, ['account'] = "Savings", ['record_id'] = statementUpdate, ['character_id'] = self.cid }
-                table.insert(self.bankStatement, statementTable)
+                self.bankStatement[#self.bankStatement+1] = statementTable
                 return true
             end
         end
