@@ -425,8 +425,8 @@ QBCore.Commands.Add('givecash', 'Give cash to player.', {{name = 'id', help = 'P
 				if #(GetEntityCoords(GetPlayerPed(src)) - GetEntityCoords(GetPlayerPed(id))) < distance then
 					if xPlayer.Functions.RemoveMoney('cash', amount) then
 						if xReciv.Functions.AddMoney('cash', amount) then
-							TriggerClientEvent('QBCore:Notify', src, "Success fully gave to ID " .. tostring(id) .. ' ' .. tostring(amount) .. '$.', "success")
-							TriggerClientEvent('QBCore:Notify', id, "Success recived gave " .. tostring(amount) .. '$ from ID ' .. tostring(src), "success")
+							TriggerClientEvent('QBCore:Notify', src, "Success fully gave to ID " .. tostring(id) .. ' $' .. tostring(amount) .. '', "success")
+							TriggerClientEvent('QBCore:Notify', id, "Success recived gave $" .. tostring(amount) .. ' from ID ' .. tostring(src), "success")
 							TriggerClientEvent("payanimation", src)
 						else
 							TriggerClientEvent('QBCore:Notify', src, "Could not give item to the given id.", "error")
