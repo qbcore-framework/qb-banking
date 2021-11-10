@@ -4,10 +4,7 @@ game 'gta5'
 description 'QB-Banking'
 version '1.0.0'
 
-shared_scripts { 
-	'@qb-core/import.lua',
-	'config/config.lua',
-}
+shared_script 'config/config.lua'
 
 server_scripts {
     'server/wrappers/business.lua',
@@ -32,3 +29,5 @@ files {
     'nui/index.html',
     'nui/qb-banking.js',
 }
+
+lua54 'yes'

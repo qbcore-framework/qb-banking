@@ -1,3 +1,5 @@
+QBCore = exports['qb-core']:GetCoreObject()
+
 function generateCurrent(cid)
     local self = {}
     self.cid = cid

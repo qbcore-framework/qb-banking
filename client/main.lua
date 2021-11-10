@@ -1,3 +1,4 @@
+local QBCore = exports['qb-core']:GetCoreObject()
 InBank = false
 blips = {}
 local banks
@@ -60,7 +61,7 @@ function openAccountScreen()
                 status = "openbank",
                 information = banking
             })
-        end        
+        end
     end)
 end
 
@@ -85,15 +86,15 @@ Citizen.CreateThread(function()
     while true do
         Citizen.Wait(1)
         letSleep = true
-        if playerLoaded and QBCore ~= nil and not InBank then 
+        if playerLoaded and QBCore ~= nil and not InBank then
             local playerPed = PlayerPedId()
             local playerCoords = GetEntityCoords(playerPed, true)
-            for k, v in pairs(Config.BankLocations) do 
+            for k, v in pairs(Config.BankLocations) do
                 local bankDist = #(playerCoords - v)
                 if bankDist < 3.0 then
                     letSleep = false
 
-                    DrawMarker(27, v.x, v.y, v.z-0.99, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.001, 1.0001, 0.5001, 0, 25, 165, 100, false, true, 2, false, false, false, false) 
+                    DrawMarker(27, v.x, v.y, v.z-0.99, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.001, 1.0001, 0.5001, 0, 25, 165, 100, false, true, 2, false, false, false, false)
 
                     if bankDist < 1.0 then
                         DrawText3Ds(v.x, v.y, v.z-0.25, '~g~E~w~ - Access Bank')
