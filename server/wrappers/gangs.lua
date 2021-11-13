@@ -53,10 +53,12 @@ function loadGangAccount(gangid)
             end
         end
     end
+
+    return rTable
 end
 
-function createGangAccount(gang, startingBalance)
-    
+local function createGangAccount(gang, startingBalance)
+
     local newBalance = tonumber(startingBalance) or 0
 
     local checkExists = exports.oxmysql:executeSync("SELECT * FROM `bank_accounts` WHERE `gangid` = ?", { gang })
