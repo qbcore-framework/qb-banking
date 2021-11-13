@@ -13,10 +13,7 @@ server_scripts {
     'server/main.lua'
 }
 
-client_scripts {
-    'client/main.lua',
-    'client/nui.lua'
-}
+client_script 'client/main.lua'
 
 ui_page 'nui/index.html'
 

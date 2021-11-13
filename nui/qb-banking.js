@@ -4,7 +4,7 @@ Config.ATMTransLimit = 5000;
 var currentLimit = null;
 var clientPin = null;
 
-window.addEventListener("message", function (event) {    
+window.addEventListener("message", function (event) {
     if(event.data.status == "openbank") {
         /*$("#cardDetails").css({"display":"none"});*/
         $("#createNewPin").css({"display":"none"});
@@ -92,12 +92,12 @@ window.addEventListener("message", function (event) {
         $("#savingsQuicky").css({"display":"none"});
         $("#savingAccountCreator").css({"display":"none"});
         $("#ATMContainer").css({"display":"none"});
-    } else if (event.data.status == "transferError") { 
+    } else if (event.data.status == "transferError") {
         if(event.data.error !== undefined) {
             $("#transferError").css({"display":"block"});
             $("#transferErrorMsg").html(event.data.error);
         }
-    } else if (event.data.status == "successMessage") { 
+    } else if (event.data.status == "successMessage") {
         if(event.data.message !== undefined) {
             $("#successRow").css({"display":"block"});
             $("#successMessage").html(event.data.message);
@@ -132,7 +132,7 @@ function setupSavingsMenu(data, name)
     if (statement2 !== undefined) {
     statement2.sort(dynamicSort("date"));
     $.each(statement2, function (index, statement) {
-        console.log(index)
+        // console.log(index)
         if(statement.deposited == null && statement.deposited == undefined) {
             deposit = "0"
         } else {
@@ -297,7 +297,7 @@ $(function() {
         if(amount !== undefined && amount > 0) {
             $("#withdrawError").css({"display":"none"});
             $("#withdrawErrorMsg").html('');
-            $.post('https://qb-banking/doWithdraw', JSON.stringify({ 
+            $.post('https://qb-banking/doWithdraw', JSON.stringify({
                 amount: parseInt(amount)
             }));
             $('#withdrawAmount').val('')
@@ -314,7 +314,7 @@ $(function() {
             if(amount !== undefined && amount > 0) {
                 $("#withdrawATMError").css({"display":"none"});
                 $("#withdrawATMErrorMsg").html('');
-                $.post('https://qb-banking/doATMWithdraw', JSON.stringify({ 
+                $.post('https://qb-banking/doATMWithdraw', JSON.stringify({
                     amount: parseInt(amount)
                 }));
                 $('#withdrawAmountATM').val('');
@@ -341,7 +341,7 @@ $(function() {
         if(amount !== undefined && amount > 0) {
             $("#depositError").css({"display":"none"});
             $("#depositErrorMsg").html('');
-            $.post('https://qb-banking/doDeposit', JSON.stringify({ 
+            $.post('https://qb-banking/doDeposit', JSON.stringify({
                 amount: parseInt(amount)
             }));
             $('#depositAmount').val('');
@@ -355,7 +355,7 @@ $(function() {
     $("[data-action=deposit]").click(function() {
         var amount = $(this).attr('data-amount');
         if(amount > 0) {
-            $.post('https://qb-banking/doDeposit', JSON.stringify({ 
+            $.post('https://qb-banking/doDeposit', JSON.stringify({
                 amount: parseInt(amount)
             }));
         }
@@ -368,11 +368,11 @@ $(function() {
 
     $("#processCard").click(function() {
         var pinValue = $('#cardPinNumber').val();
-        console.log(pinValue.replace(/[^0-9]/g,"").length);
+        // console.log(pinValue.replace(/[^0-9]/g,"").length);
         if(pinValue !== null && pinValue !== undefined && pinValue.replace(/[^0-9]/g,"").length === 4) {
             $("#pinCreatorError").css({"display":"none"});
             $("#pinCreatorErrorMsg").html('');
-            $.post('https://qb-banking/createDebitCard', JSON.stringify({ 
+            $.post('https://qb-banking/createDebitCard', JSON.stringify({
                 pin: pad(pinValue, 4)
             }));
         } else {
@@ -390,7 +390,7 @@ $(function() {
         if(amount !== undefined && amount !== null && amount > 0 && sortcode !== undefined && sortcode !== null && sortcode > 0 && account !== undefined && account !== null && account > 0) {
             $("#transferError").css({"display":"none"});
             $("#transferErrorMsg").html('');
-            $.post('https://qb-banking/doTransfer', JSON.stringify({ 
+            $.post('https://qb-banking/doTransfer', JSON.stringify({
                 amount: parseInt(amount),
                 account: parseInt(account),
                 sortcode: parseInt(sortcode)
@@ -402,13 +402,13 @@ $(function() {
             $("#transferError").css({"display":"block"});
             $("#transferErrorMsg").html('There was an error with the information you have entered, please ensure the account number, sort code and amount is correctly filled out.');
         }
-        
+
     });
-    
+
     $("[data-action=withdraw]").click(function() {
         var amount = $(this).attr('data-amount');
         if(amount > 0) {
-            $.post('https://qb-banking/doWithdraw', JSON.stringify({ 
+            $.post('https://qb-banking/doWithdraw', JSON.stringify({
                 amount: parseInt(amount)
             }));
         }
@@ -418,7 +418,7 @@ $(function() {
         var amount = $(this).attr('data-amount');
         if (currentLimit + parseInt(amount) <= Config.ATMTransLimit) {
             if(amount > 0) {
-                $.post('https://qb-banking/doATMWithdraw', JSON.stringify({ 
+                $.post('https://qb-banking/doATMWithdraw', JSON.stringify({
                     amount: parseInt(amount)
                 }));
                 $("#successMessageATM").removeClass('alert-danger').addClass('alert-success');
@@ -437,7 +437,7 @@ $(function() {
     $("[data-action=savingsdeposit]").click(function() {
         var amount = $(this).attr('data-amount');
         if(amount > 0) {
-            $.post('https://qb-banking/savingsDeposit', JSON.stringify({ 
+            $.post('https://qb-banking/savingsDeposit', JSON.stringify({
                 amount: parseInt(amount)
             }));
         }
@@ -457,16 +457,16 @@ $(function() {
         $("#requestNewCard2").css({"display":"none"});
         $("#requestNewCard3").css({"display":"block"});
 
-        $.post('https://qb-banking/requestNewCard', JSON.stringify({ 
-                
+        $.post('https://qb-banking/requestNewCard', JSON.stringify({
+
         }));
 
-        setTimeout(function(){ 
+        setTimeout(function(){
             $("#requestNewCard3").css({"display":"none"});
             $("#requestNewCard1").css({"display":"block"});
          }, 5000);
     });
-    
+
     $("#makeSavingsTransfer").click(function() {
         var amount = $("#savingsTAmount").val();
         var action = $("#savingsAction").val();
@@ -475,20 +475,20 @@ $(function() {
             if(action == "deposit") {
                 $("#savingsTAmount").val('');
                 $("#savingsAction").val('def');
-                $.post('https://qb-banking/savingsDeposit', JSON.stringify({ 
+                $.post('https://qb-banking/savingsDeposit', JSON.stringify({
                     amount: parseInt(amount)
                 }));
             } else {
                 $("#savingsTAmount").val('');
                 $("#savingsAction").val('def');
-                $.post('https://qb-banking/savingsWithdraw', JSON.stringify({ 
+                $.post('https://qb-banking/savingsWithdraw', JSON.stringify({
                     amount: parseInt(amount)
                 }));
             }
         }
     });
 
-    
+
     $("[data-action=pinNumberBtn]").click(function() {
         var number = $(this).attr('data-number');
         if(number == "ENTER") {
@@ -507,7 +507,7 @@ $(function() {
                 $("#pinErrorMsg").html('You need to enter a Pin which is 4 Digits in length.');
                 $("#pinErrorDiv").css({"display":"block"});
             }
-            
+
 
         } else if(number == "CLEAR") {
             // pin cleared
@@ -523,7 +523,7 @@ $(function() {
     $("[data-action=savingswithdraw]").click(function() {
         var amount = $(this).attr('data-amount');
         if(amount > 0) {
-            $.post('https://qb-banking/savingsWithdraw', JSON.stringify({ 
+            $.post('https://qb-banking/savingsWithdraw', JSON.stringify({
                 amount: parseInt(amount)
             }));
         }

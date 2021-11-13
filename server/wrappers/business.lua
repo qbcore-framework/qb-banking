@@ -12,7 +12,6 @@ function generatebusinessAccount(acc, sc, bid)
     self.sortCode = tonumber(sc)
     self.bid = bid
 
-    local processed = false
     local bankAccount = exports.oxmysql:executeSync('SELECT * FROM bank_accounts WHERE account_number = ? AND sort_code = ? AND businessid = ?', { self.accountNumber, self.sortCode, self.bid })
     if bankAccount[1] ~= nil then
         self.account_id = bankAccount[1].record_id
@@ -31,8 +30,6 @@ function generatebusinessAccount(acc, sc, bid)
             self.account_name = "Car Dealership"
         end
     end
-        processed = true
-    repeat Wait(0) until processed == true
 
     self.saveAccount = function()
         exports.oxmysql:execute("UPDATE `bank_accounts` SET `amount` = ? WHERE `record_id` = ?", { self.balance, self.account_id })
@@ -127,7 +124,7 @@ end
 --- CREATE A NEW business ACCOUNT ---
 -------------------------------------
 
-function createbusinessAccount(accttype, bid, startingBalance)
+local function createbusinessAccount(accttype, bid, startingBalance)
     if businessAccounts[accttype] == nil then
         businessAccounts[accttype] = {}
     end
