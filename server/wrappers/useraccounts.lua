@@ -278,8 +278,6 @@ function generateCurrent(cid)
     return rTable
 end
 
-
-
 RegisterNetEvent('qb-banking:server:registerCurrentAccount', function(cid)
     if not currentAccounts[cid] then
         currentAccounts[cid] = generateCurrent(cid)
