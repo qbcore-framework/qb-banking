@@ -5,9 +5,7 @@ gangAccounts = {}
 bankCards = {}
 
 function generatebusinessAccount(acc, sc, bid)
-
     local self = {}
-
     self.accountNumber = tonumber(acc)
     self.sortCode = tonumber(sc)
     self.bid = bid
