@@ -54,7 +54,6 @@ local function openAccountScreen()
     end)
 end
 
-
 -- Events
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
@@ -86,9 +85,10 @@ end)
 -- Loop
 
 local letSleep = true
-Citizen.CreateThread(function()
+
+CreateThread(function()
     while true do
-        Citizen.Wait(1)
+        Wait(1)
         letSleep = true
         if LocalPlayer.state.isLoggedIn and not InBank then
             local playerPed = PlayerPedId()
@@ -112,11 +112,10 @@ Citizen.CreateThread(function()
         end
 
         if letSleep then
-            Citizen.Wait(100)
+            Wait(100)
         end
     end
 end)
-
 
 -- NUI
 

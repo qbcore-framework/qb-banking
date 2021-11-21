@@ -1,6 +1,6 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
-Citizen.CreateThread(function()
+CreateThread(function()
     local accts = exports.oxmysql:executeSync('SELECT * FROM bank_accounts WHERE account_type = ?', { 'Business' })
     if accts[1] ~= nil then
         for k, v in pairs(accts) do
@@ -215,7 +215,6 @@ QBCore.Functions.CreateCallback('qb-banking:getBankingInformation', function(sou
                     ['cash'] = '$'.. format_int(xPlayer.PlayerData.money['cash']),
                     ['accountinfo'] = xPlayer.PlayerData.charinfo.account,
                 }
-
                 if savingsAccounts[xPlayer.PlayerData.citizenid] then
                     local cid = xPlayer.PlayerData.citizenid
                     banking['savings'] = {
@@ -224,7 +223,6 @@ QBCore.Functions.CreateCallback('qb-banking:getBankingInformation', function(sou
                         ['statement'] = savingsAccounts[cid].getStatement(),
                     }
                 end
-
                 cb(banking)
         else
             cb(nil)
@@ -237,7 +235,6 @@ RegisterNetEvent('qb-banking:createBankCard', function(pin)
     local cid = xPlayer.PlayerData.citizenid
     local cardNumber = math.random(1000000000000000,9999999999999999)
     xPlayer.Functions.SetCreditCard(cardNumber)
-
     local info = {}
     local selectedCard = Config.cardTypes[math.random(1,#Config.cardTypes)]
     info.citizenid = cid
@@ -351,7 +348,6 @@ RegisterNetEvent('qb-banking:createSavingsAccount', function()
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
     local success = createSavingsAccount(xPlayer.PlayerData.citizenid)
-
     repeat Wait(0) until success ~= nil
     TriggerClientEvent('qb-banking:openBankScreen', src)
     TriggerClientEvent('qb-banking:successAlert', src, 'You have successfully opened a savings account.')
