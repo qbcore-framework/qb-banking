@@ -2,7 +2,7 @@ function loadGangAccount(gangid)
     local self = {}
     self.gid = gangid
 
-    local query = exports.oxmysql:executeSync("SELECT * FROM `bank_accounts` WHERE `gangid` = ? AND `account_type` = 'Gang'", { self.gid })
+    local query = MySQL.Sync.fetchAll("SELECT * FROM `bank_accounts` WHERE `gangid` = ? AND `account_type` = 'Gang'", { self.gid })
     if query[1] ~= nil then
         self.accountnumber = query[1].account_number
         self.sortcode = query[1].sort_code
@@ -11,11 +11,11 @@ function loadGangAccount(gangid)
         self.accountid = query[1].record_id
     end
 
-    local state = exports.oxmysql:executeSync("SELECT * FROM `bank_statements` WHERE `account_number` = ? AND `sort_code` = ? AND `gangid` = ?", { self.accountnumber, self.sortcode, self.gid})
+    local state = MySQL.Sync.fetchAll('SELECT * FROM `bank_statements` WHERE `account_number` = ? AND `sort_code` = ? AND `gangid` = ?', { self.accountnumber, self.sortcode, self.gid})
     self.accountStatement = state
 
     self.saveAccount = function()
-        exports.oxmysql:execute("UPDATE `bank_accounts` SET `amount` = ? WHERE `record_id` = ?", { self.balance, self.accountid })
+        MySQL.Async.execute('UPDATE `bank_accounts` SET `amount` = ? WHERE `record_id` = ?', { self.balance, self.accountid })
     end
 
     local rTable = {}
@@ -61,11 +61,11 @@ local function createGangAccount(gang, startingBalance)
 
     local newBalance = tonumber(startingBalance) or 0
 
-    local checkExists = exports.oxmysql:executeSync("SELECT * FROM `bank_accounts` WHERE `gangid` = ?", { gang })
+    local checkExists = MySQL.Sync.fetchAll('SELECT * FROM `bank_accounts` WHERE `gangid` = ?', { gang })
     if checkExists[1] == nil then
         local sc = math.random(100000,999999)
         local acct = math.random(10000000,99999999)
-        exports.oxmysql:insert("INSERT INTO `bank_accounts` (`gangid`, `account_number`, `sort_code`, `amount`, `account_type`) VALUES (?, ?, ?, ?, ?)", {
+        MySQL.Async.insert('INSERT INTO `bank_accounts` (`gangid`, `account_number`, `sort_code`, `amount`, `account_type`) VALUES (?, ?, ?, ?, ?)', {
             gang,
             acct,
             sc,

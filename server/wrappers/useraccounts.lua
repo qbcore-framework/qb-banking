@@ -6,7 +6,7 @@ function generateCurrent(cid)
     self.source = -1
     local processed = false
 
-    local getCurrentAccount = exports.oxmysql:executeSync('SELECT * FROM bank_cards WHERE citizenid = ?', { self.cid })
+    local getCurrentAccount = MySQL.Sync.fetchAll('SELECT * FROM bank_cards WHERE citizenid = ?', { self.cid })
     if getCurrentAccount[1] ~= nil then
         self.aid = getCurrentAccount[1].record_id
         self.balance = getCurrentAccount[1].amount
@@ -30,7 +30,7 @@ function generateCurrent(cid)
     repeat Wait(0) until processed == true
     processed = false
 
-    local bankStatement = exports.oxmysql:executeSync('SELECT * FROM bank_statements WHERE account = ? AND citizenid = ? ORDER BY record_id DESC LIMIT 30', { 'Current', self.cid })
+    local bankStatement = MySQL.Sync.fetchAll('SELECT * FROM bank_statements WHERE account = ? AND citizenid = ? ORDER BY record_id DESC LIMIT 30', { 'Current', self.cid })
     if bankStatement[1] ~= nil then
         self.bankStatement = bankStatement
     else
@@ -42,13 +42,13 @@ function generateCurrent(cid)
 
     self.updateItemPin = function(pin)
         local success = nil
-        local item = exports.oxmysql:executeSync("SELECT * FROM `stored_items` WHERE `metaprivate` LIKE ? AND `metaprivate` LIKE ? AND `metaprivate` LIKE ? AND `type` = 'Bankcard' LIMIT 1", {'%\"cardnumber\":'..self.cardNumber..'%', '%\"account\":'..self.account..'%', '%\"sortcode\":'..self.sortcode..'%'})
+        local item = MySQL.Sync.fetchAll("SELECT * FROM `stored_items` WHERE `metaprivate` LIKE ? AND `metaprivate` LIKE ? AND `metaprivate` LIKE ? AND `type` = 'Bankcard' LIMIT 1", {'%\"cardnumber\":'..self.cardNumber..'%', '%\"account\":'..self.account..'%', '%\"sortcode\":'..self.sortcode..'%'})
         if item[1] ~= nil then
             itemFound = true
             local decode = json.decode(item[1].metaprivate)
             decode.pin = pin
             local recode = json.encode(decode)
-            exports.oxmysql:execute("UPDATE `stored_items` SET `metaprivate` = ? WHERE `record_id` = ?", { recode, item[1].record_id }, function(done)
+            MySQL.Async.execute('UPDATE `stored_items` SET `metaprivate` = ? WHERE `record_id` = ?', { recode, item[1].record_id }, function(done)
                 if done == 1 then
                     success = true
                 else
@@ -65,7 +65,7 @@ function generateCurrent(cid)
     self.saveAccount = function()
         local success
         local processed = false
-        exports.oxmysql:execute("UPDATE `bank_accounts` SET `amount` = ? WHERE `character_id` = ? AND `record_id` = ?", { self.balance, self.cid, self.aid }, function(success1)
+        MySQL.Async.execute('UPDATE `bank_accounts` SET `amount` = ? WHERE `character_id` = ? AND `record_id` = ?', { self.balance, self.cid, self.aid }, function(success1)
             if success1 > 0 then
                 success = true
             else
@@ -84,7 +84,7 @@ function generateCurrent(cid)
     end
 
     rTable.ToggleDebitCard = function(toggle)
-        exports.oxmysql:execute("UPDATE `bank_accounts` SET `cardLocked` = ? WHERE `character_id` = ? AND `record_id` = ?", { toggle, self.cid, self.aid }, function(rowsChanged)
+        MySQL.Async.execute('UPDATE `bank_accounts` SET `cardLocked` = ? WHERE `character_id` = ? AND `record_id` = ?', { toggle, self.cid, self.aid }, function(rowsChanged)
             if rowsChanged == 1 then
                 self.cardLocked = toggle
                 bankCards[tonumber(self.cardNumber)].locked = self.cardLocked
@@ -110,7 +110,7 @@ function generateCurrent(cid)
             else
                 friendlyName = "Mastercard"
             end
-            exports.oxmysql:execute('UPDATE bank_cards SET cardnumber = ?, cardPin = ?, cardDecrypted = ?, cardActive = ?, cardLocked = ?, cardType = ? WHERE citizenid = ? AND record_id = ?', {
+            MySQL.Async.execute('UPDATE bank_cards SET cardnumber = ?, cardPin = ?, cardDecrypted = ?, cardActive = ?, cardLocked = ?, cardType = ? WHERE citizenid = ? AND record_id = ?', {
                 cardNumber,
                 pinSet,
                 false,
@@ -157,7 +157,7 @@ function generateCurrent(cid)
     end
 
     rTable.UpdateDebitCardPin = function(pin)
-        exports.oxmysql:execute("UPDATE `bank_accounts` SET `cardPin` = ? WHERE `character_id` = ? AND `record_id` = ?", { pin, self.cid, self.aid }, function(rowsChanged)
+        MySQL.Async.execute('UPDATE `bank_accounts` SET `cardPin` = ? WHERE `character_id` = ? AND `record_id` = ?', { pin, self.cid, self.aid }, function(rowsChanged)
             if rowsChanged == 1 then
                 self.cardPin = pin
                 self.updateItemPin(pin)
@@ -195,7 +195,7 @@ function generateCurrent(cid)
             if successBank then
                 local time = os.date("%Y-%m-%d %H:%M:%S")
                 -- TODO: The nil value might not be accepted by the sql handler here
-                exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", {
+                MySQL.Async.insert('INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', {
                     "Current",
                     self.cid,
                     self.account,
@@ -239,7 +239,7 @@ function generateCurrent(cid)
                 if successBank then
                     local time = os.date("%Y-%m-%d %H:%M:%S")
                     -- TODO: The nil value might not be accepted by the sql handler here
-                    exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", {
+                    MySQL.Async.insert('INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', {
                         "Current",
                         self.cid,
                         self.account,
@@ -288,16 +288,16 @@ function generateSavings(cid)
     local self  = {}
     self.cid = cid
     self.source = -1
-    local getSavingsAccount = exports.oxmysql:executeSync('SELECT * FROM bank_accounts WHERE citizenid = ? AND account_type = ?', { self.cid, 'Savings' })
+    local getSavingsAccount = MySQL.Sync.fetchAll('SELECT * FROM bank_accounts WHERE citizenid = ? AND account_type = ?', { self.cid, 'Savings' })
     if getSavingsAccount[1] ~= nil then
         self.aid = getSavingsAccount[1].record_id
         self.balance = getSavingsAccount[1].amount
     end
-    local stats = exports.oxmysql:executeSync('SELECT * FROM bank_statements WHERE account = ? AND citizenid = ? ORDER BY record_id DESC LIMIT 30', { 'Savings', self.cid })
+    local stats = MySQL.Sync.fetchAll('SELECT * FROM bank_statements WHERE account = ? AND citizenid = ? ORDER BY record_id DESC LIMIT 30', { 'Savings', self.cid })
     self.bankStatement = stats
 
     self.saveAccount = function()
-        exports.oxmysql:execute('UPDATE bank_accounts SET amount = ? WHERE citizenid = ? AND record_id = ?', { self.balance, self.cid, self.aid }, function(success)
+        MySQL.Async.execute('UPDATE bank_accounts SET amount = ? WHERE citizenid = ? AND record_id = ?', { self.balance, self.cid, self.aid }, function(success)
             if success then
                 return true
             else
@@ -334,7 +334,7 @@ function generateSavings(cid)
             self.balance = self.balance + amt
             self.saveAccount()
             local time = os.date("%Y-%m-%d %H:%M:%S")
-            exports.oxmysql:insert('INSERT INTO bank_statements (citizenid, account, deposited, withdraw, balance, date, type) VALUES (?, ?, ?, ?, ?, ?, ?)', {
+            MySQL.Async.insert('INSERT INTO bank_statements (citizenid, account, deposited, withdraw, balance, date, type) VALUES (?, ?, ?, ?, ?, ?, ?)', {
                 self.cid,
                 'Saving',
                 amt,
@@ -359,7 +359,7 @@ function generateSavings(cid)
                 self.balance = self.balance - amt
                 self.saveAccount()
                 local time = os.date("%Y-%m-%d %H:%M:%S")
-                exports.oxmysql:insert('INSERT INTO bank_statements (citizenid, account, deposited, withdraw, balance, date, type) VALUES (?, ?, ?, ?, ?, ?, ?)', {
+                MySQL.Async.insert('INSERT INTO bank_statements (citizenid, account, deposited, withdraw, balance, date, type) VALUES (?, ?, ?, ?, ?, ?, ?)', {
                     self.cid,
                     'Saving',
                     0,
@@ -390,7 +390,7 @@ end)
 
 function createSavingsAccount(cid)
     local completed = false
-    exports.oxmysql:insert('INSERT INTO bank_accounts (citizenid, amount, account_type) VALUES (?, ?, ?)', { cid, 0, 'Savings' }, function(result)
+    MySQL.Async.insert('INSERT INTO bank_accounts (citizenid, amount, account_type) VALUES (?, ?, ?)', { cid, 0, 'Savings' }, function(result)
         savingsAccounts[cid] = generateSavings(cid)
         completed = true
     end)

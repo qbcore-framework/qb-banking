@@ -10,7 +10,7 @@ function generatebusinessAccount(acc, sc, bid)
     self.sortCode = tonumber(sc)
     self.bid = bid
 
-    local bankAccount = exports.oxmysql:executeSync('SELECT * FROM bank_accounts WHERE account_number = ? AND sort_code = ? AND businessid = ?', { self.accountNumber, self.sortCode, self.bid })
+    local bankAccount = MySQL.Sync.fetchAll('SELECT * FROM bank_accounts WHERE account_number = ? AND sort_code = ? AND businessid = ?', { self.accountNumber, self.sortCode, self.bid })
     if bankAccount[1] ~= nil then
         self.account_id = bankAccount[1].record_id
         self.balance = bankAccount[1].amount
@@ -30,7 +30,7 @@ function generatebusinessAccount(acc, sc, bid)
     end
 
     self.saveAccount = function()
-        exports.oxmysql:execute("UPDATE `bank_accounts` SET `amount` = ? WHERE `record_id` = ?", { self.balance, self.account_id })
+        MySQL.Async.execute('UPDATE `bank_accounts` SET `amount` = ? WHERE `record_id` = ?', { self.balance, self.account_id })
     end
 
     local rTable = {}
@@ -57,7 +57,7 @@ function generatebusinessAccount(acc, sc, bid)
 
     rTable.getBankStatement = function(limit)
         local resLimit = limit or 30
-        local res = exports.oxmysql:executeSync("SELECT * FROM `bank_statements` WHERE `account` = 'business' AND `business` = ? AND `account_number` = ? AND `sort_code` = ? AND `businessid` = ? LIMIT ?", {
+        local res = MySQL.Sync.fetchAll('SELECT * FROM `bank_statements` WHERE `account` = "business" AND `business` = ? AND `account_number` = ? AND `sort_code` = ? AND `businessid` = ? LIMIT ?', {
             bankAccount[1].business,
             self.accountNumber,
             self.sortCode,
@@ -73,7 +73,7 @@ function generatebusinessAccount(acc, sc, bid)
         if type(amt) == "number" and text then
             if amt <= self.balance then
                 self.balance = self.balance - amt
-                exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `withdraw`, `balance`, `type`) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", {
+                MySQL.Async.insert('INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `withdraw`, `balance`, `type`) VALUES(?, ?, ?, ?, ?, ?, ?, ?)', {
                     'business',
                     self.account_for,
                     self.bid,
@@ -94,7 +94,7 @@ function generatebusinessAccount(acc, sc, bid)
     rTable.addBalance = function(amt, text)
         if type(amt) == "number" and text then
             self.balance = self.balance + amt
-            exports.oxmysql:insert("INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `deposited`, `balance`, `type`) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", {
+            MySQL.Async.insert('INSERT INTO `bank_statements` (`account`, `business`, `businessid`, `account_number`, `sort_code`, `deposited`, `balance`, `type`) VALUES(?, ?, ?, ?, ?, ?, ?, ?)', {
                 'business',
                 self.account_for,
                 self.bid,
@@ -128,11 +128,11 @@ local function createbusinessAccount(accttype, bid, startingBalance)
     end
 
     local newBalance = tonumber(startingBalance) or 1000000
-    local checkExists = exports.oxmysql:executeSync("SELECT * FROM `bank_accounts` WHERE `business` = ? AND `businessid` = ?", { accttype, bid })
+    local checkExists = MySQL.Sync.fetchAll('SELECT * FROM `bank_accounts` WHERE `business` = ? AND `businessid` = ?', { accttype, bid })
     if checkExists[1] == nil then
         local sc = math.random(100000,999999)
         local acct = math.random(10000000,99999999)
-        exports.oxmysql:insert("INSERT INTO `bank_accounts` (`business`, `businessid`, `account_number`, `sort_code`, `amount`, `account_type`) VALUES (?, ?, ?, ?, ?, ?)", {
+        MySQL.Async.insert('INSERT INTO `bank_accounts` (`business`, `businessid`, `account_number`, `sort_code`, `amount`, `account_type`) VALUES (?, ?, ?, ?, ?, ?)', {
             accttype,
             bid,
             acct,

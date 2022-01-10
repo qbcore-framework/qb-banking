@@ -94,7 +94,7 @@ local function checkAccountExists(acct, sc)
     local cid
     local actype
     local processed = false
-    local exists = exports.oxmysql:executeSync('SELECT * FROM bank_accounts WHERE account_number = ? AND sort_code = ?', { acct, sc })
+    local exists = MySQL.Sync.fetchAll('SELECT * FROM bank_accounts WHERE account_number = ? AND sort_code = ?', { acct, sc })
     if exists[1] ~= nil then
         success = true
         cid = exists[1].character_id
