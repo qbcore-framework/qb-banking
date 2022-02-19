@@ -100,7 +100,7 @@ CreateThread(function()
                     DrawMarker(27, v.x, v.y, v.z-0.99, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.001, 1.0001, 0.5001, 0, 25, 165, 100, false, true, 2, false, false, false, false)
 
                     if bankDist < 1.0 then
-                        DrawText3Ds(v.x, v.y, v.z-0.25, '~g~E~w~ - Access Bank')
+                        DrawText3Ds(v.x, v.y, v.z-0.25, Lang:t('info.access_bank'))
                         if IsControlJustPressed(0, 38) then
                             openAccountScreen()
                         end
