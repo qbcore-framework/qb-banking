@@ -6,6 +6,7 @@ local Translations = {
         dead = "You are dead LOL.",
         too_far_away = "You are too far away lmfao.",
         not_enough = "You don\'t have this amount.",
+        invalid_amount = "Invalid amount given"
     },
     success = {
         debit_card = "You have successfully ordered a Debit Card.",
