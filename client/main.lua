@@ -85,11 +85,7 @@ end)
 -- Loop
 
 if Config.UseTarget then
-    Citizen.CreateThread(function()
-        RegisterNetEvent("banking:client:OpenAccountScreen", function()
-            openAccountScreen()
-        end)
-    
+    CreateThread(function()
         for k, v in pairs(Config.Zones) do
             exports["qb-target"]:AddBoxZone("Bank_" .. k, v.position, v.length, v.width, {
                 name = "Bank_" .. k,
@@ -100,7 +96,7 @@ if Config.UseTarget then
                 options = {
                     {
                         type = "client",
-                        event = "banking:client:OpenAccountScreen",
+                        event = "qb-banking:openBankScreen",
                         icon = "fas fa-university",
                         label = "Access Bank",
                     }
