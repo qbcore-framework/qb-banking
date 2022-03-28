@@ -84,38 +84,61 @@ end)
 
 -- Loop
 
-local letSleep = true
+if Config.UseTarget then
+    CreateThread(function()
+        for k, v in pairs(Config.Zones) do
+            exports["qb-target"]:AddBoxZone("Bank_" .. k, v.position, v.length, v.width, {
+                name = "Bank_" .. k,
+                heading = v.heading,
+                minZ = v.minZ,
+                maxZ = v.maxZ
+            }, {
+                options = {
+                    {
+                        type = "client",
+                        event = "qb-banking:openBankScreen",
+                        icon = "fas fa-university",
+                        label = "Access Bank",
+                    }
+                },
+                distance = 1.5
+            })
+        end
+    end)
+else
+    local letSleep = true
 
-CreateThread(function()
-    while true do
-        Wait(1)
-        letSleep = true
-        if LocalPlayer.state.isLoggedIn and not InBank then
-            local playerPed = PlayerPedId()
-            local playerCoords = GetEntityCoords(playerPed, true)
-            for k, v in pairs(Config.BankLocations) do
-                local bankDist = #(playerCoords - v)
-                if bankDist < 3.0 then
-                    letSleep = false
-                    DrawMarker(27, v.x, v.y, v.z-0.99, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.001, 1.0001, 0.5001, 0, 25, 165, 100, false, true, 2, false, false, false, false)
+    CreateThread(function()
+        while true do
+            Wait(1)
+            letSleep = true
+            if LocalPlayer.state.isLoggedIn and not InBank then
+                local playerPed = PlayerPedId()
+                local playerCoords = GetEntityCoords(playerPed, true)
+                for k, v in pairs(Config.BankLocations) do
+                    local bankDist = #(playerCoords - v)
+                    if bankDist < 3.0 then
+                        letSleep = false
+                        DrawMarker(27, v.x, v.y, v.z-0.99, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.001, 1.0001, 0.5001, 0, 25, 165, 100, false, true, 2, false, false, false, false)
 
-                    if bankDist < 1.0 then
-                        DrawText3Ds(v.x, v.y, v.z-0.25, '~g~E~w~ - Access Bank')
-                        if IsControlJustPressed(0, 38) then
-                            openAccountScreen()
+                        if bankDist < 1.0 then
+                            DrawText3Ds(v.x, v.y, v.z-0.25, '~g~E~w~ - Access Bank')
+                            if IsControlJustPressed(0, 38) then
+                                openAccountScreen()
+                            end
                         end
                     end
                 end
+            else
+                letSleep = false
             end
-        else
-            letSleep = false
-        end
 
-        if letSleep then
-            Wait(100)
+            if letSleep then
+                Wait(100)
+            end
         end
-    end
-end)
+    end)
+end
 
 -- NUI
 
