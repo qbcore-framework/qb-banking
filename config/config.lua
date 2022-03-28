@@ -2,7 +2,7 @@ Config = {}
 
 Config.cardTypes = { "visa", "mastercard"}
 
-Config.UseTarget = false
+Config.UseTarget = GetConvar('UseTarget', 'false')
 Config.Zones = {
         [1] = {
         position = vector3(149.05, -1041.3, 29.37),
