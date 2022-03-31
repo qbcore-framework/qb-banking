@@ -20,10 +20,10 @@ server_scripts {
 }
 
 client_script {
-    'client/main.lua',
 	'@PolyZone/client.lua',
 	'@PolyZone/BoxZone.lua',
-	'@PolyZone/ComboZone.lua'
+	'@PolyZone/ComboZone.lua',
+    'client/main.lua'
 }
 
 ui_page 'nui/index.html'
