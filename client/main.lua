@@ -78,7 +78,7 @@ local BankControlPress = false
                    TriggerEvent('qb-banking:openBankScreen')
                 end
             end
-            Wait(1)
+            Wait(0)
         end
     end)
 end 
