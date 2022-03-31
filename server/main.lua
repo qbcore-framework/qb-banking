@@ -251,7 +251,7 @@ RegisterNetEvent('qb-banking:createBankCard', function(pin)
     end
 
     TriggerClientEvent('qb-banking:openBankScreen', src)
-    TriggerClientEvent('QBCore:Notify', src, 'You have successfully ordered a Debit Card.', 'success')
+    TriggerClientEvent('QBCore:Notify', src, Lang:t('success.debit_card'), 'success')
 
     TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** successfully ordered a debit card")
 end)
@@ -267,7 +267,7 @@ RegisterNetEvent('qb-banking:doQuickDeposit', function(amount)
         local bank = xPlayer.Functions.AddMoney('bank', tonumber(amount), 'banking-quick-depo')
         if bank then
             TriggerClientEvent('qb-banking:openBankScreen', src)
-            TriggerClientEvent('qb-banking:successAlert', src, 'You made a cash deposit of $'..amount..' successfully.')
+            TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.cash_deposit', {value = amount}))
             TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a cash deposit of $"..amount.." successfully.")
         end
     end
@@ -292,7 +292,7 @@ RegisterNetEvent('qb-banking:doQuickWithdraw', function(amount, branch)
         local bank = xPlayer.Functions.AddMoney('cash', tonumber(amount), 'banking-quick-withdraw')
         if cash then
             TriggerClientEvent('qb-banking:openBankScreen', src)
-            TriggerClientEvent('qb-banking:successAlert', src, 'You made a cash withdrawal of $'..amount..' successfully.')
+            TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.cash_withdrawal', {value = amount}))
             TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'red', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a cash withdrawal of $"..amount.." successfully.")
         end
     end
@@ -306,7 +306,7 @@ RegisterNetEvent('qb-banking:updatePin', function(pin)
 
         --   _char:Bank().UpdateDebitCardPin(pin)
         TriggerClientEvent('qb-banking:openBankScreen', src)
-        TriggerClientEvent('qb-banking:successAlert', src, 'You have successfully updated your debit card pin.')
+        TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.updated_pin'))
     end
 end)
 
@@ -318,11 +318,11 @@ RegisterNetEvent('qb-banking:savingsDeposit', function(amount)
 
     if tonumber(amount) <= currentBank then
         local bank = xPlayer.Functions.RemoveMoney('bank', tonumber(amount))
-        local savings = savingsAccounts[xPlayer.PlayerData.citizenid].AddMoney(tonumber(amount), 'Current Account to Savings Transfer')
+        local savings = savingsAccounts[xPlayer.PlayerData.citizenid].AddMoney(tonumber(amount), Lang:t('info.current_to_savings'))
         while bank == nil do Wait(0) end
         while savings == nil do Wait(0) end
         TriggerClientEvent('qb-banking:openBankScreen', src)
-        TriggerClientEvent('qb-banking:successAlert', src, 'You made a savings deposit of $'..tostring(amount)..' successfully.')
+        TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.savings_deposit', {value = tostring(amount)}))
         TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a savings deposit of $"..tostring(amount).." successfully..")
     end
 end)
@@ -334,12 +334,12 @@ RegisterNetEvent('qb-banking:savingsWithdraw', function(amount)
     local currentSavings = savingsAccounts[xPlayer.PlayerData.citizenid].GetBalance()
 
     if tonumber(amount) <= currentSavings then
-        local savings = savingsAccounts[xPlayer.PlayerData.citizenid].RemoveMoney(tonumber(amount), 'Savings to Current Account Transfer')
+        local savings = savingsAccounts[xPlayer.PlayerData.citizenid].RemoveMoney(tonumber(amount), Lang:t('info.savings_to_current'))
         local bank = xPlayer.Functions.AddMoney('bank', tonumber(amount), 'banking-quick-withdraw')
         while bank == nil do Wait(0) end
         while savings == nil do Wait(0) end
         TriggerClientEvent('qb-banking:openBankScreen', src)
-        TriggerClientEvent('qb-banking:successAlert', src, 'You made a savings withdrawal of $'..tostring(amount)..' successfully.')
+        TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.savings_withdrawal', {value = tostring(amount)}))
         TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'red', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a savings withdrawal of $"..tostring(amount).." successfully.")
     end
 end)
@@ -350,12 +350,12 @@ RegisterNetEvent('qb-banking:createSavingsAccount', function()
     local success = createSavingsAccount(xPlayer.PlayerData.citizenid)
     repeat Wait(0) until success ~= nil
     TriggerClientEvent('qb-banking:openBankScreen', src)
-    TriggerClientEvent('qb-banking:successAlert', src, 'You have successfully opened a savings account.')
+    TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.opened_savings'))
     TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "lightgreen", "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** opened a savings account")
 end)
 
 
-QBCore.Commands.Add('givecash', 'Give cash to player.', {{name = 'id', help = 'Player ID'}, {name = 'amount', help = 'Amount'}}, true, function(source, args)
+QBCore.Commands.Add('givecash', Lang:t('command.givecash'), {{name = 'id', help = 'Player ID'}, {name = 'amount', help = 'Amount'}}, true, function(source, args)
     local src = source
 	local id = tonumber(args[1])
 	local amount = math.ceil(tonumber(args[2]))
@@ -368,28 +368,34 @@ QBCore.Commands.Add('givecash', 'Give cash to player.', {{name = 'id', help = 'P
 			if not xPlayer.PlayerData.metadata["isdead"] then
 				local distance = xPlayer.PlayerData.metadata["inlaststand"] and 3.0 or 10.0
 				if #(GetEntityCoords(GetPlayerPed(src)) - GetEntityCoords(GetPlayerPed(id))) < distance then
-					if xPlayer.Functions.RemoveMoney('cash', amount) then
-						if xReciv.Functions.AddMoney('cash', amount) then
-							TriggerClientEvent('QBCore:Notify', src, "Success fully gave to ID " .. tostring(id) .. ' $' .. tostring(amount) .. '.', "success")
-							TriggerClientEvent('QBCore:Notify', id, "Success recived gave $" .. tostring(amount) .. ' from ID ' .. tostring(src), "success")
-							TriggerClientEvent("payanimation", src)
-						else
-							TriggerClientEvent('QBCore:Notify', src, "Could not give item to the given id.", "error")
-						end
-					else
-						TriggerClientEvent('QBCore:Notify', src, "You don\'t have this amount.", "error")
-					end
+                    if amount > 0 then
+                        if xPlayer.Functions.RemoveMoney('cash', amount) then
+                            if xReciv.Functions.AddMoney('cash', amount) then
+                                TriggerClientEvent('QBCore:Notify', src, Lang:t('success.give_cash',{id = tostring(id), cash = tostring(amount)}), "success")
+                                TriggerClientEvent('QBCore:Notify', id, Lang:t('success.received_cash',{id = tostring(src), cash = tostring(amount)}), "success")
+                                TriggerClientEvent("payanimation", src)
+                            else
+                                -- Return player cash
+                                xPlayer.Functions.AddMoney('cash', amount)
+                                TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_give'), "error")
+                            end
+                        else
+                            TriggerClientEvent('QBCore:Notify', src, Lang:t('error.not_enough'), "error")
+                        end
+                    else
+                        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.invalid_amount'), "error")
+                    end
 				else
-					TriggerClientEvent('QBCore:Notify', src, "You are too far away lmfao.", "error")
+					TriggerClientEvent('QBCore:Notify', src, Lang:t('error.too_far_away'), "error")
 				end
 			else
-				TriggerClientEvent('QBCore:Notify', src, "You are dead LOL.", "error")
+				TriggerClientEvent('QBCore:Notify', src, Lang:t('error.dead'), "error")
 			end
 		else
-			TriggerClientEvent('QBCore:Notify', src, "Wrong ID.", "error")
+			TriggerClientEvent('QBCore:Notify', src, Lang:t('error.wrong_id'), "error")
 		end
 	else
-		TriggerClientEvent('QBCore:Notify', src, "Usage /givecash [ID] [AMOUNT]", "error")
+		TriggerClientEvent('QBCore:Notify', src, Lang:t('error.givecash'), "error")
 	end
 end)
 

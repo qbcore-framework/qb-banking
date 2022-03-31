@@ -1,24 +1,9 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-
+inBankZone = false
 InBank = false
 blips = {}
 
 -- Functions
-
-local function DrawText3Ds(x, y, z, text)
-	SetTextScale(0.35, 0.35)
-    SetTextFont(4)
-    SetTextProportional(1)
-    SetTextColour(255, 255, 255, 215)
-    SetTextEntry("STRING")
-    SetTextCentre(true)
-    AddTextComponentString(text)
-    SetDrawOrigin(x,y,z, 0)
-    DrawText(0.0, 0.0)
-    local factor = (string.len(text)) / 370
-    DrawRect(0.0, 0.0+0.0125, 0.017+ factor, 0.03, 0, 0, 0, 75)
-    ClearDrawOrigin()
-end
 
 local function createBlips()
     for k, v in pairs(Config.BankLocations) do
@@ -82,13 +67,28 @@ RegisterNetEvent('qb-banking:openBankScreen', function()
     openAccountScreen()
 end)
 
--- Loop
+local BankControlPress = false
+ local function BankControl(variable)
+    CreateThread(function()
+        BankControlPress = true
+        while BankControlPress do
+            if IsControlPressed(0, 38) then
+                exports['qb-core']:KeyPressed(38)
+                if variable == "bank" then
+                   TriggerEvent('qb-banking:openBankScreen')
+                end
+            end
+            Wait(1)
+        end
+    end)
+end 
 
+-- Loop
 if Config.UseTarget then
     CreateThread(function()
         for k, v in pairs(Config.Zones) do
-            exports["qb-target"]:AddBoxZone("Bank_" .. k, v.position, v.length, v.width, {
-                name = "Bank_" .. k,
+            exports["qb-target"]:AddBoxZone("Bank_"..k, v.position, v.length, v.width, {
+                name = "Bank_"..k,
                 heading = v.heading,
                 minZ = v.minZ,
                 maxZ = v.maxZ
@@ -106,36 +106,28 @@ if Config.UseTarget then
         end
     end)
 else
-    local letSleep = true
-
     CreateThread(function()
-        while true do
-            Wait(1)
-            letSleep = true
-            if LocalPlayer.state.isLoggedIn and not InBank then
-                local playerPed = PlayerPedId()
-                local playerCoords = GetEntityCoords(playerPed, true)
-                for k, v in pairs(Config.BankLocations) do
-                    local bankDist = #(playerCoords - v)
-                    if bankDist < 3.0 then
-                        letSleep = false
-                        DrawMarker(27, v.x, v.y, v.z-0.99, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.001, 1.0001, 0.5001, 0, 25, 165, 100, false, true, 2, false, false, false, false)
-
-                        if bankDist < 1.0 then
-                            DrawText3Ds(v.x, v.y, v.z-0.25, '~g~E~w~ - Access Bank')
-                            if IsControlJustPressed(0, 38) then
-                                openAccountScreen()
-                            end
-                        end
-                    end
+        local bankPoly = {}
+        for k, v in pairs(Config.BankLocations) do
+            bankPoly[#bankPoly+1] = BoxZone:Create(vector3(v.x, v.y, v.z), 1.5, 1.5, {
+                heading = -20,
+                name="bank"..k,
+                debugPoly = false,
+                minZ = v.z - 1,
+                maxZ = v.z + 1,
+            })
+            local bankCombo = ComboZone:Create(bankPoly, {name = "bankPoly"})
+            bankCombo:onPlayerInOut(function(isPointInside)
+                if isPointInside then
+                    inBankZone = true
+                    exports['qb-core']:DrawText(Lang:t('info.access_bank_key'),'left')
+                    BankControl("bank")
+                else
+                    inBankZone = false
+                    BankControlPress = false
+                    exports['qb-core']:HideText()
                 end
-            else
-                letSleep = false
-            end
-
-            if letSleep then
-                Wait(100)
-            end
+            end)
         end
     end)
 end
