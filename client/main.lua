@@ -73,7 +73,7 @@ local BankControlPress = false
         BankControlPress = true
         while BankControlPress do
             if IsControlPressed(0, 38) then
-                exports['qb-core']:KeyPressed(38)
+                exports['qb-core']:KeyPressed()
                 if variable == "bank" then
                    TriggerEvent('qb-banking:openBankScreen')
                 end
