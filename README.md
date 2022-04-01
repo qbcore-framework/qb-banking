@@ -47,6 +47,16 @@ ensure qb-core
 ensure qb-logs
 ensure qb-banking
 ```
+# Server.cfg Convar Update
+- Global DrawTextUi Option
+```
+setr UseTarget false
+``` 
+
+- Global Target Option
+```
+setr UseTarget true
+```
 
 ## Configuration
 ```
