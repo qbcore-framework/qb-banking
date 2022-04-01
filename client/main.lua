@@ -1,7 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-inBankZone = false
-InBank = false
-blips = {}
+local inBankZone = false
+local InBank = false
+local blips = {}
 
 -- Functions
 
@@ -68,24 +68,21 @@ RegisterNetEvent('qb-banking:openBankScreen', function()
 end)
 
 local BankControlPress = false
- local function BankControl(variable)
+ local function BankControl()
     CreateThread(function()
         BankControlPress = true
         while BankControlPress do
             if IsControlPressed(0, 38) then
                 exports['qb-core']:KeyPressed()
-                if variable == "bank" then
-                   TriggerEvent('qb-banking:openBankScreen')
-                end
+                TriggerEvent('qb-banking:openBankScreen')
             end
             Wait(0)
         end
     end)
-end 
+end
 
--- Loop
-if Config.UseTarget then
-    CreateThread(function()
+CreateThread(function()
+    if Config.UseTarget then
         for k, v in pairs(Config.Zones) do
             exports["qb-target"]:AddBoxZone("Bank_"..k, v.position, v.length, v.width, {
                 name = "Bank_"..k,
@@ -104,9 +101,7 @@ if Config.UseTarget then
                 distance = 1.5
             })
         end
-    end)
-else
-    CreateThread(function()
+    else
         local bankPoly = {}
         for k, v in pairs(Config.BankLocations) do
             bankPoly[#bankPoly+1] = BoxZone:Create(vector3(v.x, v.y, v.z), 1.5, 1.5, {
@@ -121,7 +116,7 @@ else
                 if isPointInside then
                     inBankZone = true
                     exports['qb-core']:DrawText(Lang:t('info.access_bank_key'),'left')
-                    BankControl("bank")
+                    BankControl()
                 else
                     inBankZone = false
                     BankControlPress = false
@@ -129,8 +124,8 @@ else
                 end
             end)
         end
-    end)
-end
+    end
+end)
 
 -- NUI
 
