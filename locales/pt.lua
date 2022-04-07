@@ -4,7 +4,7 @@ local Translations = {
         givecash = "/givecash [ID] [QUANTIA]",
         wrong_id = "ID errado.",
         dead = "Estás morto LOL.",
-        too_far_away = "Aproxima-te, os teus braços não esticam assim tanto.",
+        too_far_away = "Estás muito longe, aproxima-te mais.",
         not_enough = "Não tens essa quantia de dinheiro.",
         invalid_amount = "Quantia Inválida"
     },
