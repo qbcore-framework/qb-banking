@@ -28,7 +28,7 @@ CreateThread(function()
     end
 end)
 
-local validatePosition = function(coords)
+local function validatePosition(coords)
     local returnData = {
         isNearBank = false,
         nearestDistance = nil
