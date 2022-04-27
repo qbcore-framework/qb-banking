@@ -28,6 +28,23 @@ CreateThread(function()
     end
 end)
 
+local validatePosition = function(coords)
+    local returnData = {
+        isNearBank = false,
+        nearestDistance = nil
+    } 
+    for k=1, #Config.BankLocations do 
+        local distance = #(coords-Config.BankLocations[k])
+        if distance<5 then 
+            returnData.isNearBank = true
+            returnData.nearestDistance = distance
+            break
+        end
+        if not returnData.nearestDistance then returnData.nearestDistance = distance elseif distance < returnData.nearestDistance then returnData.nearestDistance = distance end
+    end
+    return returnData
+end
+
 exports('business', function(acctType, bid)
     if businessAccounts[acctType] then
         if businessAccounts[acctType][tonumber(bid)] then
@@ -71,14 +88,17 @@ RegisterNetEvent('qb-banking:createNewCard', function()
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
 
-    if xPlayer ~= nil then
+    local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
+    if auth.isNearBank then
         local cid = xPlayer.PlayerData.citizenid
         if (cid) then
             currentAccounts[cid].generateNewCard()
         end
+        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")**" .. " created new card")
+    else
+        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.too_far_away'), "error")
+        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "red", "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** has attempted to create a card whilst not at a banking location, Nearest bank = "..auth.nearestDistance)
     end
-
-    TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")**" .. " created new card")
 end)
 
 --[[ -- Only used by the following "qb-banking:initiateTransfer"
@@ -232,44 +252,56 @@ end)
 RegisterNetEvent('qb-banking:createBankCard', function(pin)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
-    local cid = xPlayer.PlayerData.citizenid
-    local cardNumber = math.random(1000000000000000,9999999999999999)
-    xPlayer.Functions.SetCreditCard(cardNumber)
-    local info = {}
-    local selectedCard = Config.cardTypes[math.random(1,#Config.cardTypes)]
-    info.citizenid = cid
-    info.name = xPlayer.PlayerData.charinfo.firstname .. ' ' .. xPlayer.PlayerData.charinfo.lastname
-    info.cardNumber = cardNumber
-    info.cardPin = tonumber(pin)
-    info.cardActive = true
-    info.cardType = selectedCard
-
-    if selectedCard == "visa" then
-        xPlayer.Functions.AddItem('visa', 1, nil, info)
-    elseif selectedCard == "mastercard" then
-        xPlayer.Functions.AddItem('mastercard', 1, nil, info)
+    local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
+    if auth.isNearBank then
+        local cid = xPlayer.PlayerData.citizenid
+        local cardNumber = math.random(1000000000000000,9999999999999999)
+        xPlayer.Functions.SetCreditCard(cardNumber)
+        local info = {}
+        local selectedCard = Config.cardTypes[math.random(1,#Config.cardTypes)]
+        info.citizenid = cid
+        info.name = xPlayer.PlayerData.charinfo.firstname .. ' ' .. xPlayer.PlayerData.charinfo.lastname
+        info.cardNumber = cardNumber
+        info.cardPin = tonumber(pin)
+        info.cardActive = true
+        info.cardType = selectedCard
+    
+        if selectedCard == "visa" then
+            xPlayer.Functions.AddItem('visa', 1, nil, info)
+        elseif selectedCard == "mastercard" then
+            xPlayer.Functions.AddItem('mastercard', 1, nil, info)
+        end
+    
+        TriggerClientEvent('qb-banking:openBankScreen', src)
+        TriggerClientEvent('QBCore:Notify', src, Lang:t('success.debit_card'), 'success')
+    
+        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** successfully ordered a debit card")    
+    else
+        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.too_far_away'), "error")
+        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "red", "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** has attempted to order a debit card whilst not at a banking location, Nearest bank = "..auth.nearestDistance)
     end
-
-    TriggerClientEvent('qb-banking:openBankScreen', src)
-    TriggerClientEvent('QBCore:Notify', src, Lang:t('success.debit_card'), 'success')
-
-    TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** successfully ordered a debit card")
 end)
 
 RegisterNetEvent('qb-banking:doQuickDeposit', function(amount)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
     while xPlayer == nil do Wait(0) end
-    local currentCash = xPlayer.Functions.GetMoney('cash')
 
-    if tonumber(amount) <= currentCash then
-        local cash = xPlayer.Functions.RemoveMoney('cash', tonumber(amount), 'banking-quick-depo')
-        local bank = xPlayer.Functions.AddMoney('bank', tonumber(amount), 'banking-quick-depo')
-        if bank then
-            TriggerClientEvent('qb-banking:openBankScreen', src)
-            TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.cash_deposit', {value = amount}))
-            TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a cash deposit of $"..amount.." successfully.")
+    local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
+    if auth.isNearBank then
+        local currentCash = xPlayer.Functions.GetMoney('cash')
+        if tonumber(amount) <= currentCash then
+            local cash = xPlayer.Functions.RemoveMoney('cash', tonumber(amount), 'banking-quick-depo')
+            local bank = xPlayer.Functions.AddMoney('bank', tonumber(amount), 'banking-quick-depo')
+            if bank then
+                TriggerClientEvent('qb-banking:openBankScreen', src)
+                TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.cash_deposit', {value = amount}))
+                TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a cash deposit of $"..amount.." successfully.")
+            end
         end
+    else
+        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.too_far_away'), "error")
+        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "red", "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** has attempted to deposit cash whilst not at a banking location, Nearest bank = "..auth.nearestDistance)
     end
 end)
 
@@ -278,23 +310,36 @@ RegisterNetEvent('qb-banking:toggleCard', function(toggle)
     local xPlayer = QBCore.Functions.GetPlayer(src)
 
     while xPlayer == nil do Wait(0) end
+        
+    local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
+    if auth.isNearBank then
         --_char:Bank():ToggleDebitCard(toggle)
+    else
+        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.too_far_away'), "error")
+        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "red", "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** has attempted to lock/unlock a debit card whilst not at a banking location, Nearest bank = "..auth.nearestDistance)
+    end
 end)
 
 RegisterNetEvent('qb-banking:doQuickWithdraw', function(amount, branch)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
     while xPlayer == nil do Wait(0) end
-    local currentCash = xPlayer.Functions.GetMoney('bank')
-
-    if tonumber(amount) <= currentCash then
-        local cash = xPlayer.Functions.RemoveMoney('bank', tonumber(amount), 'banking-quick-withdraw')
-        local bank = xPlayer.Functions.AddMoney('cash', tonumber(amount), 'banking-quick-withdraw')
-        if cash then
-            TriggerClientEvent('qb-banking:openBankScreen', src)
-            TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.cash_withdrawal', {value = amount}))
-            TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'red', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a cash withdrawal of $"..amount.." successfully.")
+    
+    local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
+    if auth.isNearBank then
+        local currentCash = xPlayer.Functions.GetMoney('bank')
+        if tonumber(amount) <= currentCash then
+            local cash = xPlayer.Functions.RemoveMoney('bank', tonumber(amount), 'banking-quick-withdraw')
+            local bank = xPlayer.Functions.AddMoney('cash', tonumber(amount), 'banking-quick-withdraw')
+            if cash then
+                TriggerClientEvent('qb-banking:openBankScreen', src)
+                TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.cash_withdrawal', {value = amount}))
+                TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'red', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a cash withdrawal of $"..amount.." successfully.")
+            end
         end
+    else
+        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.too_far_away'), "error")
+        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "red", "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** has attempted to withdraw cash whilst not at a banking location, Nearest bank = "..auth.nearestDistance)
     end
 end)
 
@@ -304,9 +349,16 @@ RegisterNetEvent('qb-banking:updatePin', function(pin)
         local xPlayer = QBCore.Functions.GetPlayer(src)
         while xPlayer == nil do Wait(0) end
 
-        --   _char:Bank().UpdateDebitCardPin(pin)
-        TriggerClientEvent('qb-banking:openBankScreen', src)
-        TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.updated_pin'))
+      
+        local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
+        if auth.isNearBank then
+              --   _char:Bank().UpdateDebitCardPin(pin)
+            TriggerClientEvent('qb-banking:openBankScreen', src)
+            TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.updated_pin'))
+        else
+            TriggerClientEvent('QBCore:Notify', src, Lang:t('error.too_far_away'), "error")
+            TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "red", "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** has attempted to change a debit card pin whilst not at a banking location, Nearest bank = "..auth.nearestDistance)
+        end
     end
 end)
 
@@ -314,16 +366,22 @@ RegisterNetEvent('qb-banking:savingsDeposit', function(amount)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
     while xPlayer == nil do Wait(0) end
-    local currentBank = xPlayer.Functions.GetMoney('bank')
-
-    if tonumber(amount) <= currentBank then
-        local bank = xPlayer.Functions.RemoveMoney('bank', tonumber(amount))
-        local savings = savingsAccounts[xPlayer.PlayerData.citizenid].AddMoney(tonumber(amount), Lang:t('info.current_to_savings'))
-        while bank == nil do Wait(0) end
-        while savings == nil do Wait(0) end
-        TriggerClientEvent('qb-banking:openBankScreen', src)
-        TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.savings_deposit', {value = tostring(amount)}))
-        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a savings deposit of $"..tostring(amount).." successfully..")
+    
+    local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
+    if auth.isNearBank then
+        local currentBank = xPlayer.Functions.GetMoney('bank')
+        if tonumber(amount) <= currentBank then
+            local bank = xPlayer.Functions.RemoveMoney('bank', tonumber(amount))
+            local savings = savingsAccounts[xPlayer.PlayerData.citizenid].AddMoney(tonumber(amount), Lang:t('info.current_to_savings'))
+            while bank == nil do Wait(0) end
+            while savings == nil do Wait(0) end
+            TriggerClientEvent('qb-banking:openBankScreen', src)
+            TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.savings_deposit', {value = tostring(amount)}))
+            TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a savings deposit of $"..tostring(amount).." successfully..")
+        end
+    else
+        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.too_far_away'), "error")
+        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "red", "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** has attempted to deposit into savings whilst not at a banking location, Nearest bank = "..auth.nearestDistance)
     end
 end)
 
@@ -331,27 +389,39 @@ RegisterNetEvent('qb-banking:savingsWithdraw', function(amount)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
     while xPlayer == nil do Wait(0) end
-    local currentSavings = savingsAccounts[xPlayer.PlayerData.citizenid].GetBalance()
-
-    if tonumber(amount) <= currentSavings then
-        local savings = savingsAccounts[xPlayer.PlayerData.citizenid].RemoveMoney(tonumber(amount), Lang:t('info.savings_to_current'))
-        local bank = xPlayer.Functions.AddMoney('bank', tonumber(amount), 'banking-quick-withdraw')
-        while bank == nil do Wait(0) end
-        while savings == nil do Wait(0) end
-        TriggerClientEvent('qb-banking:openBankScreen', src)
-        TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.savings_withdrawal', {value = tostring(amount)}))
-        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'red', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a savings withdrawal of $"..tostring(amount).." successfully.")
+    
+    local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
+    if auth.isNearBank then
+        local currentSavings = savingsAccounts[xPlayer.PlayerData.citizenid].GetBalance()
+        if tonumber(amount) <= currentSavings then
+            local savings = savingsAccounts[xPlayer.PlayerData.citizenid].RemoveMoney(tonumber(amount), Lang:t('info.savings_to_current'))
+            local bank = xPlayer.Functions.AddMoney('bank', tonumber(amount), 'banking-quick-withdraw')
+            while bank == nil do Wait(0) end
+            while savings == nil do Wait(0) end
+            TriggerClientEvent('qb-banking:openBankScreen', src)
+            TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.savings_withdrawal', {value = tostring(amount)}))
+            TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'red', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a savings withdrawal of $"..tostring(amount).." successfully.")
+        end
+    else
+        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.too_far_away'), "error")
+        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "red", "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** has attempted to withdraw from savings whilst not at a banking location, Nearest bank = "..auth.nearestDistance)
     end
 end)
 
 RegisterNetEvent('qb-banking:createSavingsAccount', function()
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
-    local success = createSavingsAccount(xPlayer.PlayerData.citizenid)
-    repeat Wait(0) until success ~= nil
-    TriggerClientEvent('qb-banking:openBankScreen', src)
-    TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.opened_savings'))
-    TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "lightgreen", "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** opened a savings account")
+    local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
+    if auth.isNearBank then
+        local success = createSavingsAccount(xPlayer.PlayerData.citizenid)
+        repeat Wait(0) until success ~= nil
+        TriggerClientEvent('qb-banking:openBankScreen', src)
+        TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.opened_savings'))
+        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "lightgreen", "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** opened a savings account")
+    else
+        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.too_far_away'), "error")
+        TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "red", "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** has attempted to open a savings account whilst not at a banking location, Nearest bank = "..auth.nearestDistance)
+    end
 end)
 
 
