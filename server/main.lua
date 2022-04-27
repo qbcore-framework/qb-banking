@@ -40,7 +40,11 @@ local function validatePosition(coords)
             returnData.nearestDistance = distance
             break
         end
-        if not returnData.nearestDistance then returnData.nearestDistance = distance elseif distance < returnData.nearestDistance then returnData.nearestDistance = distance end
+        if not returnData.nearestDistance then 
+            returnData.nearestDistance = distance 
+        elseif distance < returnData.nearestDistance then 
+            returnData.nearestDistance = distance 
+        end
     end
     return returnData
 end
@@ -87,6 +91,7 @@ end)
 RegisterNetEvent('qb-banking:createNewCard', function()
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
+    if not xPlayer then return end
 
     local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
     if auth.isNearBank then
@@ -227,31 +232,28 @@ end
 QBCore.Functions.CreateCallback('qb-banking:getBankingInformation', function(source, cb)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
-    while xPlayer == nil do Wait(0) end
-        if (xPlayer) then
-            local banking = {
-                    ['name'] = xPlayer.PlayerData.charinfo.firstname .. ' ' .. xPlayer.PlayerData.charinfo.lastname,
-                    ['bankbalance'] = '$'.. format_int(xPlayer.PlayerData.money['bank']),
-                    ['cash'] = '$'.. format_int(xPlayer.PlayerData.money['cash']),
-                    ['accountinfo'] = xPlayer.PlayerData.charinfo.account,
-                }
-                if savingsAccounts[xPlayer.PlayerData.citizenid] then
-                    local cid = xPlayer.PlayerData.citizenid
-                    banking['savings'] = {
-                        ['amount'] = savingsAccounts[cid].GetBalance(),
-                        ['details'] = savingsAccounts[cid].getAccount(),
-                        ['statement'] = savingsAccounts[cid].getStatement(),
-                    }
-                end
-                cb(banking)
-        else
-            cb(nil)
-        end
+    if not xPlayer then return cb(nil) end
+    local banking = {
+        ['name'] = xPlayer.PlayerData.charinfo.firstname .. ' ' .. xPlayer.PlayerData.charinfo.lastname,
+        ['bankbalance'] = '$'.. format_int(xPlayer.PlayerData.money['bank']),
+        ['cash'] = '$'.. format_int(xPlayer.PlayerData.money['cash']),
+        ['accountinfo'] = xPlayer.PlayerData.charinfo.account,
+    }
+    local cid = xPlayer.PlayerData.citizenid
+    if savingsAccounts[cid] then
+        banking['savings'] = {
+            ['amount'] = savingsAccounts[cid].GetBalance(),
+            ['details'] = savingsAccounts[cid].getAccount(),
+            ['statement'] = savingsAccounts[cid].getStatement(),
+        }
+    end
+    cb(banking)
 end)
 
 RegisterNetEvent('qb-banking:createBankCard', function(pin)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
+    if not xPlayer then return end
     local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
     if auth.isNearBank then
         local cid = xPlayer.PlayerData.citizenid
@@ -285,7 +287,7 @@ end)
 RegisterNetEvent('qb-banking:doQuickDeposit', function(amount)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
-    while xPlayer == nil do Wait(0) end
+    if not xPlayer then return end
 
     local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
     if auth.isNearBank then
@@ -308,9 +310,8 @@ end)
 RegisterNetEvent('qb-banking:toggleCard', function(toggle)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
-
-    while xPlayer == nil do Wait(0) end
-        
+    if not xPlayer then return end
+ 
     local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
     if auth.isNearBank then
         --_char:Bank():ToggleDebitCard(toggle)
@@ -323,7 +324,7 @@ end)
 RegisterNetEvent('qb-banking:doQuickWithdraw', function(amount, branch)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
-    while xPlayer == nil do Wait(0) end
+    if not xPlayer then return end
     
     local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
     if auth.isNearBank then
@@ -347,9 +348,8 @@ RegisterNetEvent('qb-banking:updatePin', function(pin)
     if pin ~= nil then
         local src = source
         local xPlayer = QBCore.Functions.GetPlayer(src)
-        while xPlayer == nil do Wait(0) end
+        if not xPlayer then return end
 
-      
         local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
         if auth.isNearBank then
               --   _char:Bank().UpdateDebitCardPin(pin)
@@ -365,7 +365,7 @@ end)
 RegisterNetEvent('qb-banking:savingsDeposit', function(amount)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
-    while xPlayer == nil do Wait(0) end
+    if not xPlayer then return end
     
     local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
     if auth.isNearBank then
@@ -373,8 +373,8 @@ RegisterNetEvent('qb-banking:savingsDeposit', function(amount)
         if tonumber(amount) <= currentBank then
             local bank = xPlayer.Functions.RemoveMoney('bank', tonumber(amount))
             local savings = savingsAccounts[xPlayer.PlayerData.citizenid].AddMoney(tonumber(amount), Lang:t('info.current_to_savings'))
-            while bank == nil do Wait(0) end
-            while savings == nil do Wait(0) end
+            if not bank then return end
+            if not savings then return end
             TriggerClientEvent('qb-banking:openBankScreen', src)
             TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.savings_deposit', {value = tostring(amount)}))
             TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a savings deposit of $"..tostring(amount).." successfully..")
@@ -388,7 +388,7 @@ end)
 RegisterNetEvent('qb-banking:savingsWithdraw', function(amount)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
-    while xPlayer == nil do Wait(0) end
+    if not xPlayer then return end
     
     local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
     if auth.isNearBank then
@@ -396,8 +396,8 @@ RegisterNetEvent('qb-banking:savingsWithdraw', function(amount)
         if tonumber(amount) <= currentSavings then
             local savings = savingsAccounts[xPlayer.PlayerData.citizenid].RemoveMoney(tonumber(amount), Lang:t('info.savings_to_current'))
             local bank = xPlayer.Functions.AddMoney('bank', tonumber(amount), 'banking-quick-withdraw')
-            while bank == nil do Wait(0) end
-            while savings == nil do Wait(0) end
+            if not bank then return end
+            if not savings then return end
             TriggerClientEvent('qb-banking:openBankScreen', src)
             TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.savings_withdrawal', {value = tostring(amount)}))
             TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'red', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a savings withdrawal of $"..tostring(amount).." successfully.")
@@ -411,10 +411,12 @@ end)
 RegisterNetEvent('qb-banking:createSavingsAccount', function()
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
+    if not xPlayer then return end
+
     local auth = validatePosition(GetEntityCoords(GetPlayerPed(src)))
     if auth.isNearBank then
         local success = createSavingsAccount(xPlayer.PlayerData.citizenid)
-        repeat Wait(0) until success ~= nil
+        if not success then return end
         TriggerClientEvent('qb-banking:openBankScreen', src)
         TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.opened_savings'))
         TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "lightgreen", "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** opened a savings account")
