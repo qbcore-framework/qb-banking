@@ -29,40 +29,42 @@ CreateThread(function()
 end)
 
 Citizen.CreateThread(function()
-    local shouldCalculate = false
-    local lastTime = exports.oxmysql:executeSync('SELECT * FROM interest_statements ORDER BY id DESC LIMIT 0, 1')
-    if lastTime[1] then
-        local lastCalculate = lastTime[1].timestamp
-        local diff = os.difftime(os.time(), lastCalculate)
-        local twentyFourHours = 24 * 60 * 60
-        if diff > twentyFourHours then
-            shouldCalculate = true
-        end
-    end
-    
-    if shouldCalculate then
-        local interestAccounts = exports.oxmysql:executeSync('SELECT * FROM bank_accounts', {})
-        if interestAccounts then
-            for i,v in pairs(interestAccounts) do
-                if v.account_type == 'Savings' then
-                    local balance = v.amount 
-                    local interestAmount = 2 -- in percent
-                    local interest = balance * (interestAmount / 100);
-                    interest = math.floor(interest)
-                    balance = balance + interest
-                    exports.oxmysql:executeSync('UPDATE `bank_accounts` SET `amount`= ? WHERE record_id = ?', {
-                        balance,
-                        v.record_id
-                    })
-                end
+    if Config.CalculateSavingsInterest then
+        local shouldCalculate = false
+        local lastTime = exports.oxmysql:executeSync('SELECT * FROM interest_statements ORDER BY id DESC LIMIT 0, 1')
+        if lastTime[1] then
+            local lastCalculate = lastTime[1].timestamp
+            local diff = os.difftime(os.time(), lastCalculate)
+            local twentyFourHours = 24 * 60 * 60
+            if diff > twentyFourHours then
+                shouldCalculate = true
             end
         end
-        -- UPDATE CURRENT TIME
-        exports.oxmysql:execute('INSERT INTO interest_statements (timestamp) VALUES (?)', {
-            os.time()
-        })
+        
+        if shouldCalculate then
+            local interestAccounts = exports.oxmysql:executeSync('SELECT * FROM bank_accounts', {})
+            if interestAccounts then
+                for i,v in pairs(interestAccounts) do
+                    if v.account_type == 'Savings' then
+                        local balance = v.amount 
+                        local interestAmount = 2 -- in percent
+                        local interest = balance * (interestAmount / 100);
+                        interest = math.floor(interest)
+                        balance = balance + interest
+                        exports.oxmysql:executeSync('UPDATE `bank_accounts` SET `amount`= ? WHERE record_id = ?', {
+                            balance,
+                            v.record_id
+                        })
+                    end
+                end
+            end
+            -- UPDATE CURRENT TIME
+            exports.oxmysql:execute('INSERT INTO interest_statements (timestamp) VALUES (?)', {
+                os.time()
+            })
+        end
+        Wait(100)
     end
-    Wait(100)
 end)
 
 exports('business', function(acctType, bid)
