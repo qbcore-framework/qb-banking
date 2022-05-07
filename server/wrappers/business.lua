@@ -4,7 +4,7 @@ savingsAccounts = {}
 gangAccounts = {}
 bankCards = {}
 
-function generatebusinessAccount(acc, sc, bid)
+function GeneratebusinessAccount(acc, sc, bid)
     local self = {}
     self.accountNumber = tonumber(acc)
     self.sortCode = tonumber(sc)
@@ -142,7 +142,7 @@ local function createbusinessAccount(accttype, bid, startingBalance)
         },
         function(success)
             if success > 0 then
-                businessAccounts[accttype][tonumber(bid)] = generatebusinessAccount(acct, sc, bid)
+                businessAccounts[accttype][tonumber(bid)] = GeneratebusinessAccount(acct, sc, bid)
             end
         end)
     end

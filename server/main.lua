@@ -3,26 +3,26 @@ local QBCore = exports['qb-core']:GetCoreObject()
 CreateThread(function()
     local accts = MySQL.Sync.fetchAll('SELECT * FROM bank_accounts WHERE account_type = ?', { 'Business' })
     if accts[1] ~= nil then
-        for k, v in pairs(accts) do
+        for _, v in pairs(accts) do
             local acctType = v.business
             if businessAccounts[acctType] == nil then
                 businessAccounts[acctType] = {}
             end
-            businessAccounts[acctType][tonumber(v.businessid)] = generateBusinessAccount(tonumber(v.account_number), tonumber(v.sort_code), tonumber(v.businessid))
+            businessAccounts[acctType][tonumber(v.businessid)] = GeneratebusinessAccount(tonumber(v.account_number), tonumber(v.sort_code), tonumber(v.businessid))
             while businessAccounts[acctType][tonumber(v.businessid)] == nil do Wait(0) end
         end
     end
 
     local savings = MySQL.Sync.fetchAll('SELECT * FROM bank_accounts WHERE account_type = ?', { 'Savings' })
     if savings[1] ~= nil then
-        for k, v in pairs(savings) do
+        for _, v in pairs(savings) do
             savingsAccounts[v.citizenid] = generateSavings(v.citizenid)
         end
     end
 
     local gangs = MySQL.Sync.fetchAll('SELECT * FROM bank_accounts WHERE account_type = ?', { 'Gang' })
     if gangs[1] ~= nil then
-        for k, v in pairs(gangs) do
+        for _, v in pairs(gangs) do
             gangAccounts[v.gangid] = loadGangAccount(v.gangid)
         end
     end
@@ -111,7 +111,7 @@ end
 
 ]]
 
-RegisterNetEvent('qb-banking:initiateTransfer', function(data)
+RegisterNetEvent('qb-banking:initiateTransfer', function(_)
     --[[
     local _src = source
     local _startChar = QBCore.Functions.GetPlayer(_src)
@@ -199,7 +199,7 @@ RegisterNetEvent('qb-banking:initiateTransfer', function(data)
 end)
 
 local function format_int(number)
-    local i, j, minus, int, fraction = tostring(number):find('([-]?)(%d+)([.]?%d*)')
+    local _, _, minus, int, fraction = tostring(number):find('([-]?)(%d+)([.]?%d*)')
     int = int:reverse():gsub("(%d%d%d)", "%1,")
     return minus .. int:reverse():gsub("^,", "") .. fraction
 end
@@ -263,7 +263,7 @@ RegisterNetEvent('qb-banking:doQuickDeposit', function(amount)
     local currentCash = xPlayer.Functions.GetMoney('cash')
 
     if tonumber(amount) <= currentCash then
-        local cash = xPlayer.Functions.RemoveMoney('cash', tonumber(amount), 'banking-quick-depo')
+        xPlayer.Functions.RemoveMoney('cash', tonumber(amount), 'banking-quick-depo')
         local bank = xPlayer.Functions.AddMoney('bank', tonumber(amount), 'banking-quick-depo')
         if bank then
             TriggerClientEvent('qb-banking:openBankScreen', src)
@@ -273,7 +273,7 @@ RegisterNetEvent('qb-banking:doQuickDeposit', function(amount)
     end
 end)
 
-RegisterNetEvent('qb-banking:toggleCard', function(toggle)
+RegisterNetEvent('qb-banking:toggleCard', function(_)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
 
@@ -281,7 +281,7 @@ RegisterNetEvent('qb-banking:toggleCard', function(toggle)
         --_char:Bank():ToggleDebitCard(toggle)
 end)
 
-RegisterNetEvent('qb-banking:doQuickWithdraw', function(amount, branch)
+RegisterNetEvent('qb-banking:doQuickWithdraw', function(amount, _)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
     while xPlayer == nil do Wait(0) end
@@ -289,7 +289,7 @@ RegisterNetEvent('qb-banking:doQuickWithdraw', function(amount, branch)
 
     if tonumber(amount) <= currentCash then
         local cash = xPlayer.Functions.RemoveMoney('bank', tonumber(amount), 'banking-quick-withdraw')
-        local bank = xPlayer.Functions.AddMoney('cash', tonumber(amount), 'banking-quick-withdraw')
+        bank = xPlayer.Functions.AddMoney('cash', tonumber(amount), 'banking-quick-withdraw')
         if cash then
             TriggerClientEvent('qb-banking:openBankScreen', src)
             TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.cash_withdrawal', {value = amount}))
