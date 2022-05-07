@@ -13,7 +13,7 @@ jobs:
         with:
           capture: "junit.xml"
           args: "-t --formatter JUnit"
-          extra_libs: mysql+polyzone
+          extra_libs: mysql+polyzone+qblocales
       - name: Generate Lint Report
         if: always()
         uses: mikepenz/action-junit-report@v3
