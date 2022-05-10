@@ -1,10 +1,10 @@
 local QBCore = exports['qb-core']:GetCoreObject()
+local processed = false
 
 function generateCurrent(cid)
     local self = {}
     self.cid = cid
     self.source = -1
-    local processed = false
 
     local getCurrentAccount = MySQL.Sync.fetchAll('SELECT * FROM bank_cards WHERE citizenid = ?', { self.cid })
     if getCurrentAccount[1] ~= nil then
@@ -64,7 +64,7 @@ function generateCurrent(cid)
 
     self.saveAccount = function()
         local success
-        local processed = false
+        processed = false
         MySQL.Async.execute('UPDATE `bank_accounts` SET `amount` = ? WHERE `character_id` = ? AND `record_id` = ?', { self.balance, self.cid, self.aid }, function(success1)
             if success1 > 0 then
                 success = true
@@ -119,7 +119,7 @@ function generateCurrent(cid)
                 friendlyName,
                 self.cid,
                 self.aid
-            }, function(rowsChanged)
+            }, function(_)
                 self.cardNumber = cardNumber
                 self.cardActive = true
                 self.cardLocked = false
@@ -390,7 +390,7 @@ end)
 
 function createSavingsAccount(cid)
     local completed = false
-    MySQL.Async.insert('INSERT INTO bank_accounts (citizenid, amount, account_type) VALUES (?, ?, ?)', { cid, 0, 'Savings' }, function(result)
+    MySQL.Async.insert('INSERT INTO bank_accounts (citizenid, amount, account_type) VALUES (?, ?, ?)', { cid, 0, 'Savings' }, function(_)
         savingsAccounts[cid] = generateSavings(cid)
         completed = true
     end)
