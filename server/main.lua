@@ -1,7 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
 CreateThread(function()
-    local accts = MySQL.Sync.fetchAll('SELECT * FROM bank_accounts WHERE account_type = ?', { 'Business' })
+    local accts = MySQL.query.await('SELECT * FROM bank_accounts WHERE account_type = ?', { 'Business' })
     if accts[1] ~= nil then
         for _, v in pairs(accts) do
             local acctType = v.business
@@ -13,14 +13,14 @@ CreateThread(function()
         end
     end
 
-    local savings = MySQL.Sync.fetchAll('SELECT * FROM bank_accounts WHERE account_type = ?', { 'Savings' })
+    local savings = MySQL.query.await('SELECT * FROM bank_accounts WHERE account_type = ?', { 'Savings' })
     if savings[1] ~= nil then
         for _, v in pairs(savings) do
             savingsAccounts[v.citizenid] = generateSavings(v.citizenid)
         end
     end
 
-    local gangs = MySQL.Sync.fetchAll('SELECT * FROM bank_accounts WHERE account_type = ?', { 'Gang' })
+    local gangs = MySQL.query.await('SELECT * FROM bank_accounts WHERE account_type = ?', { 'Gang' })
     if gangs[1] ~= nil then
         for _, v in pairs(gangs) do
             gangAccounts[v.gangid] = loadGangAccount(v.gangid)
@@ -94,7 +94,7 @@ local function checkAccountExists(acct, sc)
     local cid
     local actype
     local processed = false
-    local exists = MySQL.Sync.fetchAll('SELECT * FROM bank_accounts WHERE account_number = ? AND sort_code = ?', { acct, sc })
+    local exists = MySQL.query.await('SELECT * FROM bank_accounts WHERE account_number = ? AND sort_code = ?', { acct, sc })
     if exists[1] ~= nil then
         success = true
         cid = exists[1].character_id
@@ -150,7 +150,7 @@ RegisterNetEvent('qb-banking:initiateTransfer', function(_)
 
             else
                 -- User is not online so we need to manually adjust thier bank balance.
-                    MySQL.Async.fetchScalar("SELECT `amount` FROM `bank_accounts` WHERE `account_number` = @an AND `sort_code` = @sc AND `character_id` = @cid", {
+                    MySQL.scalar("SELECT `amount` FROM `bank_accounts` WHERE `account_number` = @an AND `sort_code` = @sc AND `character_id` = @cid", {
                         ['@an'] = data.account,
                         ['@sc'] = data.sortcode,
                         ['@cid'] = cid
@@ -158,7 +158,7 @@ RegisterNetEvent('qb-banking:initiateTransfer', function(_)
                         if currentBalance ~= nil then
                             local newBalance = currentBalance + data.amount
                             if newBalance ~= currentBalance then
-                                MySQL.Async.execute("UPDATE `bank_accounts` SET `amount` = @newBalance WHERE `account_number` = @an AND `sort_code` = @sc AND `character_id` = @cid", {
+                                MySQL.query("UPDATE `bank_accounts` SET `amount` = @newBalance WHERE `account_number` = @an AND `sort_code` = @sc AND `character_id` = @cid", {
                                     ['@an'] = data.account,
                                     ['@sc'] = data.sortcode,
                                     ['@cid'] = cid,
@@ -166,7 +166,7 @@ RegisterNetEvent('qb-banking:initiateTransfer', function(_)
                                 }, function(rowsChanged)
                                     if rowsChanged == 1 then
                                         local time = os.date("%Y-%m-%d %H:%M:%S")
-                                        MySQL.Async.insert("INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (@accountty, @cid, @account, @sortcode, @deposited, @withdraw, @balance, @date, @type)", {
+                                        MySQL.insert("INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (@accountty, @cid, @account, @sortcode, @deposited, @withdraw, @balance, @date, @type)", {
                                             ['@accountty'] = acType,
                                             ['@cid'] = cid,
                                             ['@account'] = data.account,
