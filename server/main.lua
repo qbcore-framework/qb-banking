@@ -221,7 +221,7 @@ local function addBankStatement(cid, accountType, amountDeposited, amountWithdra
         accountBalance,
         time,
         statementDescription
-    }, function(result)
+    }, function(_)
     end)
 end
 
