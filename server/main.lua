@@ -205,16 +205,16 @@ local function addNewBankCard(citizenid, cardNumber, cardPin, cardActive, cardLo
         cardNumber,
         cardPin,
         cardActive,
-        0, -- cardLocked
+        cardLocked,
         cardType
-    }, function(result)
+    }, function(_)
     end)
 end
 
 -- Toggle the lock status of a bank card
 local function toggleBankCardLock(cid, lockStatus)
     MySQL.Async.execute('UPDATE bank_cards SET cardLocked = ? WHERE citizenid = ?', { lockStatus, cid},
-    function(result)
+    function(_)
     end)
 end
 
