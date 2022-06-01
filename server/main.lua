@@ -204,16 +204,40 @@ local function format_int(number)
     return minus .. int:reverse():gsub("^,", "") .. fraction
 end
 
+-- Get all bank statements for the current player
+local function getBankStatements(cid)
+    local bankStatements = MySQL.Sync.fetchAll('SELECT * FROM bank_statements WHERE citizenid = ? ORDER BY record_id DESC LIMIT 30', { cid })
+    return bankStatements
+end
+
+-- Adds a bank statement to the database
+local function addBankStatement(cid, accountType, amountDeposited, amountWithdrawn, accountBalance, statementDescription)
+    local time = os.date("%Y-%m-%d %H:%M:%S")
+    MySQL.Async.insert('INSERT INTO `bank_statements` (`account`, `citizenid`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (?, ?, ?, ?, ?, ?, ?)', {
+        accountType,
+        cid,
+        amountDeposited,
+        amountWithdrawn,
+        accountBalance,
+        time,
+        statementDescription
+    }, function(result)
+    end)
+end
+
 QBCore.Functions.CreateCallback('qb-banking:getBankingInformation', function(source, cb)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
     while xPlayer == nil do Wait(0) end
         if (xPlayer) then
+            local bankStatements = getBankStatements(xPlayer.PlayerData.citizenid)
+
             local banking = {
                     ['name'] = xPlayer.PlayerData.charinfo.firstname .. ' ' .. xPlayer.PlayerData.charinfo.lastname,
                     ['bankbalance'] = '$'.. format_int(xPlayer.PlayerData.money['bank']),
                     ['cash'] = '$'.. format_int(xPlayer.PlayerData.money['cash']),
                     ['accountinfo'] = xPlayer.PlayerData.charinfo.account,
+                    ['statement'] = bankStatements,
                 }
                 if savingsAccounts[xPlayer.PlayerData.citizenid] then
                     local cid = xPlayer.PlayerData.citizenid
@@ -265,6 +289,9 @@ RegisterNetEvent('qb-banking:doQuickDeposit', function(amount)
     if tonumber(amount) <= currentCash then
         xPlayer.Functions.RemoveMoney('cash', tonumber(amount), 'banking-quick-depo')
         local bank = xPlayer.Functions.AddMoney('bank', tonumber(amount), 'banking-quick-depo')
+        local newBankBalance = xPlayer.Functions.GetMoney('bank')
+        addBankStatement(xPlayer.PlayerData.citizenid, 'Bank', amount, 0, newBankBalance, Lang:t('info.deposit', {amount = amount}))
+
         if bank then
             TriggerClientEvent('qb-banking:openBankScreen', src)
             TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.cash_deposit', {value = amount}))
@@ -286,6 +313,8 @@ RegisterNetEvent('qb-banking:doQuickWithdraw', function(amount, _)
     local xPlayer = QBCore.Functions.GetPlayer(src)
     while xPlayer == nil do Wait(0) end
     local currentCash = xPlayer.Functions.GetMoney('bank')
+    local newBankBalance = xPlayer.Functions.GetMoney('bank')
+    addBankStatement(xPlayer.PlayerData.citizenid, 'Bank', 0, amount, newBankBalance, Lang:t('info.withdraw', {amount = amount}))
 
     if tonumber(amount) <= currentCash then
         local cash = xPlayer.Functions.RemoveMoney('bank', tonumber(amount), 'banking-quick-withdraw')
