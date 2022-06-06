@@ -1,5 +1,7 @@
 Config = {}
 
+Config.CalculateSavingsInterest = true
+
 Config.cardTypes = { "visa", "mastercard"}
 
 Config.UseTarget = GetConvar('UseTarget', 'false') == 'true'
