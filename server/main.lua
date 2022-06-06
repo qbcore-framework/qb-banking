@@ -200,22 +200,19 @@ end
 local function addNewBankCard(citizenid, cardNumber, cardPin, cardActive, cardLocked, cardType)
     -- The use of REPLACE will act just like INSERT if there are no results that match on the citizenid key
     -- If there are existing results, it will replace the item with the new data
-    MySQL.Async.insert('REPLACE INTO bank_cards (`citizenid`, `cardNumber`, `cardPin`, `cardActive`, `cardLocked`, `cardType`) VALUES (?, ?, ?, ?, ?, ?)', {
+    MySQL.insert('REPLACE INTO bank_cards (`citizenid`, `cardNumber`, `cardPin`, `cardActive`, `cardLocked`, `cardType`) VALUES (?, ?, ?, ?, ?, ?)', {
         citizenid,
         cardNumber,
         cardPin,
         cardActive,
         cardLocked,
         cardType
-    }, function(_)
-    end)
+    })
 end
 
 -- Toggle the lock status of a bank card
 local function toggleBankCardLock(cid, lockStatus)
-    MySQL.Async.execute('UPDATE bank_cards SET cardLocked = ? WHERE citizenid = ?', { lockStatus, cid},
-    function(_)
-    end)
+    MySQL.update('UPDATE bank_cards SET cardLocked = ? WHERE citizenid = ?', { lockStatus, cid})
 end
 
 QBCore.Functions.CreateCallback('qb-banking:getBankingInformation', function(source, cb)
@@ -326,7 +323,7 @@ RegisterNetEvent('qb-banking:updatePin', function(currentBankCard, newPin)
         local xPlayer = QBCore.Functions.GetPlayer(src)
         while xPlayer == nil do Wait(0) end
 
-        MySQL.Async.execute('UPDATE bank_cards SET cardPin = ? WHERE record_id = ?', {
+        MySQL.update('UPDATE bank_cards SET cardPin = ? WHERE record_id = ?', {
             newPin,
             currentBankCard.record_id
         }, function(result)
