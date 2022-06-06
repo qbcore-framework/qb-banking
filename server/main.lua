@@ -206,14 +206,14 @@ end
 
 -- Get all bank statements for the current player
 local function getBankStatements(cid)
-    local bankStatements = MySQL.Sync.fetchAll('SELECT * FROM bank_statements WHERE citizenid = ? ORDER BY record_id DESC LIMIT 30', { cid })
+    local bankStatements = MySQL.query.await('SELECT * FROM bank_statements WHERE citizenid = ? ORDER BY record_id DESC LIMIT 30', { cid })
     return bankStatements
 end
 
 -- Adds a bank statement to the database
 local function addBankStatement(cid, accountType, amountDeposited, amountWithdrawn, accountBalance, statementDescription)
     local time = os.date("%Y-%m-%d %H:%M:%S")
-    MySQL.Async.insert('INSERT INTO `bank_statements` (`account`, `citizenid`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (?, ?, ?, ?, ?, ?, ?)', {
+    MySQL.insert('INSERT INTO `bank_statements` (`account`, `citizenid`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (?, ?, ?, ?, ?, ?, ?)', {
         accountType,
         cid,
         amountDeposited,
@@ -221,8 +221,7 @@ local function addBankStatement(cid, accountType, amountDeposited, amountWithdra
         accountBalance,
         time,
         statementDescription
-    }, function(_)
-    end)
+    })
 end
 
 QBCore.Functions.CreateCallback('qb-banking:getBankingInformation', function(source, cb)
