@@ -3,6 +3,7 @@ Config.closeKeys = [69, 27];
 Config.ATMTransLimit = 5000;
 var currentLimit = null;
 var clientPin = null;
+var currentBankCard = null;
 
 window.addEventListener("message", function (event) {
     if(event.data.status == "openbank") {
@@ -51,6 +52,7 @@ window.addEventListener("message", function (event) {
             enableSavingsCreator();
         }
         if(event.data.information.cardInformation !== undefined && event.data.information.cardInformation !== null) {
+            currentBankCard = event.data.information.cardInformation;
             $('#cardType').html(event.data.information.cardInformation.type)
             var str = ""+ event.data.information.cardInformation.cardNumber + "";
             var res = str.slice(12);
@@ -132,7 +134,6 @@ function setupSavingsMenu(data, name)
     if (statement2 !== undefined) {
     statement2.sort(dynamicSort("date"));
     $.each(statement2, function (index, statement) {
-        // console.log(index)
         if(statement.deposited == null && statement.deposited == undefined) {
             deposit = "0"
         } else {
@@ -281,7 +282,8 @@ $(function() {
             $("#newPinReqMsgDiv").css({"display":"none"});
             $("#newPinReqMsg").html('')
             $.post('https://qb-banking/updatePin', JSON.stringify({
-                pin: pad(newPin, 4)
+                pin: pad(newPin, 4),
+                currentBankCard
              }));
              $('#newPinNumber').val('');
         } else {
@@ -368,7 +370,7 @@ $(function() {
 
     $("#processCard").click(function() {
         var pinValue = $('#cardPinNumber').val();
-        // console.log(pinValue.replace(/[^0-9]/g,"").length);
+
         if(pinValue !== null && pinValue !== undefined && pinValue.replace(/[^0-9]/g,"").length === 4) {
             $("#pinCreatorError").css({"display":"none"});
             $("#pinCreatorErrorMsg").html('');
@@ -454,17 +456,17 @@ $(function() {
     });
 
     $("#confirmCardRequest").click(function() {
+        // Re-use the card ordering screen to request a new card
+        $("#cardDetails").css({"display":"none"});
+        $("#cardOrdering").css({"display":"block"});
+
+        // Reset the requestNewCard elements back to show existing card
+        $("#requestNewCard3").css({"display":"none"});
         $("#requestNewCard2").css({"display":"none"});
-        $("#requestNewCard3").css({"display":"block"});
+        $("#requestNewCard1").css({"display":"block"});
 
-        $.post('https://qb-banking/requestNewCard', JSON.stringify({
-
-        }));
-
-        setTimeout(function(){
-            $("#requestNewCard3").css({"display":"none"});
-            $("#requestNewCard1").css({"display":"block"});
-         }, 5000);
+        // Reset pin field to empty
+        $('#cardPinNumber').val('');
     });
 
     $("#makeSavingsTransfer").click(function() {
