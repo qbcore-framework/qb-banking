@@ -192,7 +192,7 @@ end
 
 -- Get all bank cards for the current player
 local function getBankCard(cid)
-    local bankCard = MySQL.Sync.fetchAll('SELECT * FROM bank_cards WHERE citizenid = ? ORDER BY record_id DESC LIMIT 1', { cid })
+    local bankCard = MySQL.query.await('SELECT * FROM bank_cards WHERE citizenid = ? ORDER BY record_id DESC LIMIT 1', { cid })
     return bankCard[1]
 end
 
