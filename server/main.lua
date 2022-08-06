@@ -67,20 +67,6 @@ exports('gang', function(gid)
     end
 end)
 
-RegisterNetEvent('qb-banking:createNewCard', function()
-    local src = source
-    local xPlayer = QBCore.Functions.GetPlayer(src)
-
-    if xPlayer ~= nil then
-        local cid = xPlayer.PlayerData.citizenid
-        if (cid) then
-            currentAccounts[cid].generateNewCard()
-        end
-    end
-
-    TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")**" .. " created new card")
-end)
-
 --[[ -- Only used by the following "qb-banking:initiateTransfer"
 
 local function getCharacterName(cid)
@@ -224,34 +210,59 @@ local function addBankStatement(cid, accountType, amountDeposited, amountWithdra
     })
 end
 
-QBCore.Functions.CreateCallback('qb-banking:getBankingInformation', function(source, cb)
-    local src = source
-    local xPlayer = QBCore.Functions.GetPlayer(src)
-    while xPlayer == nil do Wait(0) end
-        if (xPlayer) then
-            local bankStatements = getBankStatements(xPlayer.PlayerData.citizenid)
+-- Get all bank cards for the current player
+local function getBankCard(cid)
+    local bankCard = MySQL.query.await('SELECT * FROM bank_cards WHERE citizenid = ? ORDER BY record_id DESC LIMIT 1', { cid })
+    return bankCard[1]
+end
 
-            local banking = {
-                    ['name'] = xPlayer.PlayerData.charinfo.firstname .. ' ' .. xPlayer.PlayerData.charinfo.lastname,
-                    ['bankbalance'] = '$'.. format_int(xPlayer.PlayerData.money['bank']),
-                    ['cash'] = '$'.. format_int(xPlayer.PlayerData.money['cash']),
-                    ['accountinfo'] = xPlayer.PlayerData.charinfo.account,
-                    ['statement'] = bankStatements,
-                }
-                if savingsAccounts[xPlayer.PlayerData.citizenid] then
-                    local cid = xPlayer.PlayerData.citizenid
-                    banking['savings'] = {
-                        ['amount'] = savingsAccounts[cid].GetBalance(),
-                        ['details'] = savingsAccounts[cid].getAccount(),
-                        ['statement'] = savingsAccounts[cid].getStatement(),
-                    }
-                end
-                cb(banking)
-        else
-            cb(nil)
-        end
+-- Adds a new bank card to the database, replaces existing card if it exists
+local function addNewBankCard(citizenid, cardNumber, cardPin, cardActive, cardLocked, cardType)
+    -- The use of REPLACE will act just like INSERT if there are no results that match on the citizenid key
+    -- If there are existing results, it will replace the item with the new data
+    MySQL.insert('REPLACE INTO bank_cards (`citizenid`, `cardNumber`, `cardPin`, `cardActive`, `cardLocked`, `cardType`) VALUES (?, ?, ?, ?, ?, ?)', {
+        citizenid,
+        cardNumber,
+        cardPin,
+        cardActive,
+        cardLocked,
+        cardType
+    })
+end
+
+-- Toggle the lock status of a bank card
+local function toggleBankCardLock(cid, lockStatus)
+    MySQL.update('UPDATE bank_cards SET cardLocked = ? WHERE citizenid = ?', { lockStatus, cid})
+end
+
+QBCore.Functions.CreateCallback('qb-banking:getBankingInformation', function(source, cb)
+    local xPlayer = QBCore.Functions.GetPlayer(source)
+    if not xPlayer then return cb(nil) end
+    local bankStatements = getBankStatements(xPlayer.PlayerData.citizenid)
+    local bankCard = getBankCard(xPlayer.PlayerData.citizenid)
+
+    local banking = {
+        ['name'] = xPlayer.PlayerData.charinfo.firstname .. ' ' .. xPlayer.PlayerData.charinfo.lastname,
+        ['bankbalance'] = '$'.. format_int(xPlayer.PlayerData.money['bank']),
+        ['cash'] = '$'.. format_int(xPlayer.PlayerData.money['cash']),
+        ['accountinfo'] = xPlayer.PlayerData.charinfo.account,
+        ['cardInformation'] = bankCard,
+        ['statement'] = bankStatements,
+    }
+    if savingsAccounts[xPlayer.PlayerData.citizenid] then
+        local cid = xPlayer.PlayerData.citizenid
+        banking['savings'] = {
+            ['amount'] = savingsAccounts[cid].GetBalance(),
+            ['details'] = savingsAccounts[cid].getAccount(),
+            ['statement'] = savingsAccounts[cid].getStatement(),
+        }
+    end
+
+    cb(banking)
 end)
 
+-- Creates a new bank card.
+-- If the player already has a card it will replace the existing card with the new one
 RegisterNetEvent('qb-banking:createBankCard', function(pin)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
@@ -273,8 +284,10 @@ RegisterNetEvent('qb-banking:createBankCard', function(pin)
         xPlayer.Functions.AddItem('mastercard', 1, nil, info)
     end
 
+    addNewBankCard(cid, cardNumber, info.cardPin, info.cardActive, 0, info.cardType)
+
     TriggerClientEvent('qb-banking:openBankScreen', src)
-    TriggerClientEvent('QBCore:Notify', src, Lang:t('success.debit_card'), 'success')
+    TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.debit_card'))
 
     TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** successfully ordered a debit card")
 end)
@@ -299,12 +312,13 @@ RegisterNetEvent('qb-banking:doQuickDeposit', function(amount)
     end
 end)
 
-RegisterNetEvent('qb-banking:toggleCard', function(_)
+RegisterNetEvent('qb-banking:toggleCard', function(toggle)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
 
     while xPlayer == nil do Wait(0) end
-        --_char:Bank():ToggleDebitCard(toggle)
+
+    toggleBankCardLock(xPlayer.PlayerData.citizenid, toggle)
 end)
 
 RegisterNetEvent('qb-banking:doQuickWithdraw', function(amount, _)
@@ -326,15 +340,23 @@ RegisterNetEvent('qb-banking:doQuickWithdraw', function(amount, _)
     end
 end)
 
-RegisterNetEvent('qb-banking:updatePin', function(pin)
-    if pin ~= nil then
+RegisterNetEvent('qb-banking:updatePin', function(currentBankCard, newPin)
+    if newPin ~= nil then
         local src = source
         local xPlayer = QBCore.Functions.GetPlayer(src)
         while xPlayer == nil do Wait(0) end
 
-        --   _char:Bank().UpdateDebitCardPin(pin)
-        TriggerClientEvent('qb-banking:openBankScreen', src)
-        TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.updated_pin'))
+        MySQL.update('UPDATE bank_cards SET cardPin = ? WHERE record_id = ?', {
+            newPin,
+            currentBankCard.record_id
+        }, function(result)
+            if result == 1 then
+                TriggerClientEvent('qb-banking:openBankScreen', src)
+                TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.updated_pin'))
+            else
+                TriggerClientEvent('QBCore:Notify', src, 'Error updating pin', "error")
+            end
+        end)
     end
 end)
 
@@ -384,7 +406,7 @@ end)
 
 
 QBCore.Commands.Add('givecash', Lang:t('command.givecash'), {{name = 'id', help = 'Player ID'}, {name = 'amount', help = 'Amount'}}, true, function(source, args)
-    local src = source
+  local src = source
 	local id = tonumber(args[1])
 	local amount = math.ceil(tonumber(args[2]))
 
