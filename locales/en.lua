@@ -24,7 +24,9 @@ local Translations = {
         access_bank_target = "Access Bank",
         access_bank_key = "[E] - Access Bank",
         current_to_savings = "Transfer Current Account to Savings",
-        savings_to_current = "Transfer Savings to Current Account "
+        savings_to_current = "Transfer Savings to Current Account",
+        deposit = "Deposit $%{amount} into Current Account",
+        withdraw = "Withdraw $%{amount} from Current Account",
     },
     command = {
         givecash = "Give cash to player."
