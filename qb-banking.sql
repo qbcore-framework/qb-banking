@@ -40,5 +40,5 @@ CREATE TABLE IF NOT EXISTS `bank_cards` (
   `cardLocked` tinyint(4) DEFAULT 0,
   `cardType` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`citizenid`),
-  KEY `record_id` (`record_id`),
+  KEY `record_id` (`record_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
