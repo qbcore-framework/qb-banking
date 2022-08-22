@@ -1,4 +1,4 @@
-ocal Translations = {
+local Translations = {
     error = {
         not_give = "Вы не можете передать предмет этому ID.",
         givecash = "Используйте /givecash [ID] [AMOUNT]",
