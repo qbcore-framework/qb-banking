@@ -8,7 +8,7 @@ CreateThread(function()
             local acctType = v.business
             if businessAccounts[acctType] [tonumber(v.businessid)] then
                 if businessAccounts[acctType] == nil
-                businessAccounts[acctType] = {}
+                businessAccounts[acctType] = {} then
             end
             businessAccounts[acctType][tonumber(v.businessid)] = GeneratebusinessAccount(tonumber(v.account_number), tonumber(v.sort_code), tonumber(v.businessid))
         end
