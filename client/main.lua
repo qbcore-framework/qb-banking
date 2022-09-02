@@ -36,6 +36,25 @@ local function openAccountScreen()
     end)
 end
 
+local function PlayATMAnimation(animation)
+    local playerPed = PlayerPedId()
+    if animation == 'enter' then
+        RequestAnimDict('amb@prop_human_atm@male@enter')
+        while not HasAnimDictLoaded('amb@prop_human_atm@male@enter') do
+            Wait(0)
+        end
+        TaskPlayAnim(playerPed, 'amb@prop_human_atm@male@enter', "enter", 1.0,-1.0, 3000, 1, 1, true, true, true)
+    end
+
+    if animation == 'exit' then
+        RequestAnimDict('amb@prop_human_atm@male@exit')
+        while not HasAnimDictLoaded('amb@prop_human_atm@male@exit') do
+            Wait(0)
+        end
+        TaskPlayAnim(playerPed, 'amb@prop_human_atm@male@exit', "exit", 1.0,-1.0, 3000, 1, 1, true, true, true)
+    end
+end
+
 -- Events
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
@@ -119,6 +138,17 @@ CreateThread(function()
                 end
             end)
         end
+        exports['qb-target']:AddTargetModel(Config.ATMModels, {
+            options = {
+                {
+                    event = 'qb-atms:server:enteratm',
+                    type = 'server',
+                    icon = "fas fa-credit-card",
+                    label = "Use ATM",
+                },
+            },
+            distance = 1.5,
+        })
     end
 end)
 
@@ -231,4 +261,71 @@ RegisterNUICallback("updatePin", function(data, cb)
         cb("ok")
     end
     cb(nil)
+end)
+
+RegisterNUICallback("NUIFocusOff", function()
+    SetNuiFocus(false, false)
+    SendNUIMessage({
+        status = "closeATM"
+    })
+    PlayATMAnimation('exit')
+end)
+
+RegisterNUICallback("playATMAnim", function()
+    local anim = 'amb@prop_human_atm@male@idle_a'
+    RequestAnimDict(anim)
+    while not HasAnimDictLoaded(anim) do
+        Wait(0)
+    end
+    TaskPlayAnim(PlayerPedId(), anim, "idle_a", 1.0,-1.0, 3000, 1, 1, true, true, true)
+end)
+
+RegisterNUICallback("doATMWithdraw", function(data)
+    if data then
+        TriggerServerEvent('qb-banking:server:doAccountWithdraw', data)
+    end
+end)
+
+RegisterNUICallback("loadBankingAccount", function(data)
+    QBCore.Functions.TriggerCallback('qb-banking:server:loadBankAccount', function(banking)
+        if banking and type(banking) == "table" then
+            SendNUIMessage({
+                status = "loadBankAccount",
+                information = banking
+            })
+        else
+            SetNuiFocus(false, false)
+            SendNUIMessage({
+                status = "closeATM"
+            })
+        end
+    end, data.cid, data.cardnumber)
+end)
+
+RegisterNUICallback("removeCard", function(data)
+    QBCore.Functions.TriggerCallback('qb-debitcard:server:deleteCard', function(hasDeleted)
+        if hasDeleted then
+            SetNuiFocus(false, false)
+            SendNUIMessage({
+                status = "closeATM"
+            })
+            QBCore.Functions.Notify('Card has been deleted.', 'success')
+        else
+            QBCore.Functions.Notify('Failed to delete card.', 'error')
+        end
+    end, data)
+end)
+
+RegisterNetEvent("hidemenu", function()
+    SetNuiFocus(false, false)
+    SendNUIMessage({
+        status = "closeATM"
+    })
+end)
+
+RegisterNetEvent('qb-banking:client:updateBankInformation', function(banking)
+    SendNUIMessage({
+        status = "loadBankAccount",
+        information = banking
+    })
 end)
