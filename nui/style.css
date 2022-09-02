@@ -1,20 +1,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100&display=swap');
+
 * {
     font-family: 'Poppins', sans-serif;
     font-weight: bolder;
 }
 
 body {
-    background: transparent !important;
+    background-color: transparent !important;
     margin-top: 80px;
+    background-color: black;
+    border-style: solid;
+    display: block;
+}
+
+.col-11 {
+    height: 220px;
+    width: 270px;
+    background: #000;
+    font-size: 25px;
+    color: #FFF;
+    text-align: left;
+    text-indent: 5px;
+    letter-spacing: 15px;
+    line-height: 0.8;
 }
 
 #bankingContainer {
-    background: #444444 !important;
-    border-radius: 7px;
+    background: black !important;
+    border-radius: 15px;
     min-height: 800px;
     max-height: 810px;
-    display: none;
+    display: block;
+    border-style: solid;
 }
 
 #ATMContainer {
@@ -22,8 +39,8 @@ body {
     border-radius: 20px;
     min-height: 800px;
     max-height: 800px;
-    display: none;
-    border: 2px solid red;
+    display: block;
+    border: 2px solid #DC143C;
 }
 
 .statement:hover {
@@ -60,17 +77,17 @@ body {
     color: white;
     margin-bottom: 15px;
     font-weight: bolder;
-    border-left: 2px solid red;
+    border-left: 2px solid #5e5e5e;
 }
 
 .content {
-    color: white;
+    color: rgb(10, 9, 9);
     font-size: 20px;
 }
 
 .nav-pills .nav-link.active,
 .nav-pills .show>.nav-link {
-    color: rgb(255, 255, 255);
+    color: rgb(27, 27, 27);
     background-color: #DC143C;
 }
 
@@ -98,5 +115,9 @@ small {
 }
 
 #savingsBalance {
-    color: #28a745;
+    color: #1cd648;
+}
+
+#v-pills-tab a {
+    padding: 5px !important;
 }
