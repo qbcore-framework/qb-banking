@@ -1,16 +1,15 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-local dailyWithdraws = {}
 
 CreateThread(function()
     local accts = MySQL.query.await('SELECT * FROM bank_accounts WHERE account_type = ?', { 'Business' })
     if accts[1] ~= nil then
         for _, v in pairs(accts) do
             local acctType = v.business
-            if businessAccounts[acctType] [tonumber(v.businessid)] then
-                if businessAccounts[acctType] == nil
-                businessAccounts[acctType] = {} then
+            if businessAccounts[acctType] == nil then
+                businessAccounts[acctType] = {}
             end
             businessAccounts[acctType][tonumber(v.businessid)] = GeneratebusinessAccount(tonumber(v.account_number), tonumber(v.sort_code), tonumber(v.businessid))
+            while businessAccounts[acctType][tonumber(v.businessid)] == nil do Wait(0) end
         end
     end
 
@@ -26,14 +25,6 @@ CreateThread(function()
         for _, v in pairs(gangs) do
             gangAccounts[v.gangid] = loadGangAccount(v.gangid)
         end
-    end
-end)
-
-CreateThread(function()
-    while true do
-        Wait(3600000)
-        dailyWithdraws = {}
-        TriggerClientEvent('QBCore:Notify', -1, "Daily Withdraw Limit Reset", "success")
     end
 end)
 
@@ -76,9 +67,113 @@ exports('gang', function(gid)
     end
 end)
 
+--[[ -- Only used by the following "qb-banking:initiateTransfer"
+local function getCharacterName(cid)
+    local src = source
+    local player = QBCore.Functions.GetPlayer(src)
+    local name = player.PlayerData.name
+end
+local function checkAccountExists(acct, sc)
+    local success
+    local cid
+    local actype
+    local processed = false
+    local exists = MySQL.query.await('SELECT * FROM bank_accounts WHERE account_number = ? AND sort_code = ?', { acct, sc })
+    if exists[1] ~= nil then
+        success = true
+        cid = exists[1].character_id
+        actype = exists[1].account_type
+    else
+        success = false
+        cid = false
+        actype = false
+    end
+    processed = true
+    repeat Wait(0) until processed == true
+    return success, cid, actype
+end
+]]
 
 RegisterNetEvent('qb-banking:initiateTransfer', function(_)
-   
+    --[[
+    local _src = source
+    local _startChar = QBCore.Functions.GetPlayer(_src)
+    while _startChar == nil do Wait(0) end
+    local checkAccount, cid, acType = checkAccountExists(data.account, data.sortcode)
+    while checkAccount == nil do Wait(0) end
+    if (checkAccount) then
+        local receiptName = getCharacterName(cid)
+        while receiptName == nil do Wait(0) end
+        if receiptName ~= false or receiptName ~= nil then
+            local userOnline = exports.qb-base:checkOnline(cid)
+            if userOnline ~= false then
+                -- User is online so we can do a straght transfer
+                local _targetUser = exports.qb-base:Source(userOnline)
+                if acType == "Current" then
+                    local targetBank = _targetUser:Bank().Add(data.amount, 'Bank Transfer from '.._startChar.GetName())
+                    while targetBank == nil do Wait(0) end
+                    local bank = _startChar:Bank().Remove(data.amount, 'Bank Transfer to '..receiptName)
+                    TriggerClientEvent('pw:notification:SendAlert', _src, {type = "inform", text = "You have sent a bank transfer to "..receiptName..' for the amount of $'..data.amount, length = 5000})
+                    TriggerClientEvent('pw:notification:SendAlert', userOnline, {type = "inform", text = "You have received a bank transfer from ".._startChar.GetName()..' for the amount of $'..data.amount, length = 5000})
+                    TriggerClientEvent('qb-banking:openBankScreen', _src)
+                    TriggerClientEvent('qb-banking:successAlert', _src, 'You have sent a bank transfer to '..receiptName..' for the amount of $'..data.amount)
+                else
+                    local targetBank = savingsAccounts[cid].AddMoney(data.amount, 'Bank Transfer from '.._startChar.GetName())
+                    while targetBank == nil do Wait(0) end
+                    local bank = _startChar:Bank().Remove(data.amount, 'Bank Transfer to '..receiptName)
+                    TriggerClientEvent('pw:notification:SendAlert', _src, {type = "inform", text = "You have sent a bank transfer to "..receiptName..' for the amount of $'..data.amount, length = 5000})
+                    TriggerClientEvent('pw:notification:SendAlert', userOnline, {type = "inform", text = "You have received a bank transfer from ".._startChar.GetName()..' for the amount of $'..data.amount, length = 5000})
+                    TriggerClientEvent('qb-banking:openBankScreen', _src)
+                    TriggerClientEvent('qb-banking:successAlert', _src, 'You have sent a bank transfer to '..receiptName..' for the amount of $'..data.amount)
+                end
+            else
+                -- User is not online so we need to manually adjust thier bank balance.
+                    MySQL.scalar("SELECT `amount` FROM `bank_accounts` WHERE `account_number` = @an AND `sort_code` = @sc AND `character_id` = @cid", {
+                        ['@an'] = data.account,
+                        ['@sc'] = data.sortcode,
+                        ['@cid'] = cid
+                    }, function(currentBalance)
+                        if currentBalance ~= nil then
+                            local newBalance = currentBalance + data.amount
+                            if newBalance ~= currentBalance then
+                                MySQL.query("UPDATE `bank_accounts` SET `amount` = @newBalance WHERE `account_number` = @an AND `sort_code` = @sc AND `character_id` = @cid", {
+                                    ['@an'] = data.account,
+                                    ['@sc'] = data.sortcode,
+                                    ['@cid'] = cid,
+                                    ['@newBalance'] = newBalance
+                                }, function(rowsChanged)
+                                    if rowsChanged == 1 then
+                                        local time = os.date("%Y-%m-%d %H:%M:%S")
+                                        MySQL.insert("INSERT INTO `bank_statements` (`account`, `character_id`, `account_number`, `sort_code`, `deposited`, `withdraw`, `balance`, `date`, `type`) VALUES (@accountty, @cid, @account, @sortcode, @deposited, @withdraw, @balance, @date, @type)", {
+                                            ['@accountty'] = acType,
+                                            ['@cid'] = cid,
+                                            ['@account'] = data.account,
+                                            ['@sortcode'] = data.sortcode,
+                                            ['@deposited'] = data.amount,
+                                            ['@withdraw'] = nil,
+                                            ['@balance'] = newBalance,
+                                            ['@date'] = time,
+                                            ['@type'] = 'Bank Transfer from '.._startChar.GetName()
+                                        }, function(statementUpdated)
+                                            if statementUpdated > 0 then
+                                                local bank = _startChar:Bank().Remove(data.amount, 'Bank Transfer to '..receiptName)
+                                                TriggerClientEvent('pw:notification:SendAlert', _src, {type = "inform", text = "You have sent a bank transfer to "..receiptName..' for the amount of $'..data.amount, length = 5000})
+                                                TriggerClientEvent('qb-banking:openBankScreen', _src)
+                                                TriggerClientEvent('qb-banking:successAlert', _src, 'You have sent a bank transfer to '..receiptName..' for the amount of $'..data.amount)
+                                            end
+                                        end)
+                                    end
+                                end)
+                            end
+                        end
+                    end)
+            end
+        end
+    else
+        -- Send error to client that account details do no exist.
+        TriggerClientEvent('qb-banking:transferError', _src, 'The account details entered could not be located.')
+    end
+]]
 end)
 
 local function format_int(number)
@@ -155,62 +250,6 @@ QBCore.Functions.CreateCallback('qb-banking:getBankingInformation', function(sou
         }
     end
 
-    cb(banking)
-end)
-
-QBCore.Functions.CreateCallback('qb-debitcard:server:requestCards', function(source, cb)
-    local src = source
-    local xPlayer = QBCore.Functions.GetPlayer(src)
-    local visas = xPlayer.Functions.GetItemsByName('visa')
-    local masters = xPlayer.Functions.GetItemsByName('mastercard')
-    local cards = {}
-
-    if visas ~= nil and masters ~= nil then
-        for _, v in visas do
-            cards[#cards+1] = v.info
-        end
-        for _, v in masters do
-            cards[#cards+1] = v.info
-        end
-    end
-    return cards
-end)
-
-QBCore.Functions.CreateCallback('qb-debitcard:server:deleteCard', function(source, cb, data)
-    local cn = data.cardNumber
-    local ct = data.cardType
-    local src = source
-    local xPlayer = QBCore.Functions.GetPlayer(src)
-    local found = xPlayer.Functions.GetCardSlot(cn, ct)
-    if found ~= nil then
-        xPlayer.Functions.RemoveItem(ct, 1, found)
-        cb(true)
-    else
-        cb(false)
-    end
-end)
-
-QBCore.Functions.CreateCallback('qb-atms:server:loadBankAccount', function(source, cb, cid, cardnumber)
-    local src = source
-    local xPlayer = QBCore.Functions.GetPlayer(src)
-    local cardHolder = cid
-    local xCH = QBCore.Functions.GetPlayerByCitizenId(cardHolder)
-    local banking = {}
-    if xCH ~= nil then
-        banking['online'] = true
-        banking['name'] = xCH.PlayerData.charinfo.firstname .. ' ' .. xCH.PlayerData.charinfo.lastname
-        banking['bankbalance'] = xCH.Functions.GetMoney('bank')
-        banking['accountinfo'] = xCH.PlayerData.charinfo.account
-        banking['cash'] = xPlayer.Functions.GetMoney('cash')
-    else
-        local player = MySQL.Sync.fetchAll('SELECT * FROM players WHERE citizenid = ?', { cardHolder })
-        local xCH = json.decode(player[1])
-        banking['online'] = false
-        banking['name'] = xCH.charinfo.firstname .. ' ' .. xCH.charinfo.lastname
-        banking['bankbalance'] = xCH.money.bank
-        banking['accountinfo'] = xCH.charinfo.account
-        banking['cash'] = xPlayer.Functions.GetMoney('cash')
-    end
     cb(banking)
 end)
 
@@ -357,112 +396,6 @@ RegisterNetEvent('qb-banking:createSavingsAccount', function()
     TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', "lightgreen", "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** opened a savings account")
 end)
 
-RegisterNetEvent('qb-atms:server:enteratm',function ()
-    local src = source
-    local xPlayer = QBCore.Functions.GetPlayer(src)
-    local visas = xPlayer.Functions.GetItemsByName('visa')
-    local masters = xPlayer.Functions.GetItemsByName('mastercard')
-    local cards = {}
-
-    if visas ~= nil and masters ~= nil then
-        for _, v in pairs(visas) do
-            local info = v.info
-            local cardNum = info.cardNumber
-            local cardHolder = info.citizenid
-            local xCH = QBCore.Functions.GetPlayerByCitizenId(cardHolder)
-            if xCH ~= nil then
-                if xCH.PlayerData.charinfo.card ~= cardNum then
-                    info.cardActive = false
-                end
-            else
-                local player = MySQL.Sync.fetchScalar('SELECT charinfo FROM players WHERE citizenid = ?', { info.citizenid })
-                local xCH = player
-                if xCH.card ~= cardNum then
-                    info.cardActive = false
-                end
-            end
-            cards[#cards+1] = v.info
-        end
-        for _, v in pairs(masters) do
-            local info = v.info
-            local cardNum = info.cardNumber
-            local cardHolder = info.citizenid
-            local xCH = QBCore.Functions.GetPlayerByCitizenId(cardHolder)
-            if xCH ~= nil then
-                if xCH.PlayerData.charinfo.card ~= cardNum then
-                    info.cardActive = false
-                end
-            else
-                local player = MySQL.Sync.fetchScalar('SELECT charinfo FROM players WHERE citizenid = ?', { info.citizenid })
-                xCH = player
-                if xCH.card ~= cardNum then
-                    info.cardActive = false
-                end
-            end
-            cards[#cards+1] = v.info
-        end
-    end
-    TriggerClientEvent('qb-banking:client:loadATM', src, cards)
-end)
-
-RegisterNetEvent('qb-banking:server:doAccountWithdraw', function(data)
-    if data ~= nil then
-        local src = source
-        local xPlayer = QBCore.Functions.GetPlayer(src)
-        local cardHolder = data.cid
-        local xCH = QBCore.Functions.GetPlayerByCitizenId(cardHolder)
-
-        if not dailyWithdraws[cardHolder] then
-            dailyWithdraws[cardHolder] = 0
-        end
-
-        local dailyWith = tonumber(dailyWithdraws[cardHolder]) + tonumber(data.amount)
-
-        if dailyWith < Config.DailyLimit then
-            local banking = {}
-            if xCH ~= nil then
-                local bank = xCH.Functions.GetMoney('bank')
-                local bankCount = xCH.Functions.GetMoney('bank') - tonumber(data.amount)
-                if bankCount > 0 then
-                    xCH.Functions.RemoveMoney('bank', tonumber(data.amount))
-                    xPlayer.Functions.AddMoney('cash', tonumber(data.amount))
-                    dailyWithdraws[cardHolder] = dailyWithdraws[cardHolder] + tonumber(data.amount)
-                    TriggerClientEvent('QBCore:Notify', src, "Withdraw $" .. data.amount .. ' from credit card. Daily Withdraws: ' .. dailyWithdraws[cardHolder], "success")
-                else
-                    TriggerClientEvent('QBCore:Notify', src, "Not Enough Money", "error")
-                end
-
-                banking['online'] = true
-                banking['name'] = xCH.PlayerData.charinfo.firstname .. ' ' .. xCH.PlayerData.charinfo.lastname
-                banking['bankbalance'] = xCH.Functions.GetMoney('bank')
-                banking['accountinfo'] = xCH.PlayerData.charinfo.account
-                banking['cash'] = xPlayer.Functions.GetMoney('cash')
-            else
-                local player = MySQL.Sync.fetchAll('SELECT * FROM players WHERE citizenid = ?', { cardHolder })
-                local xCH = json.decode(player[1])
-                local bankCount = tonumber(xCH.money.bank) - tonumber(data.amount)
-                if bankCount > 0  then
-                    xPlayer.Functions.AddMoney('cash', tonumber(data.amount))
-                    xCH.money.bank = bankCount
-                    MySQL.Async.execute('UPDATE players SET money = ? WHERE citizenid = ?', { xCH.money, cardHolder })
-                    dailyWithdraws[cardHolder] = dailyWithdraws[cardHolder] + tonumber(data.amount)
-                    TriggerClientEvent('QBCore:Notify', src, "Withdraw $" .. data.amount .. ' from credit card. Daily Withdraws: ' .. dailyWithdraws[cardHolder], "success")
-                else
-                    TriggerClientEvent('QBCore:Notify', src, "Not Enough Money", "error")
-                end
-
-                banking['online'] = false
-                banking['name'] = xCH.charinfo.firstname .. ' ' .. xCH.charinfo.lastname
-                banking['bankbalance'] = xCH.money.bank
-                banking['accountinfo'] = xCH.charinfo.account
-                banking['cash'] = xPlayer.Functions.GetMoney('cash')
-            end
-            TriggerClientEvent('qb-banking:client:updateBankInformation', src, banking)
-        else
-            TriggerClientEvent('QBCore:Notify', src, "You have reached the daily limit", "error")
-        end
-    end
-end)
 
 QBCore.Commands.Add('givecash', Lang:t('command.givecash'), {{name = 'id', help = 'Player ID'}, {name = 'amount', help = 'Amount'}}, true, function(source, args)
   local src = source
@@ -511,53 +444,3 @@ end)
 RegisterNetEvent("payanimation", function()
     TriggerEvent('animations:client:EmoteCommandStart', {"id"})
 end)
-
-if not Config.UseTarget then
-    RegisterCommand('atm', function(source)
-        local src = source
-        local xPlayer = QBCore.Functions.GetPlayer(src)
-        local visas = xPlayer.Functions.GetItemsByName('visa')
-        local masters = xPlayer.Functions.GetItemsByName('mastercard')
-        local cards = {}
-    
-        if visas ~= nil and masters ~= nil then
-            for _, v in pairs(visas) do
-                local info = v.info
-                local cardNum = info.cardNumber
-                local cardHolder = info.citizenid
-                local xCH = QBCore.Functions.GetPlayerByCitizenId(cardHolder)
-                if xCH ~= nil then
-                    if xCH.PlayerData.charinfo.card ~= cardNum then
-                        info.cardActive = false
-                    end
-                else
-                    local player = MySQL.Sync.fetchScalar('SELECT charinfo FROM players WHERE citizenid = ?', { info.citizenid })
-                    local xCH = player
-                    if xCH.card ~= cardNum then
-                        info.cardActive = false
-                    end
-                end
-                cards[#cards+1] = v.info
-            end
-            for _, v in pairs(masters) do
-                local info = v.info
-                local cardNum = info.cardNumber
-                local cardHolder = info.citizenid
-                local xCH = QBCore.Functions.GetPlayerByCitizenId(cardHolder)
-                if xCH ~= nil then
-                    if xCH.PlayerData.charinfo.card ~= cardNum then
-                        info.cardActive = false
-                    end
-                else
-                    local player = MySQL.Sync.fetchScalar('SELECT charinfo FROM players WHERE citizenid = ?', { info.citizenid })
-                    xCH = player
-                    if xCH.card ~= cardNum then
-                        info.cardActive = false
-                    end
-                end
-                cards[#cards+1] = v.info
-            end
-        end
-        TriggerClientEvent('qb-banking:client:loadATM', src, cards)
-    end)
-end
