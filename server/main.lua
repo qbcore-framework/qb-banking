@@ -68,13 +68,11 @@ exports('gang', function(gid)
 end)
 
 --[[ -- Only used by the following "qb-banking:initiateTransfer"
-
 local function getCharacterName(cid)
     local src = source
     local player = QBCore.Functions.GetPlayer(src)
     local name = player.PlayerData.name
 end
-
 local function checkAccountExists(acct, sc)
     local success
     local cid
@@ -94,7 +92,6 @@ local function checkAccountExists(acct, sc)
     repeat Wait(0) until processed == true
     return success, cid, actype
 end
-
 ]]
 
 RegisterNetEvent('qb-banking:initiateTransfer', function(_)
@@ -102,17 +99,13 @@ RegisterNetEvent('qb-banking:initiateTransfer', function(_)
     local _src = source
     local _startChar = QBCore.Functions.GetPlayer(_src)
     while _startChar == nil do Wait(0) end
-
     local checkAccount, cid, acType = checkAccountExists(data.account, data.sortcode)
     while checkAccount == nil do Wait(0) end
-
     if (checkAccount) then
         local receiptName = getCharacterName(cid)
         while receiptName == nil do Wait(0) end
-
         if receiptName ~= false or receiptName ~= nil then
             local userOnline = exports.qb-base:checkOnline(cid)
-
             if userOnline ~= false then
                 -- User is online so we can do a straght transfer
                 local _targetUser = exports.qb-base:Source(userOnline)
@@ -133,7 +126,6 @@ RegisterNetEvent('qb-banking:initiateTransfer', function(_)
                     TriggerClientEvent('qb-banking:openBankScreen', _src)
                     TriggerClientEvent('qb-banking:successAlert', _src, 'You have sent a bank transfer to '..receiptName..' for the amount of $'..data.amount)
                 end
-
             else
                 -- User is not online so we need to manually adjust thier bank balance.
                     MySQL.scalar("SELECT `amount` FROM `bank_accounts` WHERE `account_number` = @an AND `sort_code` = @sc AND `character_id` = @cid", {
