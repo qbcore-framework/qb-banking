@@ -1,7 +1,7 @@
 local Translations = {
     error = {
-        not_give = "Could not give item to the given id.",
-        givecash = "Usage /givecash [ID] [AMOUNT]",
+        not_give = "Kunne ikke gi elementet til den angitte ID-en.",
+        givecash = "Bruk /givecash [ID] [BELØP]",
         wrong_id = "Feil ID.",
         dead = "Du er død.",
         too_far_away = "Du er for langt unna.",
