@@ -1,9 +1,9 @@
 local Translations = {
     error = {
-        not_give = "Não foi possível dar dinheiro ao id.",
+        not_give = "Não foi possível dar dinheiro ao id:",
         givecash = "/givecash [ID] [QUANTIA]",
         wrong_id = "ID errado.",
-        dead = "Estás morto LOL.",
+        dead = "Estás morto",
         too_far_away = "Estás muito longe, aproxima-te mais.",
         not_enough = "Não tens essa quantia de dinheiro.",
         invalid_amount = "Quantia Inválida"
@@ -24,7 +24,9 @@ local Translations = {
         access_bank_target = "Aceder ao Banco",
         access_bank_key = "[E] - Aceder ao Banco",
         current_to_savings = "Transferir Conta Corrente para Poupança",
-        savings_to_current = "Transferir Poupança para Conta Corrente"
+        savings_to_current = "Transferir Poupança para Conta Corrente",
+        deposit = "Depositar €%{amount} para a conta corrente",
+        withdraw = "Levantar €%{amount} da conta corrente",
     },
     command = {
         givecash = "Dar dinheiro ao jogador."
