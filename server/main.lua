@@ -184,6 +184,19 @@ RegisterNetEvent('qb-banking:initiateTransfer', function(_)
 ]]
 end)
 
+--- verifies society accounts
+local function verifySociety()
+    local bossList = {}
+    local bossMenu = MySQL.query.await('SELECT `job_name` AS "jobName" FROM `management_funds` WHERE type = "boss"', {})
+    for _,v in pairs(bossMenu) do bossList[v.jobName] = v.jobName end
+    for k in pairs(Config.Jobs) do
+        if not bossList[k] then
+            MySQL.query.await("INSERT INTO `management_funds` (`job_name`,`amount`,`type`) VALUES (?,0,'boss')", {k})
+        end
+    end
+end
+exports("verifySociety",verifySociety)
+
 local function format_int(number)
     local _, _, minus, int, fraction = tostring(number):find('([-]?)(%d+)([.]?%d*)')
     int = int:reverse():gsub("(%d%d%d)", "%1,")
