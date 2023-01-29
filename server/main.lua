@@ -274,6 +274,14 @@ QBCore.Functions.CreateCallback('qb-banking:getBankingInformation', function(sou
     cb(banking)
 end)
 
+--- onResourceStart fiveM native
+RegisterServerEvent('onResourceStart', function(resourceName)
+    if resourceName == GetCurrentResourceName() then
+        CreateThread(function()
+            verifySociety()
+        end)
+    end
+end)
 -- Creates a new bank card.
 -- If the player already has a card it will replace the existing card with the new one
 RegisterNetEvent('qb-banking:createBankCard', function(pin)
