@@ -37,8 +37,8 @@ exports('business', function(acctType, bid)
 end)
 
 exports('registerAccount', function(cid)
-    local _cid = tonumber(cid)
-    currentAccounts[_cid] = generateCurrent(_cid)
+    if type(cid) ~= number then cid = tonumber(cid) end
+    currentAccounts[cid] = generateCurrent(cid)
 end)
 
 exports('current', function(cid)
@@ -186,10 +186,13 @@ end)
 
 --- verifies society accounts
 local function verifySociety()
+    while not next(QBCore.Shared.Jobs) do
+        QBCore = exports['qb-core']:GetCoreObject()
+    end
     local bossList = {}
     local bossMenu = MySQL.query.await('SELECT `job_name` AS "jobName" FROM `management_funds` WHERE type = "boss"', {})
     for _,v in pairs(bossMenu) do bossList[v.jobName] = v.jobName end
-    for k in pairs(Config.Jobs) do
+    for k in pairs(QBCore.Shared.Jobs) do
         if not bossList[k] then
             MySQL.query.await("INSERT INTO `management_funds` (`job_name`,`amount`,`type`) VALUES (?,0,'boss')", {k})
         end
@@ -345,15 +348,14 @@ end)
 RegisterNetEvent('qb-banking:doQuickWithdraw', function(amount, _)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
-    while xPlayer == nil do Wait(0) end
     local currentCash = xPlayer.Functions.GetMoney('bank')
     local newBankBalance = xPlayer.Functions.GetMoney('bank')
     addBankStatement(xPlayer.PlayerData.citizenid, 'Bank', 0, amount, newBankBalance, Lang:t('info.withdraw', {amount = amount}))
 
     if tonumber(amount) <= currentCash then
         local cash = xPlayer.Functions.RemoveMoney('bank', tonumber(amount), 'banking-quick-withdraw')
-        bank = xPlayer.Functions.AddMoney('cash', tonumber(amount), 'banking-quick-withdraw')
         if cash then
+            xPlayer.Functions.AddMoney('cash', tonumber(amount), 'banking-quick-withdraw')
             TriggerClientEvent('qb-banking:openBankScreen', src)
             TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.cash_withdrawal', {value = amount}))
             TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'red', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a cash withdrawal of $"..amount.." successfully.")
@@ -427,9 +429,11 @@ end)
 
 
 QBCore.Commands.Add('givecash', Lang:t('command.givecash'), {{name = 'id', help = 'Player ID'}, {name = 'amount', help = 'Amount'}}, true, function(source, args)
-  local src = source
-	local id = tonumber(args[1])
-	local amount = math.ceil(tonumber(args[2]))
+    local src = source
+    if type(args[1] ~= "number") then args[1] = tonumber(args[1]) end
+    local id = args[1]
+    if type(args[2] ~= "number") then args[2] = tonumber(args[2]) end
+	local amount = math.ceil(args[2])
 
 	if id and amount then
 		local xPlayer = QBCore.Functions.GetPlayer(src)
