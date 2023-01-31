@@ -1,5 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-
+local bossList = {}
 CreateThread(function()
     local accts = MySQL.query.await('SELECT * FROM bank_accounts WHERE account_type = ?', { 'Business' })
     if accts[1] ~= nil then
@@ -186,19 +186,21 @@ end)
 
 --- verifies society accounts
 local function verifySociety()
+    --This while loop will exist until UpdateObject Event WORKS!
     while not next(QBCore.Shared.Jobs) do
         QBCore = exports['qb-core']:GetCoreObject()
     end
-    local bossList = {}
-    local bossMenu = MySQL.query.await('SELECT `job_name` AS "jobName" FROM `management_funds` WHERE type = "boss"', {})
-    for _,v in pairs(bossMenu) do bossList[v.jobName] = v.jobName end
+    if not next(bossList) then
+        local bossMenu = MySQL.query.await('SELECT `job_name` AS "jobName" FROM `management_funds` WHERE type = "boss"', {})
+        for _,v in pairs(bossMenu) do bossList[v.jobName] = v.jobName end
+    end
     for k in pairs(QBCore.Shared.Jobs) do
         if not bossList[k] then
+            bossList[k] = k
             MySQL.query.await("INSERT INTO `management_funds` (`job_name`,`amount`,`type`) VALUES (?,0,'boss')", {k})
         end
     end
 end
-exports("verifySociety",verifySociety)
 
 local function format_int(number)
     local _, _, minus, int, fraction = tostring(number):find('([-]?)(%d+)([.]?%d*)')
@@ -284,6 +286,13 @@ RegisterServerEvent('onResourceStart', function(resourceName)
             verifySociety()
         end)
     end
+end)
+-- Run upon Object Update Object
+RegisterNetEvent('QBCore:Client:UpdateObject', function()
+	QBCore = exports['qb-core']:GetCoreObject()
+    CreateThread(function()
+        verifySociety()
+    end)
 end)
 -- Creates a new bank card.
 -- If the player already has a card it will replace the existing card with the new one
