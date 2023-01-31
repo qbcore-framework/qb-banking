@@ -37,7 +37,7 @@ exports('business', function(acctType, bid)
 end)
 
 exports('registerAccount', function(cid)
-    if type(cid) ~= number then cid = tonumber(cid) end
+    if type(cid) ~= "number" then cid = tonumber(cid) end
     currentAccounts[cid] = generateCurrent(cid)
 end)
 
