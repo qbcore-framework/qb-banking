@@ -53,7 +53,7 @@ window.addEventListener("message", function (event) {
         }
         if(event.data.information.cardInformation !== undefined && event.data.information.cardInformation !== null) {
             currentBankCard = event.data.information.cardInformation;
-            $('#cardType').html(event.data.information.cardInformation.type)
+            $('#cardType').html(event.data.information.cardInformation.cardType)
             var str = ""+ event.data.information.cardInformation.cardNumber + "";
             var res = str.slice(12);
             var cardNumber = "************" + res;
