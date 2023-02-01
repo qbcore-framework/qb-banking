@@ -197,7 +197,7 @@ local function verifySociety()
     for k in pairs(QBCore.Shared.Jobs) do
         if not bossList[k] then
             bossList[k] = k
-            MySQL.query.await("INSERT INTO `management_funds` (`job_name`,`amount`,`type`) VALUES (?,0,'boss')", {k})
+            MySQL.query.await("INSERT INTO `management_funds` (`job_name`, `amount`, `type`) VALUES (?, 0, 'boss')", {k})
         end
     end
 end
