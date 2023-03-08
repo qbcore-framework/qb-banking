@@ -5,8 +5,10 @@ var currentLimit = null;
 var clientPin = null;
 var currentBankCard = null;
 
+const getNuiCallbackUrl = (endpoint) => `https://qb-banking/${endpoint}`
+
 window.addEventListener("message", function (event) {
-    if(event.data.status == "openbank") {
+    if(event.data.action == "open") {
         /*$("#cardDetails").css({"display":"none"});*/
         $("#createNewPin").css({"display":"none"});
         $("#successMessageATM").removeClass('alert-danger').addClass('alert-success');
@@ -14,9 +16,9 @@ window.addEventListener("message", function (event) {
         $("#successMessageATM").html('');
         $("#withdrawATMError").css({"display":"none"});
         $("#withdrawATMErrorMsg").html('');
-        $("#savingsStatement").DataTable().destroy();
-        $("#currentStatement").DataTable().destroy();
-        $("#currentStatementATM").DataTable().destroy();
+        // $("#savingsStatement").DataTable().destroy();
+        // $("#currentStatement").DataTable().destroy();
+        // $("#currentStatementATM").DataTable().destroy();
         $("#accountName").html(event.data.information.name)
         $("#accountNumber").html(event.data.information.accountinfo);
         $("#accountSortCode").html(event.data.information.accountinfo.sort_code);
@@ -63,14 +65,14 @@ window.addEventListener("message", function (event) {
         $("#bankingContainer").css({"display":"block"});
 
     }
-    else if (event.data.status == "updateCard") {
+    else if (event.data.action == "updateCard") {
         $('#cardType').html(event.data.cardtype)
         var str = ""+ event.data.number + "";
         var res = str.slice(12);
         var cardNumber = "************" + res;
         $('#cardNumberShow').html(cardNumber)
     }
-    else if (event.data.status == "closebank") {
+    else if (event.data.action == "close") {
         $("#cardDetails").css({"display":"none"});
         $("#createNewPin").css({"display":"none"});
         $("#bankingHomeATM, #bankingWithdrawATM, #bankingStatementATM").removeClass('show').removeClass('active');
@@ -81,9 +83,9 @@ window.addEventListener("message", function (event) {
         $("#successMessageATM").html('');
         $("#withdrawATMError").css({"display":"none"});
         $("#withdrawATMErrorMsg").html('');
-        $("#savingsStatement").DataTable().destroy();
-        $("#currentStatement").DataTable().destroy();
-        $("#currentStatementATM").DataTable().destroy();
+        // $("#savingsStatement").DataTable().destroy();
+        // $("#currentStatement").DataTable().destroy();
+        // $("#currentStatementATM").DataTable().destroy();
         $("#enteringPin").addClass('show').addClass('active');
         $("#bankingHomeATM-tab, #bankingWithdrawATM-tab, #bankingTransferATM-tab, #bankingStatementATM-tab").addClass('disabled').removeClass('active');
         $("#bankingHomeATM-tab").addClass('active');
@@ -155,12 +157,12 @@ function setupSavingsMenu(data, name)
 
     });
 
-    $(document).ready(function() {
-        $('#savingsStatement').DataTable({
-            "order": [[ 0, "desc" ]],
-            "pagingType": "simple"
-        });
-    } );
+    // $(document).ready(function() {
+    //     $('#savingsStatement').DataTable({
+    //         "order": [[ 0, "desc" ]],
+    //         "pagingType": "simple"
+    //     });
+    // } );
 
     }
 
@@ -226,13 +228,13 @@ function populateBanking(data)
 
     });
 
-    $(document).ready(function() {
-        $('#currentStatement').DataTable({
-            "order": [[ 0, "desc" ]],
-            "pagingType": "simple",
-            "lengthMenu": [[20, 35, 50, -1], [20, 35, 50, "All"]]
-        });
-    } );
+    // $(document).ready(function() {
+    //     $('#currentStatement').DataTable({
+    //         "order": [[ 0, "desc" ]],
+    //         "pagingType": "simple",
+    //         "lengthMenu": [[20, 35, 50, -1], [20, 35, 50, "All"]]
+    //     });
+    // } );
     }
 }
 
@@ -243,7 +245,7 @@ function pad(n, width, z) {
 }
 
 function closeBanking() {
-    $.post("https://qb-banking/NUIFocusOff", JSON.stringify({}));
+    $.post(getNuiCallbackUrl('close-nui'), JSON.stringify({}));
 };
 
 $(function() {
@@ -257,18 +259,18 @@ $(function() {
         $("#debitCardStatus").removeClass('bg-success');
         $("#debitCardStatus").addClass('bg-danger');
         $("#debitCardStatus").html('<div class="card-header">Card Locked</div><div class="card-body">Your card is currently LOCKED.</div><div class="card-footer"><button class="btn btn-primary btn-block" id="unLockCard">Unlock/Unblock Card</button></div>');
-        $.post('https://qb-banking/lockCard', JSON.stringify({ }));
+        $.post(getNuiCallbackUrl('card/lock'), JSON.stringify({ }));
     });
 
     $(document).on('click','#unLockCard',function(){
         $("#debitCardStatus").removeClass('bg-danger');
         $("#debitCardStatus").addClass('bg-success');
         $("#debitCardStatus").html('<div class="card-header">Card Unlocked</div><div class="card-body">Your card is currently active.</div><div class="card-footer"><button class="btn btn-primary btn-block" id="lockCard">Lock/Block Card</button></div>');
-        $.post('https://qb-banking/unLockCard', JSON.stringify({ }));
+        $.post(getNuiCallbackUrl('card/unlock'), JSON.stringify({ }));
     });
 
     $("#openSavings").click(function() {
-        $.post('https://qb-banking/createSavingsAccount', JSON.stringify({ }));
+        $.post(getNuiCallbackUrl('savings/account/create'), JSON.stringify({ }));
     });
 
     $("#changePin").click(function() {
@@ -281,7 +283,7 @@ $(function() {
         if(newPin !== null && newPin !== undefined && newPin.replace(/[^0-9]/g,"").length === 4) {
             $("#newPinReqMsgDiv").css({"display":"none"});
             $("#newPinReqMsg").html('')
-            $.post('https://qb-banking/updatePin', JSON.stringify({
+            $.post(getNuiCallbackUrl('card/pin/update'), JSON.stringify({
                 pin: pad(newPin, 4),
                 currentBankCard
              }));
@@ -299,7 +301,7 @@ $(function() {
         if(amount !== undefined && amount > 0) {
             $("#withdrawError").css({"display":"none"});
             $("#withdrawErrorMsg").html('');
-            $.post('https://qb-banking/doWithdraw', JSON.stringify({
+            $.post(getNuiCallbackUrl('withdraw'), JSON.stringify({
                 amount: parseInt(amount)
             }));
             $('#withdrawAmount').val('')
@@ -316,7 +318,7 @@ $(function() {
             if(amount !== undefined && amount > 0) {
                 $("#withdrawATMError").css({"display":"none"});
                 $("#withdrawATMErrorMsg").html('');
-                $.post('https://qb-banking/doATMWithdraw', JSON.stringify({
+                $.post(getNuiCallbackUrl('withdraw'), JSON.stringify({
                     amount: parseInt(amount)
                 }));
                 $('#withdrawAmountATM').val('');
@@ -343,7 +345,7 @@ $(function() {
         if(amount !== undefined && amount > 0) {
             $("#depositError").css({"display":"none"});
             $("#depositErrorMsg").html('');
-            $.post('https://qb-banking/doDeposit', JSON.stringify({
+            $.post(getNuiCallbackUrl('deposit'), JSON.stringify({
                 amount: parseInt(amount)
             }));
             $('#depositAmount').val('');
@@ -357,7 +359,7 @@ $(function() {
     $("[data-action=deposit]").click(function() {
         var amount = $(this).attr('data-amount');
         if(amount > 0) {
-            $.post('https://qb-banking/doDeposit', JSON.stringify({
+            $.post(getNuiCallbackUrl('deposit'), JSON.stringify({
                 amount: parseInt(amount)
             }));
         }
@@ -374,7 +376,7 @@ $(function() {
         if(pinValue !== null && pinValue !== undefined && pinValue.replace(/[^0-9]/g,"").length === 4) {
             $("#pinCreatorError").css({"display":"none"});
             $("#pinCreatorErrorMsg").html('');
-            $.post('https://qb-banking/createDebitCard', JSON.stringify({
+            $.post(getNuiCallbackUrl('card/create'), JSON.stringify({
                 pin: pad(pinValue, 4)
             }));
         } else {
@@ -392,7 +394,7 @@ $(function() {
         if(amount !== undefined && amount !== null && amount > 0 && sortcode !== undefined && sortcode !== null && sortcode > 0 && account !== undefined && account !== null && account > 0) {
             $("#transferError").css({"display":"none"});
             $("#transferErrorMsg").html('');
-            $.post('https://qb-banking/doTransfer', JSON.stringify({
+            $.post(getNuiCallbackUrl('transfer'), JSON.stringify({
                 amount: parseInt(amount),
                 account: parseInt(account),
                 sortcode: parseInt(sortcode)
@@ -410,7 +412,7 @@ $(function() {
     $("[data-action=withdraw]").click(function() {
         var amount = $(this).attr('data-amount');
         if(amount > 0) {
-            $.post('https://qb-banking/doWithdraw', JSON.stringify({
+            $.post(getNuiCallbackUrl('withdraw'), JSON.stringify({
                 amount: parseInt(amount)
             }));
         }
@@ -420,7 +422,7 @@ $(function() {
         var amount = $(this).attr('data-amount');
         if (currentLimit + parseInt(amount) <= Config.ATMTransLimit) {
             if(amount > 0) {
-                $.post('https://qb-banking/doATMWithdraw', JSON.stringify({
+                $.post(getNuiCallbackUrl('withdraw'), JSON.stringify({
                     amount: parseInt(amount)
                 }));
                 $("#successMessageATM").removeClass('alert-danger').addClass('alert-success');
@@ -439,7 +441,7 @@ $(function() {
     $("[data-action=savingsdeposit]").click(function() {
         var amount = $(this).attr('data-amount');
         if(amount > 0) {
-            $.post('https://qb-banking/savingsDeposit', JSON.stringify({
+            $.post(getNuiCallbackUrl('savings/deposit'), JSON.stringify({
                 amount: parseInt(amount)
             }));
         }
@@ -477,13 +479,13 @@ $(function() {
             if(action == "deposit") {
                 $("#savingsTAmount").val('');
                 $("#savingsAction").val('def');
-                $.post('https://qb-banking/savingsDeposit', JSON.stringify({
+                $.post(getNuiCallbackUrl('savings/deposit'), JSON.stringify({
                     amount: parseInt(amount)
                 }));
             } else {
                 $("#savingsTAmount").val('');
                 $("#savingsAction").val('def');
-                $.post('https://qb-banking/savingsWithdraw', JSON.stringify({
+                $.post(getNuiCallbackUrl('savings/withdraw'), JSON.stringify({
                     amount: parseInt(amount)
                 }));
             }
@@ -525,7 +527,7 @@ $(function() {
     $("[data-action=savingswithdraw]").click(function() {
         var amount = $(this).attr('data-amount');
         if(amount > 0) {
-            $.post('https://qb-banking/savingsWithdraw', JSON.stringify({
+            $.post(getNuiCallbackUrl('savings/withdraw'), JSON.stringify({
                 amount: parseInt(amount)
             }));
         }
@@ -534,5 +536,4 @@ $(function() {
     $("#logoffbutton, #logoffbuttonatm").click(function() {
         closeBanking();
     });
-
 });

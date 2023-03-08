@@ -24,17 +24,22 @@ local function removeBlips()
     blips = {}
 end
 
-local function openAccountScreen()
+local function showBank()
     QBCore.Functions.TriggerCallback('qb-banking:getBankingInformation', function(banking)
         if banking ~= nil then
             SetNuiFocus(true, true)
             SendNUIMessage({
-                status = "openbank",
+                type = "bank",
+                action = "open",
                 information = banking
             })
         end
     end)
 end
+
+RegisterCommand("bank", function(source, args, rawCommand)
+    showBank()
+end)
 
 -- Events
 
@@ -61,7 +66,7 @@ RegisterNetEvent('qb-banking:successAlert', function(msg)
 end)
 
 RegisterNetEvent('qb-banking:openBankScreen', function()
-    openAccountScreen()
+    showBank()
 end)
 
 local BankControlPress = false
@@ -78,57 +83,70 @@ local BankControlPress = false
     end)
 end
 
+local function CreateBoxZonesLegacy(zones)
+    for k, v in pairs(zones) do
+        exports["qb-target"]:AddBoxZone("Bank_"..k, v.position, v.length, v.width, {
+            name = "Bank_"..k,
+            heading = v.heading,
+            minZ = v.minZ,
+            maxZ = v.maxZ
+        }, {
+            options = {
+                {
+                    type = "client",
+                    event = "qb-banking:openBankScreen",
+                    icon = "fas fa-university",
+                    label = "Access Bank",
+                }
+            },
+            distance = 1.5
+        })
+    end
+end
+
+local function CreateBoxZones(zones)
+    local bankPoly = {}
+    for k, v in pairs(Config.BankLocations) do
+        bankPoly[#bankPoly+1] = BoxZone:Create(vector3(v.x, v.y, v.z), 1.5, 1.5, {
+            heading = -20,
+            name="bank"..k,
+            debugPoly = false,
+            minZ = v.z - 1,
+            maxZ = v.z + 1,
+        })
+        local bankCombo = ComboZone:Create(bankPoly, {name = "bankPoly"})
+        bankCombo:onPlayerInOut(function(isPointInside)
+            if isPointInside then
+                exports['qb-core']:DrawText(Lang:t('info.access_bank_key'),'left')
+                BankControl()
+            else
+                BankControlPress = false
+                exports['qb-core']:HideText()
+            end
+        end)
+    end
+end
+
 CreateThread(function()
     if Config.UseTarget then
-        for k, v in pairs(Config.Zones) do
-            exports["qb-target"]:AddBoxZone("Bank_"..k, v.position, v.length, v.width, {
-                name = "Bank_"..k,
-                heading = v.heading,
-                minZ = v.minZ,
-                maxZ = v.maxZ
-            }, {
-                options = {
-                    {
-                        type = "client",
-                        event = "qb-banking:openBankScreen",
-                        icon = "fas fa-university",
-                        label = "Access Bank",
-                    }
-                },
-                distance = 1.5
-            })
-        end
+        CreateBoxZonesLegacy(Config.Bank.Zones)
     else
-        local bankPoly = {}
-        for k, v in pairs(Config.BankLocations) do
-            bankPoly[#bankPoly+1] = BoxZone:Create(vector3(v.x, v.y, v.z), 1.5, 1.5, {
-                heading = -20,
-                name="bank"..k,
-                debugPoly = false,
-                minZ = v.z - 1,
-                maxZ = v.z + 1,
-            })
-            local bankCombo = ComboZone:Create(bankPoly, {name = "bankPoly"})
-            bankCombo:onPlayerInOut(function(isPointInside)
-                if isPointInside then
-                    exports['qb-core']:DrawText(Lang:t('info.access_bank_key'),'left')
-                    BankControl()
-                else
-                    BankControlPress = false
-                    exports['qb-core']:HideText()
-                end
-            end)
-        end
+        CreateBoxZones(Config.Bank.Zones)
     end
 end)
 
 -- NUI
 
-RegisterNetEvent("hidemenu", function()
+local function closeNui()
     SetNuiFocus(false, false)
     SendNUIMessage({
-        status = "closebank"
+        type = "bank",
+        action = "close"
     })
+end
+
+RegisterNetEvent("hidemenu", function()
+    closeNui()
 end)
 
 RegisterNetEvent('qb-banking:client:newCardSuccess', function(cardno, ctype)
@@ -141,65 +159,53 @@ end)
 
 -- NUI Callbacks
 
-RegisterNUICallback("NUIFocusOff", function(_, cb)
-    SetNuiFocus(false, false)
-    SendNUIMessage({
-        status = "closebank"
-    })
+RegisterNUICallback("close-nui", function(_, cb)
+    closeNui()
     cb("ok")
 end)
 
-RegisterNUICallback("createSavingsAccount", function(_, cb)
+RegisterNUICallback("savings/account/create", function(_, cb)
     TriggerServerEvent('qb-banking:createSavingsAccount')
     cb("ok")
 end)
 
-RegisterNUICallback("doDeposit", function(data, cb)
+RegisterNUICallback("deposit", function(data, cb)
     if tonumber(data.amount) ~= nil and tonumber(data.amount) > 0 then
         TriggerServerEvent('qb-banking:doQuickDeposit', data.amount)
-        openAccountScreen()
+        showBank()
         cb("ok")
     end
     cb(nil)
 end)
 
-RegisterNUICallback("doWithdraw", function(data, cb)
+RegisterNUICallback("withdraw", function(data, cb)
     if tonumber(data.amount) ~= nil and tonumber(data.amount) > 0 then
         TriggerServerEvent('qb-banking:doQuickWithdraw', data.amount, true)
-        openAccountScreen()
+        showBank()
         cb("ok")
     end
     cb(nil)
 end)
 
-RegisterNUICallback("doATMWithdraw", function(data, cb)
-    if tonumber(data.amount) ~= nil and tonumber(data.amount) > 0 then
-        TriggerServerEvent('qb-banking:doQuickWithdraw', data.amount, false)
-        openAccountScreen()
-        cb("ok")
-    end
-    cb(nil)
-end)
-
-RegisterNUICallback("savingsDeposit", function(data, cb)
+RegisterNUICallback("savings/deposit", function(data, cb)
     if tonumber(data.amount) ~= nil and tonumber(data.amount) > 0 then
         TriggerServerEvent('qb-banking:savingsDeposit', data.amount)
-        openAccountScreen()
+        showBank()
         cb("ok")
     end
     cb(nil)
 end)
 
-RegisterNUICallback("savingsWithdraw", function(data, cb)
+RegisterNUICallback("savings/withdraw", function(data, cb)
     if tonumber(data.amount) ~= nil and tonumber(data.amount) > 0 then
         TriggerServerEvent('qb-banking:savingsWithdraw', data.amount)
-        openAccountScreen()
+        showBank()
         cb("ok")
     end
     cb(nil)
 end)
 
-RegisterNUICallback("doTransfer", function(data, cb)
+RegisterNUICallback("transfer", function(data, cb)
     if data ~= nil then
         TriggerServerEvent('qb-banking:initiateTransfer', data)
         cb("ok")
@@ -207,7 +213,7 @@ RegisterNUICallback("doTransfer", function(data, cb)
     cb(nil)
 end)
 
-RegisterNUICallback("createDebitCard", function(data, cb)
+RegisterNUICallback("card/create", function(data, cb)
     if data.pin ~= nil then
         TriggerServerEvent('qb-banking:createBankCard', data.pin)
         cb("ok")
@@ -215,17 +221,17 @@ RegisterNUICallback("createDebitCard", function(data, cb)
     cb(nil)
 end)
 
-RegisterNUICallback("lockCard", function(_, cb)
+RegisterNUICallback("card/lock", function(_, cb)
     TriggerServerEvent('qb-banking:toggleCard', true)
     cb("ok")
 end)
 
-RegisterNUICallback("unLockCard", function(_, cb)
+RegisterNUICallback("card/unlock", function(_, cb)
     TriggerServerEvent('qb-banking:toggleCard', false)
     cb("ok")
 end)
 
-RegisterNUICallback("updatePin", function(data, cb)
+RegisterNUICallback("card/pin/update", function(data, cb)
     if data.pin and data.currentBankCard then
         TriggerServerEvent('qb-banking:updatePin', data.currentBankCard, data.pin)
         cb("ok")

@@ -270,7 +270,7 @@ RegisterNetEvent('qb-banking:createBankCard', function(pin)
     local cardNumber = math.random(1000000000000000,9999999999999999)
     xPlayer.Functions.SetCreditCard(cardNumber)
     local info = {}
-    local selectedCard = Config.cardTypes[math.random(1,#Config.cardTypes)]
+    local selectedCard = Config.Bank.CardVendors[math.random(1,#Config.Bank.CardVendors)]
     info.citizenid = cid
     info.name = xPlayer.PlayerData.charinfo.firstname .. ' ' .. xPlayer.PlayerData.charinfo.lastname
     info.cardNumber = cardNumber

@@ -16,26 +16,36 @@ server_scripts {
     'server/wrappers/business.lua',
     'server/wrappers/useraccounts.lua',
     'server/wrappers/gangs.lua',
-    'server/main.lua'
+    'server/atm.lua',
+    'server/bank.lua',
 }
 
 client_script {
     '@PolyZone/client.lua',
     '@PolyZone/BoxZone.lua',
     '@PolyZone/ComboZone.lua',
-    'client/main.lua'
+    'client/main.lua',
+    'client/atm.lua',
+    'client/bank.lua',
 }
 
 ui_page 'nui/index.html'
 
 files {
-    'nui/images/logo.png',
-    'nui/scripting/jquery-ui.css',
-    'nui/scripting/external/jquery/jquery.js',
-    'nui/scripting/jquery-ui.js',
-    'nui/style.css',
     'nui/index.html',
-    'nui/qb-banking.js',
+    'nui/app.js',
+    'nui/atm/images/logo.png',
+    'nui/atm/images/logo1.png',
+    'nui/atm/images/mastercard.png',
+    'nui/atm/images/visa.png',
+    'nui/atm/index.html',
+    'nui/atm/app.js',
+    'nui/atm/style.css',
+    'nui/bank/images/logo.png',
+    'nui/bank/index.html',
+    'nui/bank/app.js',
+    'nui/bank/style.css',
 }
 
 lua54 'yes'
+use_fxv2_oal 'yes'
