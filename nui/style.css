@@ -1,7 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400,600&display=swap');
 * {
     font-family: 'Poppins', sans-serif;
-    font-weight: bolder;
+    font-weight: 400;
+}
+
+.form-control {
+    font-weight: 600;
 }
 
 body {
@@ -59,7 +63,7 @@ body {
 .title {
     color: white;
     margin-bottom: 15px;
-    font-weight: bolder;
+    font-weight: 600;
     border-left: 2px solid red;
 }
 
@@ -69,7 +73,7 @@ body {
 }
 
 .nav-pills .nav-link.active,
-.nav-pills .show>.nav-link {
+.nav-pills .show > .nav-link {
     color: rgb(255, 255, 255);
     background-color: #DC143C;
 }
@@ -94,7 +98,6 @@ body {
 .small,
 small {
     font-size: 95%;
-    font-weight: bolder;
 }
 
 #savingsBalance {
