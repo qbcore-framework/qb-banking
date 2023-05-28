@@ -9,7 +9,6 @@ CreateThread(function()
                 businessAccounts[acctType] = {}
             end
             businessAccounts[acctType][tonumber(v.businessid)] = GeneratebusinessAccount(tonumber(v.account_number), tonumber(v.sort_code), tonumber(v.businessid))
-            while businessAccounts[acctType][tonumber(v.businessid)] == nil do Wait(0) end
         end
     end
 
@@ -295,7 +294,7 @@ end)
 RegisterNetEvent('qb-banking:doQuickDeposit', function(amount)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
-    while xPlayer == nil do Wait(0) end
+    if not xPlayer then return end
     local currentCash = xPlayer.Functions.GetMoney('cash')
 
     if tonumber(amount) <= currentCash then
@@ -316,7 +315,7 @@ RegisterNetEvent('qb-banking:toggleCard', function(toggle)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
 
-    while xPlayer == nil do Wait(0) end
+    if not xPlayer then return end
 
     toggleBankCardLock(xPlayer.PlayerData.citizenid, toggle)
 end)
@@ -324,7 +323,7 @@ end)
 RegisterNetEvent('qb-banking:doQuickWithdraw', function(amount, _)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
-    while xPlayer == nil do Wait(0) end
+    if not xPlayer then return end
     local currentCash = xPlayer.Functions.GetMoney('bank')
     local newBankBalance = xPlayer.Functions.GetMoney('bank')
     addBankStatement(xPlayer.PlayerData.citizenid, 'Bank', 0, amount, newBankBalance, Lang:t('info.withdraw', {amount = amount}))
@@ -344,7 +343,7 @@ RegisterNetEvent('qb-banking:updatePin', function(currentBankCard, newPin)
     if newPin ~= nil then
         local src = source
         local xPlayer = QBCore.Functions.GetPlayer(src)
-        while xPlayer == nil do Wait(0) end
+        if not xPlayer then return end
 
         MySQL.update('UPDATE bank_cards SET cardPin = ? WHERE record_id = ?', {
             newPin,
@@ -363,14 +362,12 @@ end)
 RegisterNetEvent('qb-banking:savingsDeposit', function(amount)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
-    while xPlayer == nil do Wait(0) end
+    if not xPlayer then return end
     local currentBank = xPlayer.Functions.GetMoney('bank')
 
     if tonumber(amount) <= currentBank then
         local bank = xPlayer.Functions.RemoveMoney('bank', tonumber(amount))
         local savings = savingsAccounts[xPlayer.PlayerData.citizenid].AddMoney(tonumber(amount), Lang:t('info.current_to_savings'))
-        while bank == nil do Wait(0) end
-        while savings == nil do Wait(0) end
         TriggerClientEvent('qb-banking:openBankScreen', src)
         TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.savings_deposit', {value = tostring(amount)}))
         TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'lightgreen', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a savings deposit of $"..tostring(amount).." successfully..")
@@ -380,14 +377,12 @@ end)
 RegisterNetEvent('qb-banking:savingsWithdraw', function(amount)
     local src = source
     local xPlayer = QBCore.Functions.GetPlayer(src)
-    while xPlayer == nil do Wait(0) end
+    if not xPlayer then return end
     local currentSavings = savingsAccounts[xPlayer.PlayerData.citizenid].GetBalance()
 
     if tonumber(amount) <= currentSavings then
         local savings = savingsAccounts[xPlayer.PlayerData.citizenid].RemoveMoney(tonumber(amount), Lang:t('info.savings_to_current'))
         local bank = xPlayer.Functions.AddMoney('bank', tonumber(amount), 'banking-quick-withdraw')
-        while bank == nil do Wait(0) end
-        while savings == nil do Wait(0) end
         TriggerClientEvent('qb-banking:openBankScreen', src)
         TriggerClientEvent('qb-banking:successAlert', src, Lang:t('success.savings_withdrawal', {value = tostring(amount)}))
         TriggerEvent('qb-log:server:CreateLog', 'banking', 'Banking', 'red', "**"..GetPlayerName(xPlayer.PlayerData.source) .. " (citizenid: "..xPlayer.PlayerData.citizenid.." | id: "..xPlayer.PlayerData.source..")** made a savings withdrawal of $"..tostring(amount).." successfully.")
