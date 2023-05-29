@@ -34,7 +34,6 @@
 - Savings Account
 - Detailed interface
 - /atm for players
-- /refreshBanks
 - Business and Gang accounts
 
 ## Installation
