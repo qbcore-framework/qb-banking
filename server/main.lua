@@ -276,6 +276,7 @@ RegisterNetEvent('qb-banking:createBankCard', function(pin)
     info.cardPin = tonumber(pin)
     info.cardActive = true
     info.cardType = selectedCard
+    info.cardLocked = false
 
     if selectedCard == "visa" then
         xPlayer.Functions.AddItem('visa', 1, nil, info)
