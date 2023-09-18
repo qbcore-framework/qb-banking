@@ -1,6 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400,600&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Poppins:wght@400&display=swap');
 * {
     font-family: 'Poppins', sans-serif;
+    font-size: 1.4vh;
     font-weight: 400;
 }
 
@@ -28,6 +29,15 @@ body {
     max-height: 800px;
     display: none;
     border: 2px solid red;
+}
+
+#customerName {
+    font-size: 1.8vh;
+} 
+
+.img-fluid {
+    height: 12.5rem;
+    width: 12.5rem;
 }
 
 .statement:hover {
