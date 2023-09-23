@@ -12,7 +12,7 @@ local function createBlips()
         SetBlipColour (blips[k], Config.Blip.blipColor)
         SetBlipAsShortRange(blips[k], true)
         BeginTextCommandSetBlipName("STRING")
-        AddTextComponentString(tostring(Config.Blip.blipName))
+        AddTextComponentSubstringPlayerName(tostring(Config.Blip.blipName))
         EndTextCommandSetBlipName(blips[k])
     end
 end
