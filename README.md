@@ -1,4 +1,105 @@
-# qb-banking
+# QB-Banking
+
+## Features
+- Handles all player interaction with bank/job/gang/shared accounts
+- ATM and bank card integration
+- Shared accounts between players
+- Auto creation of job/gang accounts on bank first open
+- Boss-only access to job/gang accounts
+
+## Exports
+```lua
+exports['qb-banking']:ExportName() -- replace export name with desired from below and needed arguments
+```
+
+### CreatePlayerAccount
+
+Creates a new shared account for a player
+
+```lua
+    CreatePlayerAccount(
+        playerId, -- id of the player account is being created for
+        accountName, -- name of the account, must be a string
+        accountBalance, -- balance of the account on creation, must be a number
+        json.encode({'LCC00307', 'LCC00308'}) -- table of users on account by citizenid
+    )
+```
+### CreateJobAccount
+
+Creates a new job type account, this is automatically done so shouldn't need this
+
+```lua
+    CreateJobAccount(
+        accountName, -- name of the account, must be a string
+        accountBalance, -- balance of the account on creation, must be a number
+    )
+```
+### CreateGangAccount
+
+Creates a new gang type account, this is automatically done so shouldn't need this
+
+```lua
+    CreateGangAccount(
+        accountName, -- name of the account, must be a string
+        accountBalance, -- balance of the account on creation, must be a number
+    )
+```
+### AddMoney
+
+Adds money to an account by name, checks for regular account first
+If playerId is provided and a regular account isn't found then it will check for shared account
+
+```lua
+    AddMoney(
+        accountName, -- name of the account, must be a string
+        accountBalance, -- balance of the account on creation, must be a number
+        reason -- optional, must be a string
+    )
+```
+### RemoveMoney
+
+Removes money from an account by name, checks for regular account first
+If playerId is provided and a regular account isn't found then it will check for shared account
+
+```lua
+    RemoveMoney(
+        accountName, -- name of the account, must be a string
+        accountBalance, -- balance of the account on creation, must be a number
+        reason -- optional, must be a string
+    )
+```
+### GetAccount
+
+Returns all the information for the specified account by name
+
+```lua
+    GetAccount(
+        accountName, -- name of the account
+    )
+```
+### GetAccountBalance
+
+Returns just the balance of the specified account by name
+
+```lua
+    GetAccountBalance(
+        accountName, -- name of the account
+    )
+```
+### CreateBankStatement
+
+This will create a statement for a specified account
+
+```lua
+    CreateBankStatement(
+        playerId, -- id of the player to create the statement for
+        account, -- name of the shared account, must be a string
+        amount, -- amount of the transaction, must be a number
+        reason, -- reason for the transaction , must be a string
+        statementType, -- type of statement, must be a string 'withdraw' or 'deposit'
+        accountType -- type of account, must be a string 'player', 'shared', 'job', 'gang'
+    )
+```
 
 # License
 
@@ -17,78 +118,3 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>
-
-## Dependencies
-- [qb-core](https://github.com/qbcore-framework/qb-core)
-- [qb-logs](https://github.com/qbcore-framework/qb-logs) - For keeping records
-
-## Screenshots
-![Account Home](https://i.imgur.com/XazaYYI.png)
-![Debit Card Selection on ATM](https://i.imgur.com/dvJ9hnC.png)
-![Savings Account](https://i.imgur.com/1HFUL06.png)
-![Transfer](https://i.imgur.com/SqADuRg.png)
-![Account Options](https://i.imgur.com/blMgfpG.png)
-
-## Features
-- Debit card (MasterCard/Visa) with PIN
-- Savings Account
-- Detailed interface
-- /atm for players
-- Business and Gang accounts
-
-## Installation
-### Manual
-- Download the script and put it in the `[qb]` directory.
-- Import `qb-banking.sql` in your database
-- Add the following code to your server.cfg/resouces.cfg
-```
-ensure qb-core
-ensure qb-logs
-ensure qb-banking
-```
-# Server.cfg Convar Update
-- Global DrawTextUi Option
-```
-setr UseTarget false
-``` 
-
-- Global Target Option
-```
-setr UseTarget true
-```
-
-## Configuration
-```
-Config = {}
-
-Config.Blip = {
-    blipName = "Bank", -- Blips name for banks
-    blipType = 108, -- Blip icon for banks
-    blipColor = 37, -- Blip color for banks
-    blipScale = 0.8 -- Blip scale for banks
-    }
-
-Config.ATMModels = { -- Props which will be considered as ATM (Can use /atm nearby)
-        "prop_atm_01",
-        "prop_atm_02",
-        "prop_atm_03",
-        "prop_fleeca_atm"
-    }
-
-Config.BankLocations = { -- Bank locations
-    { ['x'] = 149.9,    ['y'] = -1040.46,   ['z'] = 29.37,  ['bankOpen'] = true, ['bankCooldown'] = 0 },
-    { ['x'] = 314.23,   ['y'] = -278.83,    ['z'] = 54.17,  ['bankOpen'] = true, ['bankCooldown'] = 0 },
-    { ['x'] = -350.8,   ['y'] = -49.57,     ['z'] = 49.04,  ['bankOpen'] = true, ['bankCooldown'] = 0 },
-    { ['x'] = -1213.0,  ['y'] = -330.39,    ['z'] = 37.79,  ['bankOpen'] = true, ['bankCooldown'] = 0 },
-    { ['x'] = -2962.71, ['y'] = 483.0,      ['z'] = 15.7,   ['bankOpen'] = true, ['bankCooldown'] = 0 },
-    { ['x'] = 1175.07,  ['y'] = 2706.41,    ['z'] = 38.09,  ['bankOpen'] = true, ['bankCooldown'] = 0 },
-    { ['x'] = 1653.41,  ['y'] = 4850.6,     ['z'] = 41.99,  ['bankOpen'] = true, ['bankCooldown'] = 0 },
-    
-    -- Pacific Standard Bank
-    { ['x'] = 246.64, ['y'] = 223.20, ['z'] = 106.29, ['bankOpen'] = true, ['bankCooldown'] = 0 },
-    -- Paleto
-    { ['x'] = -113.22, ['y'] = 6470.03, ['z'] = 31.63, ['bankOpen'] = true, ['bankCooldown'] = 0 },
-}
-
-Config.cardTypes = { "visa", "mastercard"} -- Debit card types (When requesting a debit card it gives randomly one of these.)
-```

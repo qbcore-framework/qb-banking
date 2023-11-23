@@ -1,0 +1,395 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", "sans-serif";
+    color: white;
+    font-weight: bold;
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+ul {
+    list-style-type: none;
+    padding-inline-start: 0;
+}
+
+li {
+    list-style-type: none;
+}
+
+label {
+    display: block;
+    margin: 10px 0 5px;
+}
+
+select,
+input {
+    width: 50%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    background-color: #111923;
+    color: white;
+    font-weight: bold;
+    font-family: "Poppins", "sans-serif";
+    border: none;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+select option {
+    background-color: #111923;
+}
+
+select:focus {
+    outline: none;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    display: none;
+}
+
+input:focus {
+    outline: none;
+}
+
+.banking-container {
+    display: flex;
+    height: 50vh;
+    width: 50vw;
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border-radius: 10px;
+    background-color: #060d15;
+}
+
+.sidebar {
+    height: 100%;
+    width: 20%;
+    display: flex;
+    flex-shrink: 0;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #060d15;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-right: 1px solid #111923;
+}
+
+.sidebar-header {
+    background-color: #111923;
+    border-radius: 5px;
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+}
+
+.sidebar-footer {
+    background-color: #111923;
+    border-radius: 5px;
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+}
+
+.sidebar-accounts {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.sidebar-accounts li {
+    background-color: #111923;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    margin-left: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+}
+
+.sidebar-selected {
+    border-right: 2px solid #dc143c;
+}
+
+.main-content {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.nav-bar {
+    height: 10%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: #060d15;
+    border-top-right-radius: 10px;
+    border-bottom: 1px solid #111923;
+}
+
+.nav-options {
+    display: flex;
+    align-items: center;
+}
+
+.nav-option {
+    display: flex;
+    align-items: center;
+    background-color: #111923;
+    border-radius: 5px;
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+}
+
+.transactions {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    margin-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.transactions li {
+    display: flex;
+    justify-content: space-between;
+    background-color: #111923;
+    border-radius: 5px;
+    margin-right: 30px;
+    margin-bottom: 10px;
+    padding: 10px 20px;
+    border: none;
+}
+
+.money {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+.manage-money {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 5px;
+    margin: 2px;
+    padding: 20px;
+}
+
+.money-title {
+    font-size: 2vh;
+}
+
+.transfer {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+.transfer-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.transfer-options {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.account-options {
+    display: flex;
+    flex-grow: 1;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+
+.debit-card,
+.create-account,
+.edit-account,
+.manage-account {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 21.5vh;
+    width: 19.8vw;
+    border-right: 1px solid #111923;
+    border-top: 1px solid #111923;
+    margin: 1px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.options-labels {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 65%;
+}
+
+.options-inputs {
+    width: 100%;
+    max-height: 3.6vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#createAccountName,
+#editAccount,
+#manageAccountName {
+    margin-right: 25px;
+}
+
+#manageUserName {
+    width: 95%;
+}
+
+.combo-input {
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown-container {
+    display: flex;
+    flex-grow: 1;
+    justify-content: flex-end;
+}
+
+.list-container {
+    width: fit-content;
+    background-color: #111923;
+    border-radius: 5px;
+}
+
+.list-container ul {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.action-button {
+    border-radius: 5px;
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    background-color: #dc143c;
+    font-family: "Poppins", "sans-serif";
+    color: white;
+    font-weight: bold;
+}
+
+.selected {
+    background-color: #28a745;
+}
+
+.positive-balance {
+    color: #28a745;
+}
+
+.negative-balance {
+    color: #dc3545;
+}
+
+.pin-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 25vh;
+    width: 15vw;
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border-radius: 10px;
+    background-color: #060d15;
+}
+
+.pin-input {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.number-pad {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    height: 80%;
+}
+
+.number-pad button {
+    width: 25%;
+    height: 20%;
+    margin: 5px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    background-color: #111923;
+    font-family: "Poppins", "sans-serif";
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+}
+
+.notiffication-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.notification {
+    display: flex;
+    align-items: center;
+    background-color: #111923;
+    border-radius: 5px;
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+}
+
+.notification.success {
+    background-color: #28a745; /* Green for success */
+}
+
+.notification.error {
+    background-color: #dc3545; /* Red for error */
+}
