@@ -172,6 +172,7 @@ if Config.useTarget then
                     {
                         icon = 'fas fa-university',
                         label = 'Open ATM',
+                        item = 'bank_card',
                         action = function()
                             OpenATM()
                         end,
