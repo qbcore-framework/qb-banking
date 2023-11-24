@@ -132,7 +132,8 @@ input:focus {
 }
 
 .nav-bar {
-    height: 10%;
+    min-height: 10%;
+    max-height: 10%;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -152,7 +153,9 @@ input:focus {
     align-items: center;
     background-color: #111923;
     border-radius: 5px;
-    margin: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
     padding: 10px 20px;
     border: none;
     cursor: pointer;
@@ -212,14 +215,16 @@ input:focus {
     flex-direction: column;
     overflow-x: hidden;
     overflow-y: scroll;
-    margin-top: 20px;
+    margin-top: 10px;
     margin-bottom: 30px;
 }
 
 .transfer-header {
     display: flex;
     flex-direction: row;
+    align-items: center;
     justify-content: space-evenly;
+    height: 10%;
 }
 
 .transfer-options {
@@ -368,21 +373,18 @@ input:focus {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
 }
 
-.notiffication-container {
+.notification-container {
     display: flex;
-    flex-direction: row;
+    align-items: center;
     justify-content: flex-end;
 }
 
 .notification {
     display: flex;
     align-items: center;
-    background-color: #111923;
     border-radius: 5px;
     margin: 10px;
     padding: 10px 20px;
-    border: none;
-    cursor: pointer;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
 }
 
