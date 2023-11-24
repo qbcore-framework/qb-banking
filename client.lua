@@ -195,7 +195,7 @@ if not Config.useTarget then
 
         local combo = ComboZone:Create(zones, {
             name = 'bank_combo',
-            debugPoly = true,
+            debugPoly = false,
         })
 
         combo:onPlayerInOut(function(isPointInside)
