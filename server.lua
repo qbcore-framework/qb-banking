@@ -105,7 +105,7 @@ local function AddMoney(accountName, amount, reason)
         accountToUpdate.account_balance = accountToUpdate.account_balance + amount
         if not Statements[accountName] then Statements[accountName] = {} end
         Statements[accountName][#Statements[accountName] + 1] = newStatement
-        MySQL.insert.await('INSERT INTO bank_statements (account_name, amount, reason, statement_type) VALUES (?, ?, ?)', { accountName, amount, reason, 'deposit' })
+        MySQL.insert.await('INSERT INTO bank_statements (account_name, amount, reason, statement_type) VALUES (?, ?, ?, ?)', { accountName, amount, reason, 'deposit' })
         local updateSuccess = MySQL.update.await('UPDATE bank_accounts SET account_balance = account_balance + ? WHERE account_name = ?', { amount, accountName })
         return updateSuccess
     end
@@ -126,7 +126,7 @@ local function RemoveMoney(accountName, amount, reason)
         accountToUpdate.account_balance = accountToUpdate.account_balance - amount
         if not Statements[accountName] then Statements[accountName] = {} end
         Statements[accountName][#Statements[accountName] + 1] = newStatement
-        MySQL.insert.await('INSERT INTO bank_statements (account_name, amount, reason, statement_type) VALUES (?, ?, ?)', { accountName, amount, reason, 'withdraw' })
+        MySQL.insert.await('INSERT INTO bank_statements (account_name, amount, reason, statement_type) VALUES (?, ?, ?, ?)', { accountName, amount, reason, 'withdraw' })
         local updateSuccess = MySQL.update.await('UPDATE bank_accounts SET account_balance = account_balance - ? WHERE account_name = ?', { amount, accountName })
         return updateSuccess
     end
