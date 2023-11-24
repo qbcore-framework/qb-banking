@@ -122,7 +122,7 @@ end)
 
 -- Events
 
-RegisterNetEvent('qb-atms:client:useCard', function()
+RegisterNetEvent('qb-banking:client:useCard', function()
     if NearATM() then OpenATM() end
 end)
 
