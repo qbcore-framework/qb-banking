@@ -1,8 +1,17 @@
+:root {
+    --text-color: white;
+    --main-background: #060d15;
+    --accent-color: #111923;
+    --button-color: #dc143c;
+    --box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+    --font: "Poppins", "sans-serif";
+}
+
 body {
     margin: 0;
     padding: 0;
-    font-family: "Poppins", "sans-serif";
-    color: white;
+    font-family: var(--font);
+    color: var(--text-color);
     font-weight: bold;
 }
 
@@ -30,17 +39,17 @@ input {
     padding: 8px;
     margin-bottom: 15px;
     border-radius: 5px;
-    background-color: #111923;
-    color: white;
+    background-color: var(--accent-color);
+    color: var(--text-color);
     font-weight: bold;
-    font-family: "Poppins", "sans-serif";
+    font-family: var(--font);
     border: none;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: var(--box-shadow);
     text-align: center;
 }
 
 select option {
-    background-color: #111923;
+    background-color: var(--accent-color);
 }
 
 select:focus {
@@ -65,7 +74,7 @@ input:focus {
     position: absolute;
     transform: translate(-50%, -50%);
     border-radius: 10px;
-    background-color: #060d15;
+    background-color: var(--main-background);
 }
 
 .sidebar {
@@ -75,28 +84,28 @@ input:focus {
     flex-shrink: 0;
     flex-direction: column;
     justify-content: space-between;
-    background-color: #060d15;
+    background-color: var(--main-background);
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
-    border-right: 1px solid #111923;
+    border-right: 1px solid var(--accent-color);
 }
 
 .sidebar-header {
-    background-color: #111923;
+    background-color: var(--accent-color);
     border-radius: 5px;
     margin: 10px;
     padding: 10px 20px;
     border: none;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: var(--box-shadow);
 }
 
 .sidebar-footer {
-    background-color: #111923;
+    background-color: var(--accent-color);
     border-radius: 5px;
     margin: 10px;
     padding: 10px 20px;
     border: none;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: var(--box-shadow);
 }
 
 .sidebar-accounts {
@@ -109,18 +118,18 @@ input:focus {
 }
 
 .sidebar-accounts li {
-    background-color: #111923;
+    background-color: var(--accent-color);
     border-radius: 5px;
     margin-bottom: 10px;
     margin-right: 10px;
     margin-left: 10px;
     padding: 10px 20px;
     cursor: pointer;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: var(--box-shadow);
 }
 
 .sidebar-selected {
-    border-right: 2px solid #dc143c;
+    border-right: 2px solid var(--button-color);
 }
 
 .main-content {
@@ -138,9 +147,9 @@ input:focus {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    background-color: #060d15;
+    background-color: var(--main-background);
     border-top-right-radius: 10px;
-    border-bottom: 1px solid #111923;
+    border-bottom: 1px solid var(--accent-color);
 }
 
 .nav-options {
@@ -151,7 +160,7 @@ input:focus {
 .nav-option {
     display: flex;
     align-items: center;
-    background-color: #111923;
+    background-color: var(--accent-color);
     border-radius: 5px;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -159,7 +168,7 @@ input:focus {
     padding: 10px 20px;
     border: none;
     cursor: pointer;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: var(--box-shadow);
 }
 
 .transactions {
@@ -176,7 +185,7 @@ input:focus {
 .transactions li {
     display: flex;
     justify-content: space-between;
-    background-color: #111923;
+    background-color: var(--accent-color);
     border-radius: 5px;
     margin-right: 30px;
     margin-bottom: 10px;
@@ -252,8 +261,8 @@ input:focus {
     justify-content: space-between;
     height: 21.5vh;
     width: 19.8vw;
-    border-right: 1px solid #111923;
-    border-top: 1px solid #111923;
+    border-right: 1px solid var(--accent-color);
+    border-top: 1px solid var(--accent-color);
     margin: 1px;
     padding: 20px;
     box-sizing: border-box;
@@ -297,7 +306,7 @@ input:focus {
 
 .list-container {
     width: fit-content;
-    background-color: #111923;
+    background-color: var(--accent-color);
     border-radius: 5px;
 }
 
@@ -312,9 +321,9 @@ input:focus {
     padding: 10px 20px;
     border: none;
     cursor: pointer;
-    background-color: #dc143c;
-    font-family: "Poppins", "sans-serif";
-    color: white;
+    background-color: var(--button-color);
+    font-family: var(--font);
+    color: var(--text-color);
     font-weight: bold;
 }
 
@@ -342,7 +351,7 @@ input:focus {
     position: absolute;
     transform: translate(-50%, -50%);
     border-radius: 10px;
-    background-color: #060d15;
+    background-color: var(--main-background);
 }
 
 .pin-input {
@@ -366,11 +375,11 @@ input:focus {
     border-radius: 5px;
     border: none;
     cursor: pointer;
-    background-color: #111923;
-    font-family: "Poppins", "sans-serif";
-    color: white;
+    background-color: var(--accent-color);
+    font-family: var(--font);
+    color: var(--text-color);
     font-weight: bold;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: var(--box-shadow);
 }
 
 .notification-container {
@@ -385,7 +394,7 @@ input:focus {
     border-radius: 5px;
     margin: 10px;
     padding: 10px 20px;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: var(--box-shadow);
 }
 
 .notification.success {
