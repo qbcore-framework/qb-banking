@@ -30,6 +30,7 @@ local function OpenATM()
         coords = vector3(0.1, 0.03, -0.05),
         rotation = vector3(0.0, 0.0, 180.0),
     }, {}, function()
+            ClearPedTasks(PlayerPedId())
         QBCore.Functions.TriggerCallback('qb-banking:server:openATM', function(accounts, playerData, acceptablePins)
             SetNuiFocus(true, true)
             SendNUIMessage({
