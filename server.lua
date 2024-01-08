@@ -112,6 +112,7 @@ local function AddMoney(accountName, amount, reason)
     return false
 end
 exports('AddMoney', AddMoney)
+exports('AddGangMoney', AddMoney)
 
 local function RemoveMoney(accountName, amount, reason)
     if not reason then reason = 'External Withdrawal' end
@@ -133,6 +134,7 @@ local function RemoveMoney(accountName, amount, reason)
     return false
 end
 exports('RemoveMoney', RemoveMoney)
+exports('RemoveGangMoney', RemoveMoney)
 
 local function GetAccount(accountName)
     if Accounts[accountName] then
@@ -141,6 +143,7 @@ local function GetAccount(accountName)
     return nil
 end
 exports('GetAccount', GetAccount)
+exports('GetGangAccount', GetAccount)
 
 local function GetAccountBalance(accountName)
     local account = GetAccount(accountName)
