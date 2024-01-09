@@ -82,12 +82,20 @@ const bankingApp = Vue.createApp({
         t(key) {
             return this.ui[key] ?? key
         },
+        updateTranslationData(translation) {
+            for (let k in translation) {
+                if (this.ui[k]) {
+                    this.ui[k] = translation[k]
+                }
+            }
+        },
         openBank(bankData) {
             const playerData = bankData.playerData;
             this.playerName = playerData.charinfo.firstname;
             this.accountNumber = playerData.citizenid;
             this.playerCash = playerData.money.cash;
             this.accounts = [];
+            this.updateTranslationData( bankData.translation )
             bankData.accounts.forEach((account) => {
                 this.accounts.push({
                     name: account.account_name,
@@ -116,6 +124,7 @@ const bankingApp = Vue.createApp({
             this.accountNumber = playerData.citizenid;
             this.playerCash = playerData.money.cash;
             this.accounts = [];
+            this.updateTranslationData( bankData.translation )
             bankData.accounts.forEach((account) => {
                 this.accounts.push({
                     name: account.account_name,

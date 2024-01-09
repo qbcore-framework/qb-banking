@@ -50,7 +50,9 @@ local Translations = {
         remove = 'Remove',
         enterPin = 'Enter Pin',
         clear = 'Clear',
-        submit = 'Submit'
+        submit = 'Submit',
+        openAtm = 'Open ATM',
+        openBank = 'Open Bank',
     }
 }
 
