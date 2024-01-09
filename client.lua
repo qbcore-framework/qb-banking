@@ -6,11 +6,18 @@ local zones = {}
 local function OpenBank()
     QBCore.Functions.TriggerCallback('qb-banking:server:openBank', function(accounts, statements, playerData)
         SetNuiFocus(true, true)
+        local translation = {}
+        for k in pairs(Lang.fallback and Lang.fallback.phrases or Lang.phrases) do
+            if k:sub(0, ('ui.'):len()) then
+                translation[k:sub(('ui.'):len() + 1)] = Lang:t(k)
+            end
+        end
         SendNUIMessage({
             action = 'openBank',
             accounts = accounts,
             statements = statements,
-            playerData = playerData
+            playerData = playerData,
+            translation = translation
         })
     end)
 end
