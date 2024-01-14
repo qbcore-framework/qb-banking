@@ -9,6 +9,8 @@ local Translations = {
         userAdd = 'User added',
         userRemove = 'User removed',
         card = 'Card created',
+        give = '$%s cash given',
+        receive = '$%s cash received',
     },
     error = {
         error = 'An error occurred',
@@ -20,6 +22,8 @@ local Translations = {
         money = 'Not enough money',
         pin = 'Invalid PIN',
         card = 'No bank card found',
+        amount = 'Invalid amount',
+        toofar = 'You are too far away',
     },
     progress = {
         atm = 'Accessing ATM',
