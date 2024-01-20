@@ -364,6 +364,7 @@ QBCore.Functions.CreateCallback('qb-banking:server:openAccount', function(source
     if not CreatePlayerAccount(src, accountName, initialAmount, json.encode({})) then return cb({ success = false, message = Lang:t('error.error') }) end
     if not CreateBankStatement(src, accountName, initialAmount, 'Initial deposit', 'deposit', 'shared') then return cb({ success = false, message = Lang:t('error.error') }) end
     if not CreateBankStatement(src, 'checking', initialAmount, 'Initial deposit for ' .. accountName, 'withdraw', 'player') then return cb({ success = false, message = Lang:t('error.error') }) end
+    TriggerEvent('qb-log:server:CreateLog', 'banking', 'Account Opened', 'green', string.format('**%s** opened account **%s** with an initial deposit of **$%s**', GetPlayerName(src), accountName, initialAmount))
     cb({ success = true, message = Lang:t('success.account') })
 end)
 
@@ -378,8 +379,10 @@ QBCore.Functions.CreateCallback('qb-banking:server:renameAccount', function(sour
     Accounts[newName] = Accounts[oldName]
     Accounts[newName].account_name = newName
     Accounts[oldName] = nil
-    local result = MySQL.update.await('UPDATE bank_accounts SET account_name = ? WHERE account_name = ?', { newName, oldName })
-    if result then cb({ success = true, message = Lang:t('success.rename') }) else cb({ success = false, message = Lang:t('error.error') }) end
+    local result = MySQL.update.await('UPDATE bank_accounts SET account_name = ? WHERE account_name = ? AND citizenid = ?', { newName, oldName, citizenid })
+    if not result then return cb({ success = false, message = Lang:t('error.error') }) end
+    TriggerEvent('qb-log:server:CreateLog', 'banking', 'Account Renamed', 'red', string.format('**%s** renamed **%s** to **%s**', GetPlayerName(src), oldName, newName))
+    cb({ success = true, message = Lang:t('success.rename') })
 end)
 
 QBCore.Functions.CreateCallback('qb-banking:server:deleteAccount', function(source, cb, data)
@@ -390,8 +393,10 @@ QBCore.Functions.CreateCallback('qb-banking:server:deleteAccount', function(sour
     if not Accounts[accountName] then return cb({ success = false, message = Lang:t('error.error') }) end
     if Accounts[accountName].citizenid ~= citizenid then return cb({ success = false, message = Lang:t('error.access') }) end
     Accounts[accountName] = nil
-    local result = MySQL.rawExecute.await('DELETE FROM bank_accounts WHERE account_name = ?', { accountName })
-    if result then cb({ success = true, message = Lang:t('success.delete') }) else cb({ success = false, message = Lang:t('error.error') }) end
+    local result = MySQL.rawExecute.await('DELETE FROM bank_accounts WHERE account_name = ? AND citizenid = ?', { accountName, citizenid })
+    if not result then return cb({ success = false, message = Lang:t('error.error') }) end
+    TriggerEvent('qb-log:server:CreateLog', 'banking', 'Account Deleted', 'red', string.format('**%s** deleted account **%s**', GetPlayerName(src), accountName))
+    cb({ success = true, message = Lang:t('success.delete') })
 end)
 
 QBCore.Functions.CreateCallback('qb-banking:server:addUser', function(source, cb, data)
@@ -410,8 +415,10 @@ QBCore.Functions.CreateCallback('qb-banking:server:addUser', function(source, cb
     users[#users + 1] = userToAdd
     local usersData = json.encode(users)
     Accounts[accountName].users = usersData
-    local result = MySQL.update.await('UPDATE bank_accounts SET users = ? WHERE account_name = ?', { usersData, accountName })
-    if result then cb({ success = true, message = Lang:t('success.userAdd') }) else cb({ success = false, message = Lang:t('error.error') }) end
+    local result = MySQL.update.await('UPDATE bank_accounts SET users = ? WHERE account_name = ? AND citizenid = ?', { usersData, accountName, citizenid })
+    if not result then cb({ success = false, message = Lang:t('error.error') }) end
+    TriggerEvent('qb-log:server:CreateLog', 'banking', 'User Added', 'green', string.format('**%s** added **%s** to **%s**', GetPlayerName(src), userToAdd, accountName))
+    cb({ success = true, message = Lang:t('success.userAdd') })
 end)
 
 QBCore.Functions.CreateCallback('qb-banking:server:removeUser', function(source, cb, data)
@@ -435,8 +442,10 @@ QBCore.Functions.CreateCallback('qb-banking:server:removeUser', function(source,
     if not userFound then return cb({ success = false, message = Lang:t('error.noUser') }) end
     local usersData = json.encode(users)
     Accounts[accountName].users = usersData
-    local result = MySQL.update.await('UPDATE bank_accounts SET users = ? WHERE account_name = ?', { usersData, accountName })
-    if result then cb({ success = true, message = Lang:t('success.userRemove') }) else cb({ success = false, message = Lang:t('error.error') }) end
+    local result = MySQL.update.await('UPDATE bank_accounts SET users = ? WHERE account_name = ? AND citizenid = ?', { usersData, accountName, citizenid })
+    if not result then cb({ success = false, message = Lang:t('error.error') }) end
+    TriggerEvent('qb-log:server:CreateLog', 'banking', 'User Removed', 'red', string.format('**%s** removed **%s** from **%s**', GetPlayerName(src), userToRemove, accountName))
+    cb({ success = true, message = Lang:t('success.userRemove') })
 end)
 
 -- Items
