@@ -231,7 +231,7 @@ QBCore.Functions.CreateCallback('qb-banking:server:withdraw', function(source, c
         local accountBalance = GetAccountBalance(accountName)
         if accountBalance < withdrawAmount then return cb({ success = false, message = Lang:t('error.money') }) end
         if not RemoveMoney(accountName, withdrawAmount) then return cb({ success = false, message = Lang:t('error.error') }) end
-        Player.Functions.AddMoney('cash', withdrawAmount)
+        Player.Functions.AddMoney('cash', withdrawAmount, 'bank account: ' .. accountName .. ' withdrawal')
         if not CreateBankStatement(src, accountName, withdrawAmount, reason, 'withdraw', Accounts[accountName].account_type) then return cb({ success = false, message = Lang:t('error.error') }) end
         cb({ success = true, message = Lang:t('success.withdraw') })
     end
@@ -258,7 +258,7 @@ QBCore.Functions.CreateCallback('qb-banking:server:deposit', function(source, cb
         if Accounts[accountName].account_type == 'job' and job.name ~= accountName and not job.isboss then return cb({ success = false, message = Lang:t('error.access') }) end
         if Accounts[accountName].account_type == 'gang' and gang.name ~= accountName and not gang.isboss then return cb({ success = false, message = Lang:t('error.access') }) end
         if Player.PlayerData.money.cash < depositAmount then return cb({ success = false, message = Lang:t('error.money') }) end
-        Player.Functions.RemoveMoney('cash', depositAmount)
+        Player.Functions.RemoveMoney('cash', depositAmount, 'bank account: ' .. accountName .. ' deposit')
         if not AddMoney(accountName, depositAmount) then return cb({ success = false, message = Lang:t('error.error') }) end
         cb({ success = true, message = Lang:t('success.deposit') })
     end
@@ -364,6 +364,7 @@ QBCore.Functions.CreateCallback('qb-banking:server:openAccount', function(source
     if not CreatePlayerAccount(src, accountName, initialAmount, json.encode({})) then return cb({ success = false, message = Lang:t('error.error') }) end
     if not CreateBankStatement(src, accountName, initialAmount, 'Initial deposit', 'deposit', 'shared') then return cb({ success = false, message = Lang:t('error.error') }) end
     if not CreateBankStatement(src, 'checking', initialAmount, 'Initial deposit for ' .. accountName, 'withdraw', 'player') then return cb({ success = false, message = Lang:t('error.error') }) end
+    TriggerEvent('qb-log:server:CreateLog', 'banking', 'Account Opened', 'green', string.format('**%s** opened account **%s** with an initial deposit of **$%s**', GetPlayerName(src), accountName, initialAmount))
     cb({ success = true, message = Lang:t('success.account') })
 end)
 
@@ -378,8 +379,10 @@ QBCore.Functions.CreateCallback('qb-banking:server:renameAccount', function(sour
     Accounts[newName] = Accounts[oldName]
     Accounts[newName].account_name = newName
     Accounts[oldName] = nil
-    local result = MySQL.update.await('UPDATE bank_accounts SET account_name = ? WHERE account_name = ?', { newName, oldName })
-    if result then cb({ success = true, message = Lang:t('success.rename') }) else cb({ success = false, message = Lang:t('error.error') }) end
+    local result = MySQL.update.await('UPDATE bank_accounts SET account_name = ? WHERE account_name = ? AND citizenid = ?', { newName, oldName, citizenid })
+    if not result then return cb({ success = false, message = Lang:t('error.error') }) end
+    TriggerEvent('qb-log:server:CreateLog', 'banking', 'Account Renamed', 'red', string.format('**%s** renamed **%s** to **%s**', GetPlayerName(src), oldName, newName))
+    cb({ success = true, message = Lang:t('success.rename') })
 end)
 
 QBCore.Functions.CreateCallback('qb-banking:server:deleteAccount', function(source, cb, data)
@@ -390,8 +393,10 @@ QBCore.Functions.CreateCallback('qb-banking:server:deleteAccount', function(sour
     if not Accounts[accountName] then return cb({ success = false, message = Lang:t('error.error') }) end
     if Accounts[accountName].citizenid ~= citizenid then return cb({ success = false, message = Lang:t('error.access') }) end
     Accounts[accountName] = nil
-    local result = MySQL.rawExecute.await('DELETE FROM bank_accounts WHERE account_name = ?', { accountName })
-    if result then cb({ success = true, message = Lang:t('success.delete') }) else cb({ success = false, message = Lang:t('error.error') }) end
+    local result = MySQL.rawExecute.await('DELETE FROM bank_accounts WHERE account_name = ? AND citizenid = ?', { accountName, citizenid })
+    if not result then return cb({ success = false, message = Lang:t('error.error') }) end
+    TriggerEvent('qb-log:server:CreateLog', 'banking', 'Account Deleted', 'red', string.format('**%s** deleted account **%s**', GetPlayerName(src), accountName))
+    cb({ success = true, message = Lang:t('success.delete') })
 end)
 
 QBCore.Functions.CreateCallback('qb-banking:server:addUser', function(source, cb, data)
@@ -410,8 +415,10 @@ QBCore.Functions.CreateCallback('qb-banking:server:addUser', function(source, cb
     users[#users + 1] = userToAdd
     local usersData = json.encode(users)
     Accounts[accountName].users = usersData
-    local result = MySQL.update.await('UPDATE bank_accounts SET users = ? WHERE account_name = ?', { usersData, accountName })
-    if result then cb({ success = true, message = Lang:t('success.userAdd') }) else cb({ success = false, message = Lang:t('error.error') }) end
+    local result = MySQL.update.await('UPDATE bank_accounts SET users = ? WHERE account_name = ? AND citizenid = ?', { usersData, accountName, citizenid })
+    if not result then cb({ success = false, message = Lang:t('error.error') }) end
+    TriggerEvent('qb-log:server:CreateLog', 'banking', 'User Added', 'green', string.format('**%s** added **%s** to **%s**', GetPlayerName(src), userToAdd, accountName))
+    cb({ success = true, message = Lang:t('success.userAdd') })
 end)
 
 QBCore.Functions.CreateCallback('qb-banking:server:removeUser', function(source, cb, data)
@@ -435,8 +442,10 @@ QBCore.Functions.CreateCallback('qb-banking:server:removeUser', function(source,
     if not userFound then return cb({ success = false, message = Lang:t('error.noUser') }) end
     local usersData = json.encode(users)
     Accounts[accountName].users = usersData
-    local result = MySQL.update.await('UPDATE bank_accounts SET users = ? WHERE account_name = ?', { usersData, accountName })
-    if result then cb({ success = true, message = Lang:t('success.userRemove') }) else cb({ success = false, message = Lang:t('error.error') }) end
+    local result = MySQL.update.await('UPDATE bank_accounts SET users = ? WHERE account_name = ? AND citizenid = ?', { usersData, accountName, citizenid })
+    if not result then cb({ success = false, message = Lang:t('error.error') }) end
+    TriggerEvent('qb-log:server:CreateLog', 'banking', 'User Removed', 'red', string.format('**%s** removed **%s** from **%s**', GetPlayerName(src), userToRemove, accountName))
+    cb({ success = true, message = Lang:t('success.userRemove') })
 end)
 
 -- Items
@@ -470,4 +479,27 @@ CreateThread(function()
             Statements[statement.account_name][#Statements[statement.account_name] + 1] = statement
         end
     end
+end)
+
+-- Commands
+
+QBCore.Commands.Add('givecash', 'Give Cash', { { name = 'id', help = 'Player ID' }, { name = 'amount', help = 'Amount' } }, true, function(source, args)
+    local src = source
+    local Player = QBCore.Functions.GetPlayer(src)
+    if not Player then return end
+    local playerPed = GetPlayerPed(src)
+    local playerCoords = GetEntityCoords(playerPed)
+    local target = QBCore.Functions.GetPlayer(tonumber(args[1]))
+    if not target then return TriggerClientEvent('QBCore:Notify', src, Lang:t('error.noUser'), 'error') end
+    local targetPed = GetPlayerPed(tonumber(args[1]))
+    local targetCoords = GetEntityCoords(targetPed)
+    local amount = tonumber(args[2])
+    if not amount then return TriggerClientEvent('QBCore:Notify', src, Lang:t('error.amount'), 'error') end
+    if amount <= 0 then return TriggerClientEvent('QBCore:Notify', src, Lang:t('error.amount'), 'error') end
+    if #(playerCoords - targetCoords) > 5 then return TriggerClientEvent('QBCore:Notify', src, Lang:t('error.toofar'), 'error') end
+    if Player.PlayerData.money.cash < amount then return TriggerClientEvent('QBCore:Notify', src, Lang:t('error.money'), 'error') end
+    Player.Functions.RemoveMoney('cash', amount, 'cash transfer')
+    target.Functions.AddMoney('cash', amount, 'cash transfer')
+    TriggerClientEvent('QBCore:Notify', src, string.format(Lang:t('success.give'), amount), 'success')
+    TriggerClientEvent('QBCore:Notify', target.PlayerData.source, string.format(Lang:t('success.receive'), amount), 'success')
 end)

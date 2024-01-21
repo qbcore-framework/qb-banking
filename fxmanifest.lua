@@ -31,7 +31,3 @@ files {
     'html/script.js',
     'html/style.css',
 }
-
-provides {
-    'qb-management'
-}
