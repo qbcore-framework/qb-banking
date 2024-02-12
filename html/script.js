@@ -35,6 +35,34 @@ const bankingApp = Vue.createApp({
             manageUserName: "",
             filteredUsers: [],
             showUsersDropdown: false,
+            ui : {
+                cash : 'Cash',
+                accountNumber : 'Account Number: ',
+                home : 'Home',
+                transfer : 'Transfer',
+                accountOptions : 'Account Options',
+                moneyManagement : 'Money Management',
+                account : 'Account: ',
+                amount : 'Amount: ',
+                reason : 'Reason: ',
+                withdraw : 'Withdraw',
+                deposit : 'Deposit',
+                internal : 'Internal',
+                external : 'External',
+                orderDebitCard : 'Order Debit Card',
+                pinNumber : 'Pin Number: ',
+                openSharedAccount : 'Open Shared Account',
+                name : 'Name: ',
+                openAccount : 'Open Account',
+                manageSharedAccount : 'Manage Shared Account',
+                delete : 'Delete',
+                rename : 'Rename',
+                add : 'Add',
+                remove : 'Remove',
+                enterPin : 'Enter Pin',
+                clear : 'Clear',
+                submit : 'Submit'
+            }
         };
     },
     computed: {
@@ -51,12 +79,23 @@ const bankingApp = Vue.createApp({
         },
     },
     methods: {
+        t(key) {
+            return this.ui[key] ?? key
+        },
+        updateTranslationData(translation) {
+            for (let k in translation) {
+                if (this.ui[k]) {
+                    this.ui[k] = translation[k]
+                }
+            }
+        },
         openBank(bankData) {
             const playerData = bankData.playerData;
             this.playerName = playerData.charinfo.firstname;
             this.accountNumber = playerData.citizenid;
             this.playerCash = playerData.money.cash;
             this.accounts = [];
+            this.updateTranslationData( bankData.translation )
             bankData.accounts.forEach((account) => {
                 this.accounts.push({
                     name: account.account_name,
@@ -85,6 +124,7 @@ const bankingApp = Vue.createApp({
             this.accountNumber = playerData.citizenid;
             this.playerCash = playerData.money.cash;
             this.accounts = [];
+            this.updateTranslationData( bankData.translation )
             bankData.accounts.forEach((account) => {
                 this.accounts.push({
                     name: account.account_name,

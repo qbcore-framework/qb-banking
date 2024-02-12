@@ -3,6 +3,16 @@ local zones = {}
 
 -- Functions
 
+local function getTranslation()
+    local translation = {}
+    for k in pairs(Lang.fallback and Lang.fallback.phrases or Lang.phrases) do
+        if k:sub(0, ('ui.'):len()) then
+            translation[k:sub(('ui.'):len() + 1)] = Lang:t(k)
+        end
+    end
+    return translation
+end
+
 local function OpenBank()
     QBCore.Functions.TriggerCallback('qb-banking:server:openBank', function(accounts, statements, playerData)
         SetNuiFocus(true, true)
@@ -10,7 +20,8 @@ local function OpenBank()
             action = 'openBank',
             accounts = accounts,
             statements = statements,
-            playerData = playerData
+            playerData = playerData,
+            translation = getTranslation()
         })
     end)
 end
@@ -36,7 +47,8 @@ local function OpenATM()
                 action = 'openATM',
                 accounts = accounts,
                 pinNumbers = acceptablePins,
-                playerData = playerData
+                playerData = playerData,
+                translation = getTranslation()
             })
         end)
     end)
@@ -153,7 +165,7 @@ if Config.useTarget then
                 options = {
                     {
                         icon = 'fas fa-university',
-                        label = 'Open Bank',
+                        label = Lang:t('ui.openBank'),
                         action = function()
                             OpenBank()
                         end,
@@ -171,7 +183,7 @@ if Config.useTarget then
                 options = {
                     {
                         icon = 'fas fa-university',
-                        label = 'Open ATM',
+                        label = Lang:t('ui.openAtm'),
                         item = 'bank_card',
                         action = function()
                             OpenATM()

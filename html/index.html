@@ -15,7 +15,7 @@
                 <div class="sidebar">
                     <div class="sidebar-header">
                         {{ playerName }}<br />
-                        Cash: <span class="positive-balance">${{ formatCurrency(playerCash) }}</span>
+                        {{t('cash')}}: <span class="positive-balance">${{ formatCurrency(playerCash) }}</span>
                     </div>
                     <div class="sidebar-accounts">
                         <ul>
@@ -23,15 +23,15 @@
                         </ul>
                     </div>
                     <button class="action-button" @click="closeApplication()">Logout</button>
-                    <div class="sidebar-footer">Account Number: {{ accountNumber }}</div>
+                    <div class="sidebar-footer"> {{ t('accountNumber') }} {{ accountNumber }}</div>
                 </div>
                 <div class="main-content">
                     <div class="nav-bar">
                         <div class="nav-options">
-                            <div class="nav-option" :class="{selected: activeView === 'home'}" @click="setActiveView('home')">Home</div>
-                            <div class="nav-option" :class="{selected: activeView === 'money'}" @click="setActiveView('money')">Money</div>
-                            <div class="nav-option" :class="{selected: activeView === 'transfer'}" @click="setActiveView('transfer')">Transfer</div>
-                            <div class="nav-option" :class="{selected: activeView === 'accountOptions'}" @click="setActiveView('accountOptions')">Account Options</div>
+                            <div class="nav-option" :class="{selected: activeView === 'home'}" @click="setActiveView('home')">{{t('home')}}</div>
+                            <div class="nav-option" :class="{selected: activeView === 'money'}" @click="setActiveView('money')">{{t('money')}}</div>
+                            <div class="nav-option" :class="{selected: activeView === 'transfer'}" @click="setActiveView('transfer')">{{ t('transfer') }}</div>
+                            <div class="nav-option" :class="{selected: activeView === 'accountOptions'}" @click="setActiveView('accountOptions')">{{ t('accountOptions')}}</div>
                         </div>
                         <div class="notification-container" v-if="notification">
                             <div :class="['notification', notification.type]">{{ notification.message }}</div>
@@ -47,84 +47,84 @@
                     </div>
                     <div v-if="activeView === 'money'" class="money">
                         <div class="manage-money">
-                            <div class="money-title">Money Management</div>
-                            <label for="fromAccount">Account:</label>
+                            <div class="money-title">{{t('moneyManagement')}}</div>
+                            <label for="fromAccount">{{t('account')}}</label>
                             <select id="fromAccount" v-model="selectedMoneyAccount">
                                 <option v-for="account in accounts" :key="account.name" :value="account">{{ account.name }}</option>
                             </select>
-                            <label for="amount">Amount:</label>
+                            <label for="amount">{{ t('amount') }}</label>
                             <input type="number" id="amount" v-model="selectedMoneyAmount" />
-                            <label for="money-reason">Reason:</label>
+                            <label for="money-reason">{{t('reason')}}</label>
                             <input type="text" id="money-reason" v-model="moneyReason" />
                             <div class="card-buttons">
-                                <button class="action-button" @click="withdrawMoney">Withdraw</button>
-                                <button class="action-button" @click="depositMoney">Deposit</button>
+                                <button class="action-button" @click="withdrawMoney">{{t('withdraw')}}</button>
+                                <button class="action-button" @click="depositMoney">{{ t('deposit') }}</button>
                             </div>
                         </div>
                     </div>
                     <div v-if="activeView === 'transfer'" class="transfer">
                         <div class="transfer-header">
-                            <div class="nav-option" :class="{selected: transferType === 'internal'}" @click="setTransferType('internal')">Internal</div>
-                            <span class="money-title">Transfer</span>
-                            <div class="nav-option" :class="{selected: transferType === 'external'}" @click="setTransferType('external')">External</div>
+                            <div class="nav-option" :class="{selected: transferType === 'internal'}" @click="setTransferType('internal')">{{t('internal')}}</div>
+                            <span class="money-title">{{t('transfer')}}</span>
+                            <div class="nav-option" :class="{selected: transferType === 'external'}" @click="setTransferType('external')">{{t('external')}}</div>
                         </div>
                         <div v-if="transferType === 'internal'" class="transfer-options">
-                            <label for="internalFrom">Account:</label>
+                            <label for="internalFrom">{{ t('account') }}</label>
                             <select id="internalFrom" v-model="internalFromAccount">
                                 <option v-for="account in accounts" :key="account.name" :value="account">{{ account.name }}</option>
                             </select>
-                            <label for="internalTo">Account:</label>
+                            <label for="internalTo">{{ t('account') }}</label>
                             <select id="internalTo" v-model="internalToAccount">
                                 <option v-for="account in accounts" :key="account.name" :value="account">{{ account.name }}</option>
                             </select>
-                            <label for="internalAmount">Amount:</label>
+                            <label for="internalAmount">{{ t('amount') }}</label>
                             <input type="number" id="internalAmount" v-model="internalTransferAmount" />
-                            <label for="transfer-reason">Reason:</label>
+                            <label for="transfer-reason">{{ t('reason') }}</label>
                             <input type="text" id="transfer-reason" v-model="transferReason" />
-                            <button class="action-button" @click="internalTransfer">Transfer</button>
+                            <button class="action-button" @click="internalTransfer"> {{ t('transfer') }} </button>
                         </div>
                         <div v-if="transferType === 'external'" class="transfer-options">
-                            <label for="externalAccountNumber">Account Number:</label>
+                            <label for="externalAccountNumber">{{ t('accountNumber') }}</label>
                             <input type="text" id="externalAccountNumber" v-model="externalAccountNumber" />
-                            <label for="externalFrom">Account:</label>
+                            <label for="externalFrom">{{ t('account') }}</label>
                             <select id="externalFrom" v-model="externalFromAccount">
                                 <option v-for="account in accounts" :key="account.name" :value="account">{{ account.name }}</option>
                             </select>
-                            <label for="externalAmount">Amount:</label>
+                            <label for="externalAmount">{{ t('amount') }}</label>
                             <input type="number" id="externalAmount" v-model="externalTransferAmount" />
-                            <label for="transfer-reason">Reason:</label>
+                            <label for="transfer-reason">{{ t('reason') }}</label>
                             <input type="text" id="transfer-reason" v-model="transferReason" />
-                            <button class="action-button" @click="externalTransfer">Transfer</button>
+                            <button class="action-button" @click="externalTransfer"> {{ t('transfer') }} </button>
                         </div>
                     </div>
                     <div v-if="activeView === 'accountOptions'" class="account-options">
                         <div class="debit-card">
-                            <div>Order Debit Card</div>
-                            <label for="pin-number">Pin Number:</label>
+                            <div>{{ t('orderDebitCard') }}</div>
+                            <label for="pin-number">{{ t('pinNumber') }}</label>
                             <input type="number" id="pin-number" v-model="debitPin" />
                             <div class="card-buttons">
                                 <button class="action-button" @click="orderDebitCard">Order</button>
                             </div>
                         </div>
                         <div class="create-account">
-                            <div>Open Shared Account</div>
+                            <div>{{ t('openSharedAccount') }} </div>
                             <div class="options-labels">
-                                <label for="createAccountName">Name:</label>
-                                <label for="createAccountAmount">Amount:</label>
+                                <label for="createAccountName">{{ t('name') }}</label>
+                                <label for="createAccountAmount">{{ t('amount') }}</label>
                             </div>
                             <div class="options-inputs">
                                 <input type="text" id="createAccountName" v-model="createAccountName" />
                                 <input type="number" id="createAccountAmount" v-model="createAccountAmount" />
                             </div>
                             <div class="card-buttons">
-                                <button class="action-button" @click="openAccount">Open Account</button>
+                                <button class="action-button" @click="openAccount"> {{ t('openAccount') }}</button>
                             </div>
                         </div>
                         <div class="edit-account">
-                            <div>Manage Shared Account</div>
+                            <div>{{ t('manageSharedAccount') }}</div>
                             <div class="options-labels">
-                                <label for="editAccount">Account:</label>
-                                <label for="editAccountName">Name:</label>
+                                <label for="editAccount">{{ t('account') }}</label>
+                                <label for="editAccountName">{{ t('name') }}</label>
                             </div>
                             <div class="options-inputs">
                                 <select id="editAccount" v-model="editAccount">
@@ -133,14 +133,14 @@
                                 <input type="text" id="editAccountName" v-model="editAccountName" />
                             </div>
                             <div class="card-buttons">
-                                <button class="action-button" @click="deleteAccount">Delete</button>
-                                <button class="action-button" @click="renameAccount">Rename</button>
+                                <button class="action-button" @click="deleteAccount">{{ t('delete') }} </button>
+                                <button class="action-button" @click="renameAccount">{{ t('rename') }}</button>
                             </div>
                         </div>
                         <div class="manage-account">
                             <div>Manage Account Users</div>
                             <div class="options-labels">
-                                <label for="manageAccountName">Account:</label>
+                                <label for="manageAccountName">{{ t('account') }}</label>
                                 <label for="manageUserName">Citizen ID:</label>
                             </div>
                             <div class="options-inputs">
@@ -159,8 +159,8 @@
                                 </div>
                             </div>
                             <div class="card-buttons">
-                                <button class="action-button" @click="addUserToAccount">Add</button>
-                                <button class="action-button" @click="removeUserFromAccount">Remove</button>
+                                <button class="action-button" @click="addUserToAccount">{{t('add')}}</button>
+                                <button class="action-button" @click="removeUserFromAccount">{{t('remove')}}</button>
                             </div>
                         </div>
                     </div>
@@ -170,7 +170,7 @@
                 <div class="sidebar">
                     <div class="sidebar-header">
                         {{ playerName }}<br />
-                        Cash: <span class="positive-balance">${{ formatCurrency(playerCash) }}</span>
+                        {{ t('cash') }} <span class="positive-balance">${{ formatCurrency(playerCash) }}</span>
                     </div>
                     <div class="sidebar-accounts">
                         <ul>
@@ -178,22 +178,22 @@
                         </ul>
                     </div>
                     <button class="action-button" @click="closeApplication()">Logout</button>
-                    <div class="sidebar-footer">Account Number: {{ accountNumber }}</div>
+                    <div class="sidebar-footer">{{ t('accountNumber') }} {{ accountNumber }}</div>
                 </div>
                 <div class="main-content">
                     <div class="money">
                         <div class="manage-money">
-                            <div class="money-title">Withdraw</div>
-                            <label for="fromAccount">Account:</label>
+                            <div class="money-title">{{ t('withdraw') }}</div>
+                            <label for="fromAccount">{{ t('account') }}</label>
                             <select id="fromAccount" v-model="selectedMoneyAccount">
                                 <option v-for="account in accounts" :key="account.name" :value="account">{{ account.name }}</option>
                             </select>
-                            <label for="amount">Amount:</label>
+                            <label for="amount">{{ t('amount') }}</label>
                             <input type="number" id="amount" v-model="selectedMoneyAmount" />
-                            <label for="money-reason">Reason:</label>
+                            <label for="money-reason">{{ t('reason') }}</label>
                             <input type="text" id="money-reason" v-model="moneyReason" />
                             <div class="card-buttons">
-                                <button class="action-button" @click="withdrawMoney">Withdraw</button>
+                                <button class="action-button" @click="withdrawMoney">{{ t('withdraw') }}</button>
                             </div>
                         </div>
                     </div>
@@ -201,18 +201,18 @@
             </div>
             <div v-if="showPinPrompt" class="pin-prompt">
                 <div class="pin-input">
-                    <input type="password" v-model="enteredPin" placeholder="Enter PIN" readonly />
+                    <input type="password" v-model="enteredPin" :placeholder="t('enterPin')" readonly />
                 </div>
                 <div class="number-pad">
                     <button v-for="number in 9" :key="number" @click="appendNumber(number)">{{ number }}</button>
                     <button @click="appendNumber(0)">0</button>
                 </div>
                 <div class="card-buttons">
-                    <button class="action-button" @click="enteredPin = ''">Clear</button>
-                    <button class="action-button" @click="pinPrompt(enteredPin)">Submit</button>
+                    <button class="action-button" @click="enteredPin = ''">{{ t('clear') }}</button>
+                    <button class="action-button" @click="pinPrompt(enteredPin)">{{ t('submit') }}</button>
                 </div>
             </div>
         </div>
     </body>
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
 </html>
