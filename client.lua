@@ -56,6 +56,7 @@ end
 -- NUI Callback
 
 RegisterNUICallback('closeApp', function(_, cb)
+    ClearPedTasksImmediately(PlayerPedId())
     SetNuiFocus(false, false)
     cb('ok')
 end)
