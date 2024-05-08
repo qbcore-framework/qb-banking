@@ -25,7 +25,12 @@ end
 local function CreatePlayerAccount(playerId, accountName, accountBalance, accountUsers)
     local Player, citizenid = getPlayerAndCitizenId(playerId)
     if not Player or not citizenid then return false end
+    local result = MySQL.scalar.await("SELECT `account_name` FROM `bank_accounts` WHERE `account_name` = ?",{accountName})
 
+    if result then 
+        TriggerClientEvent('QBCore:Notify', playerId, ""..accountName.. " "..Lang:t('error.alreadytaken'), 'error') return
+    end
+    
     if Accounts[accountName] then
         return false
     end
@@ -37,6 +42,7 @@ local function CreatePlayerAccount(playerId, accountName, accountBalance, accoun
         account_type = 'shared',
         users = accountUsers
     }
+
 
     local insertSuccess = MySQL.insert.await('INSERT INTO bank_accounts (citizenid, account_name, account_balance, account_type, users) VALUES (?, ?, ?, ?, ?)', { citizenid, accountName, accountBalance, 'shared', accountUsers })
     return insertSuccess
@@ -360,10 +366,10 @@ QBCore.Functions.CreateCallback('qb-banking:server:openAccount', function(source
     local initialAmount = tonumber(data.amount)
     if GetNumberOfAccounts(citizenid) >= Config.maxAccounts then return cb({ success = false, message = Lang:t('error.accounts') }) end
     if Player.PlayerData.money.bank < initialAmount then return cb({ success = false, message = Lang:t('error.money') }) end
-    Player.Functions.RemoveMoney('bank', initialAmount, 'Opened account ' .. accountName)
     if not CreatePlayerAccount(src, accountName, initialAmount, json.encode({})) then return cb({ success = false, message = Lang:t('error.error') }) end
     if not CreateBankStatement(src, accountName, initialAmount, 'Initial deposit', 'deposit', 'shared') then return cb({ success = false, message = Lang:t('error.error') }) end
     if not CreateBankStatement(src, 'checking', initialAmount, 'Initial deposit for ' .. accountName, 'withdraw', 'player') then return cb({ success = false, message = Lang:t('error.error') }) end
+    Player.Functions.RemoveMoney('bank', initialAmount, 'Opened account ' .. accountName)
     TriggerEvent('qb-log:server:CreateLog', 'banking', 'Account Opened', 'green', string.format('**%s** opened account **%s** with an initial deposit of **$%s**', GetPlayerName(src), accountName, initialAmount))
     cb({ success = true, message = Lang:t('success.account') })
 end)

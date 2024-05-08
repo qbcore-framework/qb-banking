@@ -20,6 +20,7 @@ local Translations = {
         user = 'User already added',
         noUser = 'User not found',
         money = 'Not enough money',
+        alreadytaken = 'already exist, Choose a new name',
         pin = 'Invalid PIN',
         card = 'No bank card found',
         amount = 'Invalid amount',
