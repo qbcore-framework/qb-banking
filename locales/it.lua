@@ -18,6 +18,7 @@ local Translations = {
         user = 'Utente già autorizzato',
         noUser = 'Utente non trovato',
         money = 'Non hai abbastanza soldi',
+        alreadytaken = 'esistono già, scegli un nuovo nome',
         pin = 'PIN Errato',
         card = 'Nessuna Carta di Credito trovata',
     },
