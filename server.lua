@@ -65,9 +65,9 @@ local function CreateGangAccount(accountName, accountBalance)
 end
 exports('CreateGangAccount', CreateGangAccount)
 
-local function CreateBankStatement(playerId, account, amount, reason, statementType, accountType)
-    local Player, citizenid = getPlayerAndCitizenId(playerId)
-    if not Player or not citizenid then return false end
+local function _createBankStatement(Player, account, amount, reason, statementType, accountType)
+    if not Player then return false end
+    local citizenid = Player.PlayerData.citizenid
 
     local newStatement = {
         citizenid = citizenid,
@@ -90,7 +90,18 @@ local function CreateBankStatement(playerId, account, amount, reason, statementT
     if not insertSuccess then return false end
     return true
 end
+
+local function CreateBankStatement(playerId, account, amount, reason, statementType, accountType)
+    local Player, _ = getPlayerAndCitizenId(playerId)
+    return _createBankStatement(Player, account, amount, reason, statementType, accountType)
+end
 exports('CreateBankStatement', CreateBankStatement)
+
+local function CreateCitizenBankStatement(citizenId, amount, reason, statementType)
+    local Player = QBCore.Functions.GetPlayerByCitizenId(citizenId) or QBCore.Functions.GetOfflinePlayerByCitizenId(citizenId)
+    _createBankStatement(Player, 'checking', amount, reason, statementType, 'player')
+end
+exports('CreateCitizenBankStatement', CreateCitizenBankStatement)
 
 local function AddMoney(accountName, amount, reason)
     if not reason then reason = 'External Deposit' end
