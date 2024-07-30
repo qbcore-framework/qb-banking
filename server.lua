@@ -124,6 +124,7 @@ local function RemoveMoney(accountName, amount, reason)
     }
     if Accounts[accountName] then
         local accountToUpdate = Accounts[accountName]
+        if accountToUpdate.account_balance < accountToUpdate.account_balance - amount then return end
         accountToUpdate.account_balance = accountToUpdate.account_balance - amount
         if not Statements[accountName] then Statements[accountName] = {} end
         Statements[accountName][#Statements[accountName] + 1] = newStatement
