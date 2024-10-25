@@ -9,6 +9,8 @@ local Translations = {
         userAdd = 'Benutzer hinzugefügt',
         userRemove = 'Benutzer entfernt',
         card = 'Karte erstellt',
+        give = '$%s Bargeld gegeben',
+        receive = '$%s Bargeld erhalten',
     },
     error = {
         error = 'Ein Fehler ist aufgetreten',
@@ -20,13 +22,19 @@ local Translations = {
         money = 'Nicht genug Geld',
         pin = 'Ungültige PIN',
         card = 'Keine Bankkarte gefunden',
+        amount = 'Ungültiger Betrag',
+        toofar = 'Du bist zu weit entfernt',
     },
     progress = {
-        atm = 'Zugriff auf Geldautomaten',
+        atm = 'Zugriff auf Geldautomaten...',
     }
 }
 
-Lang = Lang or Locale:new({
-    phrases = Translations,
-    warnOnMissing = true
-})
+
+if GetConvar('qb_locale', 'en') == 'de' then
+    Lang = Locale:new({
+        phrases = Translations,
+        warnOnMissing = true,
+        fallbackLang = Lang,
+    })
+end
