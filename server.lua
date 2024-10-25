@@ -462,8 +462,15 @@ end)
 
 CreateThread(function()
     local accounts = MySQL.query.await('SELECT * FROM bank_accounts')
+
     for _, account in ipairs(accounts) do
         Accounts[account.account_name] = account
+    end
+
+    for job in pairs(QBCore.Shared.Jobs) do
+        if Accounts[job] == nil then
+            CreateJobAccount(job, 0)
+        end
     end
 end)
 
