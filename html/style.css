@@ -109,7 +109,6 @@ input {
     width: 50%;
     padding: 8px;
     margin-bottom: 15px;
-    border-radius: var(--md-radius-small);
     background-color: var(--accent-color);
     color: var(--text-color);
     font-weight: var(--font-weight-medium);
@@ -142,7 +141,6 @@ input[type="number"]::-webkit-outer-spin-button {
     left: 50%;
     position: absolute;
     transform: translate(-50%, -50%);
-    border-radius: var(--md-radius-large);
     background-color: var(--md-surface-container);
     box-shadow: var(--md-elevation-3);
 }
@@ -162,7 +160,6 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .sidebar-header {
     background-color: var(--accent-color);
-    border-radius: var(--md-radius-small);
     margin: 10px;
     padding: 10px 20px;
     border: none;
@@ -171,7 +168,6 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .sidebar-footer {
     background-color: var(--accent-color);
-    border-radius: var(--md-radius-small);
     margin: 10px;
     padding: 10px 20px;
     border: none;
@@ -189,7 +185,6 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .sidebar-accounts li {
     background-color: var(--accent-color);
-    border-radius: var(--md-radius-small);
     margin-bottom: 10px;
     margin-right: 10px;
     margin-left: 10px;
@@ -231,7 +226,6 @@ input[type="number"]::-webkit-outer-spin-button {
     display: flex;
     align-items: center;
     background-color: var(--accent-color);
-    border-radius: var(--md-radius-small);
     margin-top: 10px;
     margin-bottom: 10px;
     margin-left: 10px;
@@ -261,7 +255,6 @@ input[type="number"]::-webkit-outer-spin-button {
     display: flex;
     justify-content: space-between;
     background-color: var(--accent-color);
-    border-radius: var(--md-radius-small);
     margin-right: 30px;
     margin-bottom: 10px;
     padding: 10px 20px;
@@ -285,7 +278,6 @@ input[type="number"]::-webkit-outer-spin-button {
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    border-radius: var(--md-radius-small);
     margin: 2px;
     padding: 20px;
 }
@@ -385,7 +377,6 @@ input[type="number"]::-webkit-outer-spin-button {
 .list-container {
     width: fit-content;
     background-color: var(--accent-color);
-    border-radius: var(--md-radius-small);
     box-shadow: var(--md-elevation-3);
 }
 
@@ -395,7 +386,6 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .action-button {
-    border-radius: var(--md-radius-small);
     margin: 10px;
     padding: 10px 20px;
     border: none;
@@ -435,7 +425,6 @@ input[type="number"]::-webkit-outer-spin-button {
     left: 50%;
     position: absolute;
     transform: translate(-50%, -50%);
-    border-radius: var(--md-radius-large);
     background-color: var(--md-surface-container);
     box-shadow: var(--md-elevation-4);
 }
@@ -458,7 +447,6 @@ input[type="number"]::-webkit-outer-spin-button {
     width: 25%;
     height: 20%;
     margin: 5px;
-    border-radius: var(--md-radius-small);
     border: none;
     cursor: pointer;
     background-color: var(--accent-color);
@@ -482,7 +470,6 @@ input[type="number"]::-webkit-outer-spin-button {
 .notification {
     display: flex;
     align-items: center;
-    border-radius: var(--md-radius-small);
     margin: 10px;
     padding: 10px 20px;
     box-shadow: var(--box-shadow);
